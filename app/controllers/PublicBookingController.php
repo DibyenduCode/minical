@@ -76,7 +76,16 @@ class PublicBookingController extends Controller {
         }
 
         $dayOfWeek = (int)$dateObj->format('w');
-        $avail = $this->availabilityModel->getByUserIdAndDay($user['id'], $dayOfWeek);
+        
+        // Fail-safe fetch availability using getByUserId
+        $allAvail = $this->availabilityModel->getByUserId($user['id']);
+        $avail = null;
+        foreach ($allAvail as $a) {
+            if ((int)$a['day_of_week'] === $dayOfWeek) {
+                $avail = $a;
+                break;
+            }
+        }
 
         if (!$avail || empty($avail['is_enabled'])) {
             $this->response->json(['date' => $dateStr, 'slots' => []]);
@@ -94,6 +103,10 @@ class PublicBookingController extends Controller {
         $event = !empty($eventSlug) ? $this->eventModel->findBySlugAndUserId($eventSlug, $user['id']) : $this->eventModel->findByUserId($user['id']);
 
         $duration = (int)($event['duration_minutes'] ?? 30);
+        if ($duration <= 0) {
+            $duration = 30;
+        }
+
         $startTime = new DateTime($dateStr . ' ' . $avail['start_time']);
         $endTime = new DateTime($dateStr . ' ' . $avail['end_time']);
         $interval = new DateInterval('PT' . $duration . 'M');

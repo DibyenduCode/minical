@@ -127,4 +127,22 @@ class Booking extends Model {
         $stmt->execute(['user_id' => $userId, 'date' => $date]);
         return $stmt->fetchAll();
     }
+
+    public function getBookedSlots(int $userId, string $date): array {
+        return $this->getExistingBookingsForDate($userId, $date);
+    }
+
+    public function isSlotBooked(int $userId, string $date, string $startTime, string $endTime): bool {
+        $stmt = $this->db->prepare("
+            SELECT COUNT(*) FROM `bookings` 
+            WHERE `user_id` = :user_id AND `booking_date` = :date AND `start_time` = :start_time AND `end_time` = :end_time AND `status` != 'cancelled'
+        ");
+        $stmt->execute([
+            'user_id'    => $userId,
+            'date'       => $date,
+            'start_time' => $startTime,
+            'end_time'   => $endTime
+        ]);
+        return ((int)$stmt->fetchColumn()) > 0;
+    }
 }

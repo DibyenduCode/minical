@@ -13,6 +13,13 @@ class Availability extends Model {
         return $stmt->fetchAll();
     }
 
+    public function getByUserIdAndDay(int $userId, int $dayOfWeek): ?array {
+        $stmt = $this->db->prepare("SELECT * FROM `availability` WHERE `user_id` = :user_id AND `day_of_week` = :day_of_week LIMIT 1");
+        $stmt->execute(['user_id' => $userId, 'day_of_week' => $dayOfWeek]);
+        $res = $stmt->fetch();
+        return $res ?: null;
+    }
+
     public function updateDay(int $userId, int $dayOfWeek, string $startTime, string $endTime, int $isEnabled): bool {
         $stmt = $this->db->prepare("
             INSERT INTO `availability` (`user_id`, `day_of_week`, `start_time`, `end_time`, `is_enabled`)
