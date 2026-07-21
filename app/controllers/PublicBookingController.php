@@ -9,6 +9,7 @@ use App\Models\Event;
 use App\Models\FormField;
 use App\Models\Profile;
 use App\Models\User;
+use App\Services\GoogleCalendarService;
 use DateTime;
 use DateInterval;
 
@@ -189,6 +190,9 @@ class PublicBookingController extends Controller {
             }
         }
 
+        // Auto-sync with Google Calendar
+        GoogleCalendarService::syncEvent($bookingId);
+
         $this->response->json([
             'status'   => 'success',
             'message'  => 'Booking confirmed successfully!',
@@ -206,11 +210,15 @@ class PublicBookingController extends Controller {
 
         $user = $this->userModel->findById($booking['user_id']);
         $event = $this->eventModel->findByIdAndUserId($booking['event_id'], $booking['user_id']);
+        $googleConnected = GoogleCalendarService::isConnected((int)$booking['user_id']);
+        $googleCalendarUrl = GoogleCalendarService::generateGoogleCalendarUrl($booking, $event, $user);
 
         $this->render('booking/confirmation', [
-            'booking'  => $booking,
-            'hostUser' => $user,
-            'event'    => $event
+            'booking'           => $booking,
+            'hostUser'          => $user,
+            'event'             => $event,
+            'googleConnected'   => $googleConnected,
+            'googleCalendarUrl' => $googleCalendarUrl
         ]);
     }
 }
