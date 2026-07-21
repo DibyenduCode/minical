@@ -4,8 +4,6 @@ namespace App\Services;
 
 use App\Core\Database;
 use PDO;
-use DateTime;
-use DateTimeZone;
 
 class GoogleCalendarService {
     public static function isConnected(int $userId): bool {
@@ -21,6 +19,20 @@ class GoogleCalendarService {
         $stmt->execute(['user_id' => $userId]);
         $res = $stmt->fetch();
         return $res ?: null;
+    }
+
+    public static function getGoogleAuthUrl(): string {
+        $db = Database::getInstance();
+        $clientId = self::getSetting('google_client_id');
+
+        if (empty($clientId)) {
+            return '';
+        }
+
+        $redirectUri = urlencode(APP_URL . '/integrations/google/callback');
+        $scope = urlencode('https://www.googleapis.com/auth/calendar.events');
+
+        return "https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id={$clientId}&redirect_uri={$redirectUri}&scope={$scope}&access_type=offline&prompt=consent";
     }
 
     public static function syncEvent(int $bookingId): bool {
@@ -39,7 +51,6 @@ class GoogleCalendarService {
 
         if (!$booking) return false;
 
-        // Check if host has connected Google Calendar account
         $googleAcc = self::getConnectedAccount((int)$booking['user_id']);
         if (!$googleAcc) return false;
 
@@ -59,7 +70,6 @@ class GoogleCalendarService {
     public static function generateGoogleCalendarUrl(array $booking, array $event, array $hostUser): string {
         $title = urlencode($event['name'] . ' with ' . $hostUser['name']);
         
-        // Format ISO UTC dates for Google Calendar rendering (YYYYMMDDTHHISZ)
         $startStr = str_replace(['-', ':'], '', $booking['booking_date'] . 'T' . $booking['start_time']);
         $endStr = str_replace(['-', ':'], '', $booking['booking_date'] . 'T' . $booking['end_time']);
         $dates = $startStr . '/' . $endStr;
@@ -68,5 +78,12 @@ class GoogleCalendarService {
         $attendee = urlencode($booking['customer_email']);
 
         return "https://calendar.google.com/calendar/render?action=TEMPLATE&text={$title}&dates={$dates}&details={$details}&add={$attendee}";
+    }
+
+    private static function getSetting(string $key): string {
+        $db = Database::getInstance();
+        $stmt = $db->prepare("SELECT `setting_value` FROM `settings` WHERE `setting_key` = :key LIMIT 1");
+        $stmt->execute(['key' => $key]);
+        return (string)$stmt->fetchColumn();
     }
 }

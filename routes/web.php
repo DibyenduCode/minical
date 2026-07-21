@@ -32,6 +32,7 @@ App::post('/profile', [ProfileController::class, 'update']);
 
 // Google Calendar Integration Routes
 App::post('/integrations/google/connect', [GoogleCalendarController::class, 'connect']);
+App::get('/integrations/google/callback', [GoogleCalendarController::class, 'callback']);
 App::post('/integrations/google/disconnect', [GoogleCalendarController::class, 'disconnect']);
 
 // Availability & Event Configuration

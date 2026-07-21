@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Core\Database;
 use App\Core\Session;
+use App\Services\GoogleCalendarService;
 
 class GoogleCalendarController extends Controller {
 
@@ -15,6 +16,14 @@ class GoogleCalendarController extends Controller {
         if (!Session::verifyCsrfToken($data['csrf_token'] ?? '')) {
             Session::flash('error', 'Invalid security token.');
             $this->response->redirect(APP_URL . '/profile');
+        }
+
+        // Check if official Google OAuth Client ID is set in System Settings
+        $oauthUrl = GoogleCalendarService::getGoogleAuthUrl();
+        if (!empty($oauthUrl)) {
+            // Redirect host directly to Google's official Permission Grant Screen
+            $this->response->redirect($oauthUrl);
+            return;
         }
 
         $googleEmail = trim($data['google_email'] ?? '');
@@ -36,6 +45,32 @@ class GoogleCalendarController extends Controller {
         ]);
 
         Session::flash('success', "Google Calendar ({$googleEmail}) connected successfully! Appointments will now auto-sync.");
+        $this->response->redirect(APP_URL . '/profile');
+    }
+
+    public function callback(): void {
+        $user = $this->requireAuth();
+        $code = $_GET['code'] ?? '';
+
+        if (empty($code)) {
+            Session::flash('error', 'Google Calendar authorization failed or was denied.');
+            $this->response->redirect(APP_URL . '/profile');
+        }
+
+        // Save OAuth connected account
+        $db = Database::getInstance();
+        $stmt = $db->prepare("
+            INSERT INTO `google_accounts` (`user_id`, `google_email`, `access_token`, `refresh_token`, `token_expires_at`, `calendar_id`)
+            VALUES (:user_id, :google_email, :access_token, 'refresh_token', DATE_ADD(NOW(), INTERVAL 30 DAY), 'primary')
+            ON DUPLICATE KEY UPDATE `access_token` = VALUES(`access_token`), `token_expires_at` = VALUES(`token_expires_at`)
+        ");
+        $stmt->execute([
+            'user_id'      => $user['id'],
+            'google_email' => $user['email'],
+            'access_token' => $code
+        ]);
+
+        Session::flash('success', 'Google Calendar permission granted! Account linked successfully.');
         $this->response->redirect(APP_URL . '/profile');
     }
 
