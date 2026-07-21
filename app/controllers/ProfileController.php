@@ -3,9 +3,11 @@
 namespace App\Controllers;
 
 use App\Core\Controller;
+use App\Core\Database;
 use App\Core\Session;
 use App\Models\Profile;
 use App\Models\User;
+use App\Services\GoogleCalendarService;
 
 class ProfileController extends Controller {
     private Profile $profileModel;
@@ -21,11 +23,20 @@ class ProfileController extends Controller {
         $user = $this->requireAuth();
         $profile = $this->profileModel->findByUserId($user['id']);
 
+        $db = Database::getInstance();
+        $stmt = $db->prepare("SELECT * FROM `google_accounts` WHERE `user_id` = :user_id LIMIT 1");
+        $stmt->execute(['user_id' => $user['id']]);
+        $googleAccount = $stmt->fetch();
+
+        $isGoogleConnected = !empty($googleAccount);
+
         $this->render('profile/index', [
-            'user'    => $user,
-            'profile' => $profile,
-            'success' => Session::flash('success'),
-            'error'   => Session::flash('error')
+            'user'              => $user,
+            'profile'           => $profile,
+            'googleAccount'     => $googleAccount ?: null,
+            'isGoogleConnected' => $isGoogleConnected,
+            'success'           => Session::flash('success'),
+            'error'             => Session::flash('error')
         ]);
     }
 
@@ -50,7 +61,7 @@ class ProfileController extends Controller {
         }
 
         // Update user name
-        $db = \App\Core\Database::getInstance();
+        $db = Database::getInstance();
         $stmt = $db->prepare("UPDATE `users` SET `name` = :name WHERE `id` = :id");
         $stmt->execute(['name' => $name, 'id' => $user['id']]);
 

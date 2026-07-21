@@ -10,6 +10,7 @@ use App\Controllers\EventController;
 use App\Controllers\FormBuilderController;
 use App\Controllers\AdminController;
 use App\Controllers\PublicBookingController;
+use App\Controllers\GoogleCalendarController;
 use App\Controllers\ApiController;
 
 // Home & Landing Page Routes
@@ -28,6 +29,10 @@ App::get('/dashboard', [DashboardController::class, 'index']);
 App::post('/dashboard/cancel', [DashboardController::class, 'cancelBooking']);
 App::get('/profile', [ProfileController::class, 'index']);
 App::post('/profile', [ProfileController::class, 'update']);
+
+// Google Calendar Integration Routes
+App::post('/integrations/google/connect', [GoogleCalendarController::class, 'connect']);
+App::post('/integrations/google/disconnect', [GoogleCalendarController::class, 'disconnect']);
 
 // Availability & Event Configuration
 App::get('/availability', [AvailabilityController::class, 'index']);

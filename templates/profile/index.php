@@ -19,6 +19,61 @@ require_once TEMPLATES_DIR . '/layout/header.php';
         </div>
     <?php endif; ?>
 
+    <!-- Google Calendar Integration Section -->
+    <div class="bg-white border border-slate-200/90 rounded-3xl p-8 space-y-6 shadow-sm">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-blue-50 border border-blue-200 text-blue-600 rounded-2xl flex items-center justify-center font-bold text-lg">
+                    📅
+                </div>
+                <div>
+                    <h2 class="text-lg font-bold text-slate-950 tracking-tight">Google Calendar Integration</h2>
+                    <p class="text-slate-500 text-xs font-medium mt-0.5">Automatically sync appointments with your Google Calendar and prevent double bookings.</p>
+                </div>
+            </div>
+
+            <?php if ($isGoogleConnected): ?>
+                <span class="px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-xs font-bold flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Connected
+                </span>
+            <?php else: ?>
+                <span class="px-3 py-1 bg-slate-100 text-slate-600 border border-slate-200 rounded-full text-xs font-semibold">
+                    Not Connected
+                </span>
+            <?php endif; ?>
+        </div>
+
+        <?php if ($isGoogleConnected): ?>
+            <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between text-xs">
+                <div>
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Connected Account</span>
+                    <p class="font-bold text-slate-900 text-sm"><?= htmlspecialchars($googleAccount['google_email']) ?></p>
+                </div>
+                <form action="<?= APP_URL ?>/integrations/google/disconnect" method="POST">
+                    <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+                    <button type="submit" class="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 font-semibold text-xs rounded-xl border border-red-200 transition-colors">
+                        Disconnect
+                    </button>
+                </form>
+            </div>
+        <?php else: ?>
+            <form action="<?= APP_URL ?>/integrations/google/connect" method="POST" class="space-y-4 pt-2">
+                <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+                
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Google Account Email</label>
+                    <input type="email" name="google_email" required placeholder="your.name@gmail.com"
+                           class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-black">
+                </div>
+
+                <button type="submit" class="px-6 py-3 bg-black hover:bg-slate-800 text-white font-bold text-sm rounded-xl shadow-md transition-all">
+                    Connect Google Calendar
+                </button>
+            </form>
+        <?php endif; ?>
+    </div>
+
+    <!-- Profile & Branding Settings Section -->
     <div class="bg-white border border-slate-200/90 rounded-3xl p-8 space-y-6 shadow-sm">
         <div>
             <h1 class="text-2xl font-extrabold text-slate-950 tracking-tight">Profile & Branding Settings</h1>
