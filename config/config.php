@@ -18,5 +18,10 @@ define('TEMPLATES_DIR', ROOT_DIR . '/templates');
 // Session Config
 define('SESSION_NAME', 'minical_session');
 
+// Google OAuth 2.0 Credentials (Set via Environment Variables or Admin Settings)
+define('GOOGLE_CLIENT_ID', getenv('GOOGLE_CLIENT_ID') ?: 'YOUR_GOOGLE_CLIENT_ID');
+define('GOOGLE_CLIENT_SECRET', getenv('GOOGLE_CLIENT_SECRET') ?: 'YOUR_GOOGLE_CLIENT_SECRET');
+define('GOOGLE_REDIRECT_URI', getenv('GOOGLE_REDIRECT_URI') ?: 'http://localhost/cal/integrations/google/callback');
+
 // Timezone
 date_default_timezone_set('UTC');

@@ -29,7 +29,7 @@ require_once TEMPLATES_DIR . '/layout/header.php';
             <p class="text-slate-500 text-xs font-medium mt-1">Connect your calendars, video conferencing tools, and payment gateways.</p>
         </div>
         <span class="text-xs font-bold text-slate-700 bg-slate-100 px-3.5 py-2 rounded-xl border border-slate-200">
-            <?= $isGoogleConnected ? '1 Active App' : '0 Apps Connected' ?>
+            <?= $isGoogleConnected ? '2 Active Apps' : '0 Apps Connected' ?>
         </span>
     </div>
 
@@ -84,7 +84,6 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                             <span class="text-emerald-700 font-semibold">✓ Active & Auto-Refreshed</span>
                         </div>
 
-                        <!-- Target Calendar Selector Form -->
                         <?php if (!empty($calendars)): ?>
                             <form action="<?= APP_URL ?>/integrations/google/select-calendar" method="POST" class="pt-2 border-t border-slate-200/80 space-y-2">
                                 <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
@@ -124,7 +123,7 @@ require_once TEMPLATES_DIR . '/layout/header.php';
         </div>
 
         <!-- Google Meet Integration Card -->
-        <div class="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-sm flex flex-col justify-between space-y-6 opacity-75">
+        <div class="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-sm flex flex-col justify-between space-y-6">
             <div class="space-y-4">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
@@ -136,18 +135,39 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                             <p class="text-xs text-slate-500 font-medium">Video Conferencing</p>
                         </div>
                     </div>
-                    <span class="px-3 py-1 bg-slate-100 text-slate-500 border border-slate-200 rounded-full text-xs font-bold">
-                        Coming Soon
-                    </span>
+                    <?php if ($isGoogleConnected): ?>
+                        <span class="px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-xs font-bold flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Active & Ready ✅
+                        </span>
+                    <?php else: ?>
+                        <span class="px-3 py-1 bg-slate-100 text-slate-600 border border-slate-200 rounded-full text-xs font-semibold">
+                            Requires Google Auth
+                        </span>
+                    <?php endif; ?>
                 </div>
+
                 <p class="text-xs text-slate-600 leading-relaxed">
-                    Automatically generate unique Google Meet video links for all scheduled appointments.
+                    Automatically generate unique Google Meet video call links for all online consultation bookings.
                 </p>
+
+                <?php if ($isGoogleConnected): ?>
+                    <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-xs space-y-1">
+                        <p class="font-bold text-emerald-900">✓ Auto-Provisioning Active</p>
+                        <p class="text-[11px] text-emerald-800">Every new online appointment generates a dedicated Google Meet room automatically.</p>
+                    </div>
+                <?php endif; ?>
             </div>
+
             <div class="pt-4 border-t border-slate-100">
-                <button disabled class="w-full py-2.5 bg-slate-100 text-slate-400 font-bold text-xs rounded-xl cursor-not-allowed">
-                    Coming Soon
-                </button>
+                <?php if ($isGoogleConnected): ?>
+                    <button disabled class="w-full py-2.5 bg-slate-100 text-slate-700 font-bold text-xs rounded-xl cursor-default">
+                        Bundled with Google OAuth
+                    </button>
+                <?php else: ?>
+                    <a href="<?= APP_URL ?>/integrations/google/connect" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl border border-slate-200 transition-colors block text-center">
+                        Connect Google Account
+                    </a>
+                <?php endif; ?>
             </div>
         </div>
 
