@@ -209,6 +209,9 @@ class PublicBookingController extends Controller {
         // Auto-create event on connected Google Calendar
         GoogleCalendarService::createEvent($bookingId);
 
+        // Send booking confirmation emails (with Google Meet join link)
+        \App\Services\EmailService::sendBookingConfirmation($bookingId);
+
         $this->response->json([
             'status'   => 'success',
             'message'  => 'Booking confirmed successfully!',
