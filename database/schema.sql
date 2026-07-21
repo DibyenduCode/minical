@@ -97,6 +97,7 @@ CREATE TABLE `bookings` (
   `start_time` TIME NOT NULL,
   `end_time` TIME NOT NULL,
   `status` ENUM('pending', 'awaiting_payment', 'paid', 'confirmed', 'completed', 'cancelled', 'refunded') NOT NULL DEFAULT 'confirmed',
+  `google_event_id` VARCHAR(255) NULL,
   `cancellation_reason` TEXT NULL,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

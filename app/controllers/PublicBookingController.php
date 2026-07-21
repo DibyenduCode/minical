@@ -78,7 +78,7 @@ class PublicBookingController extends Controller {
 
         $dayOfWeek = (int)$dateObj->format('w');
         
-        // Fail-safe fetch availability using getByUserId
+        // Fetch host working hours availability
         $allAvail = $this->availabilityModel->getByUserId($user['id']);
         $avail = null;
         foreach ($allAvail as $a) {
@@ -93,12 +93,16 @@ class PublicBookingController extends Controller {
             return;
         }
 
+        // 1. Fetch DB Existing Bookings
         $existingBookings = $this->bookingModel->getBookedSlots($user['id'], $dateStr);
         $bookedMap = [];
         foreach ($existingBookings as $b) {
             $key = substr($b['start_time'], 0, 5) . '-' . substr($b['end_time'], 0, 5);
             $bookedMap[$key] = true;
         }
+
+        // 2. Read Busy Slots from connected Google Calendar to prevent double bookings
+        $googleBusy = GoogleCalendarService::getBusySlots($user['id'], $dateStr, $dateStr);
 
         $eventSlug = $_GET['event'] ?? '';
         $event = !empty($eventSlug) ? $this->eventModel->findBySlugAndUserId($eventSlug, $user['id']) : $this->eventModel->findByUserId($user['id']);
@@ -124,7 +128,19 @@ class PublicBookingController extends Controller {
             $slotEnd = $slotEndObj->format('H:i');
             $slotKey = $slotStart . '-' . $slotEnd;
 
-            if (!isset($bookedMap[$slotKey])) {
+            // Check if slot overlaps with DB booking
+            $isBookedInDb = isset($bookedMap[$slotKey]);
+
+            // Check if slot overlaps with Google Calendar Busy event
+            $isBusyInGoogle = false;
+            foreach ($googleBusy as $gb) {
+                if ($slotStart < $gb['end_time'] && $slotEnd > $gb['start_time']) {
+                    $isBusyInGoogle = true;
+                    break;
+                }
+            }
+
+            if (!$isBookedInDb && !$isBusyInGoogle) {
                 $slots[] = [
                     'start_time' => $slotStart . ':00',
                     'end_time'   => $slotEnd . ':00',
@@ -190,8 +206,8 @@ class PublicBookingController extends Controller {
             }
         }
 
-        // Auto-sync with Google Calendar
-        GoogleCalendarService::syncEvent($bookingId);
+        // Auto-create event on connected Google Calendar
+        GoogleCalendarService::createEvent($bookingId);
 
         $this->response->json([
             'status'   => 'success',

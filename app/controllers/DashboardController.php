@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Core\Session;
 use App\Models\Booking;
+use App\Services\GoogleCalendarService;
 
 class DashboardController extends Controller {
     private Booking $bookingModel;
@@ -16,10 +17,12 @@ class DashboardController extends Controller {
 
     public function index(): void {
         $user = $this->requireAuth();
+
         $stats = $this->bookingModel->getDashboardStats($user['id']);
 
         $filter = $_GET['filter'] ?? null;
         $search = $_GET['search'] ?? null;
+
         $bookings = $this->bookingModel->getBookingsForUser($user['id'], $filter, $search);
 
         $this->render('dashboard/index', [
@@ -47,8 +50,13 @@ class DashboardController extends Controller {
 
         $booking = $this->bookingModel->findById($bookingId);
         if ($booking && (int)$booking['user_id'] === (int)$user['id']) {
+            // Cancel Google Calendar event
+            GoogleCalendarService::deleteEvent($bookingId);
+
+            // Update database booking status
             $this->bookingModel->cancelBooking($bookingId, $reason);
-            Session::flash('success', 'Booking has been cancelled.');
+
+            Session::flash('success', 'Booking has been cancelled and removed from Google Calendar.');
         } else {
             Session::flash('error', 'Booking not found.');
         }

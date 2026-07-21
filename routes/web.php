@@ -8,9 +8,10 @@ use App\Controllers\ProfileController;
 use App\Controllers\AvailabilityController;
 use App\Controllers\EventController;
 use App\Controllers\FormBuilderController;
+use App\Controllers\IntegrationController;
+use App\Controllers\GoogleAuthController;
 use App\Controllers\AdminController;
 use App\Controllers\PublicBookingController;
-use App\Controllers\GoogleCalendarController;
 use App\Controllers\ApiController;
 
 // Home & Landing Page Routes
@@ -30,10 +31,12 @@ App::post('/dashboard/cancel', [DashboardController::class, 'cancelBooking']);
 App::get('/profile', [ProfileController::class, 'index']);
 App::post('/profile', [ProfileController::class, 'update']);
 
-// Google Calendar Integration Routes
-App::post('/integrations/google/connect', [GoogleCalendarController::class, 'connect']);
-App::get('/integrations/google/callback', [GoogleCalendarController::class, 'callback']);
-App::post('/integrations/google/disconnect', [GoogleCalendarController::class, 'disconnect']);
+// Integrations & Apps Routes
+App::get('/integrations', [IntegrationController::class, 'index']);
+App::get('/integrations/google/connect', [GoogleAuthController::class, 'connect']);
+App::get('/integrations/google/callback', [GoogleAuthController::class, 'callback']);
+App::post('/integrations/google/disconnect', [GoogleAuthController::class, 'disconnect']);
+App::post('/integrations/google/select-calendar', [GoogleAuthController::class, 'selectCalendar']);
 
 // Availability & Event Configuration
 App::get('/availability', [AvailabilityController::class, 'index']);
