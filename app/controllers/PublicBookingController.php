@@ -38,13 +38,26 @@ class PublicBookingController extends Controller {
         }
 
         $profile = $this->profileModel->findByUserId($user['id']);
-        $event = $this->eventModel->findByUserId($user['id']);
-        $customFields = $this->fieldModel->getByUserId($user['id']);
+        $allEvents = $this->eventModel->getByUserId($user['id']);
+
+        $eventSlug = $_GET['event'] ?? '';
+        $selectedEvent = null;
+
+        if (!empty($eventSlug)) {
+            $selectedEvent = $this->eventModel->findBySlugAndUserId($eventSlug, $user['id']);
+        }
+
+        if (!$selectedEvent && !empty($allEvents)) {
+            $selectedEvent = $allEvents[0];
+        }
+
+        $customFields = $selectedEvent ? $this->fieldModel->getByUserId($user['id'], $selectedEvent['id']) : [];
 
         $this->render('booking/public', [
             'hostUser'     => $user,
             'profile'      => $profile,
-            'event'        => $event,
+            'allEvents'    => $allEvents,
+            'event'        => $selectedEvent,
             'customFields' => $customFields
         ]);
     }
@@ -62,119 +75,112 @@ class PublicBookingController extends Controller {
             $this->response->json(['status' => 'error', 'message' => 'Invalid date format'], 400);
         }
 
-        $dayOfWeek = (int)$dateObj->format('w'); // 0=Sun, 1=Mon, ..., 6=Sat
+        $dayOfWeek = (int)$dateObj->format('w');
+        $avail = $this->availabilityModel->getByUserIdAndDay($user['id'], $dayOfWeek);
 
-        // Get Host Availability for this day
-        $schedule = $this->availabilityModel->getByUserId($user['id']);
-        $dayAvail = null;
-        foreach ($schedule as $row) {
-            if ((int)$row['day_of_week'] === $dayOfWeek) {
-                $dayAvail = $row;
-                break;
-            }
-        }
-
-        if (!$dayAvail || !$dayAvail['is_enabled']) {
-            $this->response->json(['slots' => []]);
+        if (!$avail || empty($avail['is_enabled'])) {
+            $this->response->json(['date' => $dateStr, 'slots' => []]);
             return;
         }
 
-        $event = $this->eventModel->findByUserId($user['id']);
-        $durationMinutes = (int)($event['duration_minutes'] ?? 30);
-
-        // Calculate time slots between start_time and end_time
-        $startTimeStr = $dateStr . ' ' . $dayAvail['start_time'];
-        $endTimeStr = $dateStr . ' ' . $dayAvail['end_time'];
-
-        $current = new DateTime($startTimeStr);
-        $end = new DateTime($endTimeStr);
-
-        // Fetch existing bookings for this date
-        $existingBookings = $this->bookingModel->getExistingBookingsForDate($user['id'], $dateStr);
-
-        $slots = [];
-        $interval = new DateInterval("PT{$durationMinutes}M");
-
-        while ($current < $end) {
-            $slotStart = clone $current;
-            $slotEnd = clone $current;
-            $slotEnd->add($interval);
-
-            if ($slotEnd > $end) {
-                break;
-            }
-
-            $startFormatted = $slotStart->format('H:i:s');
-            $endFormatted = $slotEnd->format('H:i:s');
-
-            // Check if slot overlaps with any existing booking
-            $isOccupied = false;
-            foreach ($existingBookings as $b) {
-                if ($startFormatted < $b['end_time'] && $endFormatted > $b['start_time']) {
-                    $isOccupied = true;
-                    break;
-                }
-            }
-
-            if (!$isOccupied) {
-                $slots[] = [
-                    'start_time' => $startFormatted,
-                    'end_time'   => $endFormatted,
-                    'display'    => $slotStart->format('h:i A') . ' - ' . $slotEnd->format('h:i A')
-                ];
-            }
-
-            $current->add($interval);
+        $existingBookings = $this->bookingModel->getBookedSlots($user['id'], $dateStr);
+        $bookedMap = [];
+        foreach ($existingBookings as $b) {
+            $key = substr($b['start_time'], 0, 5) . '-' . substr($b['end_time'], 0, 5);
+            $bookedMap[$key] = true;
         }
 
-        $this->response->json(['slots' => $slots]);
+        $eventSlug = $_GET['event'] ?? '';
+        $event = !empty($eventSlug) ? $this->eventModel->findBySlugAndUserId($eventSlug, $user['id']) : $this->eventModel->findByUserId($user['id']);
+
+        $duration = (int)($event['duration_minutes'] ?? 30);
+        $startTime = new DateTime($dateStr . ' ' . $avail['start_time']);
+        $endTime = new DateTime($dateStr . ' ' . $avail['end_time']);
+        $interval = new DateInterval('PT' . $duration . 'M');
+
+        $slots = [];
+        $curr = clone $startTime;
+
+        while ($curr < $endTime) {
+            $slotStart = $curr->format('H:i');
+            $slotEndObj = (clone $curr)->add($interval);
+
+            if ($slotEndObj > $endTime) break;
+
+            $slotEnd = $slotEndObj->format('H:i');
+            $slotKey = $slotStart . '-' . $slotEnd;
+
+            if (!isset($bookedMap[$slotKey])) {
+                $slots[] = [
+                    'start_time' => $slotStart . ':00',
+                    'end_time'   => $slotEnd . ':00',
+                    'display'    => $curr->format('h:i A') . ' - ' . $slotEndObj->format('h:i A')
+                ];
+            }
+            $curr->add($interval);
+        }
+
+        $this->response->json(['date' => $dateStr, 'slots' => $slots]);
     }
 
     public function submitBooking(string $username): void {
         $user = $this->userModel->findByUsername($username);
-        if (!$user) {
-            $this->response->json(['status' => 'error', 'message' => 'Host not found'], 404);
+        if (!$user || $user['status'] !== 'active') {
+            $this->response->json(['status' => 'error', 'message' => 'Invalid host.'], 400);
         }
 
         $data = $this->request->getBody();
+
         $customerName = trim($data['customer_name'] ?? '');
         $customerEmail = trim($data['customer_email'] ?? '');
-        $bookingDate = $data['booking_date'] ?? '';
-        $startTime = $data['start_time'] ?? '';
-        $endTime = $data['end_time'] ?? '';
+        $bookingDate = trim($data['booking_date'] ?? '');
+        $startTime = trim($data['start_time'] ?? '');
+        $endTime = trim($data['end_time'] ?? '');
+        $eventSlug = trim($data['event_slug'] ?? '');
 
         if (empty($customerName) || empty($customerEmail) || empty($bookingDate) || empty($startTime) || empty($endTime)) {
-            $this->response->json(['status' => 'error', 'message' => 'Please fill in all required fields.'], 400);
+            $this->response->json(['status' => 'error', 'message' => 'Please fill in all required booking fields.'], 400);
         }
 
-        $event = $this->eventModel->findByUserId($user['id']);
+        $event = !empty($eventSlug) ? $this->eventModel->findBySlugAndUserId($eventSlug, $user['id']) : $this->eventModel->findByUserId($user['id']);
 
-        // Determine status (Paid vs Free)
-        $status = (!empty($event['is_paid']) && (float)$event['price'] > 0) ? 'awaiting_payment' : 'confirmed';
+        if (!$event) {
+            $this->response->json(['status' => 'error', 'message' => 'Selected consultation event not found.'], 400);
+        }
+
+        if ($this->bookingModel->isSlotBooked($user['id'], $bookingDate, $startTime, $endTime)) {
+            $this->response->json(['status' => 'error', 'message' => 'Selected slot is no longer available. Please choose another slot.'], 400);
+        }
 
         $bookingId = $this->bookingModel->createBooking([
-            'user_id'        => $user['id'],
-            'event_id'       => $event['id'],
+            'user_id'       => $user['id'],
+            'event_id'      => $event['id'],
             'customer_name'  => $customerName,
             'customer_email' => $customerEmail,
-            'booking_date'   => $bookingDate,
-            'start_time'     => $startTime,
-            'end_time'       => $endTime,
-            'status'         => $status
+            'booking_date'  => $bookingDate,
+            'start_time'    => $startTime,
+            'end_time'      => $endTime,
+            'status'        => $event['is_paid'] ? 'awaiting_payment' : 'confirmed'
         ]);
 
         // Save Custom Form Field Responses
-        $customFields = $this->fieldModel->getByUserId($user['id']);
+        $customFields = $this->fieldModel->getByUserId($user['id'], $event['id']);
         foreach ($customFields as $field) {
             $fieldKey = 'field_' . $field['id'];
-            if (isset($data[$fieldKey])) {
-                $val = is_array($data[$fieldKey]) ? implode(', ', $data[$fieldKey]) : (string)$data[$fieldKey];
-                $this->fieldModel->saveResponse($bookingId, $field['id'], $field['label'], $val);
+            $val = $data[$fieldKey] ?? null;
+            if (is_array($val)) {
+                $val = implode(', ', $val);
+            }
+            if ($val !== null) {
+                $this->fieldModel->saveResponse($bookingId, $field['id'], $field['label'], trim($val));
             }
         }
 
-        $redirectUrl = APP_URL . '/booking/confirmation/' . $bookingId;
-        $this->response->json(['status' => 'success', 'booking_id' => $bookingId, 'redirect' => $redirectUrl]);
+        $this->response->json([
+            'status'   => 'success',
+            'message'  => 'Booking confirmed successfully!',
+            'redirect' => APP_URL . '/booking/confirmation/' . $bookingId
+        ]);
     }
 
     public function showConfirmation(string $id): void {
@@ -182,18 +188,16 @@ class PublicBookingController extends Controller {
         $booking = $this->bookingModel->findById($bookingId);
 
         if (!$booking) {
-            die("Booking not found.");
+            die("Booking record not found.");
         }
 
-        $event = $this->eventModel->findById($booking['event_id']);
-        $hostUser = $this->userModel->findById($booking['user_id']);
-        $profile = $this->profileModel->findByUserId($booking['user_id']);
+        $user = $this->userModel->findById($booking['user_id']);
+        $event = $this->eventModel->findByIdAndUserId($booking['event_id'], $booking['user_id']);
 
         $this->render('booking/confirmation', [
             'booking'  => $booking,
-            'event'    => $event,
-            'hostUser' => $hostUser,
-            'profile'  => $profile
+            'hostUser' => $user,
+            'event'    => $event
         ]);
     }
 }

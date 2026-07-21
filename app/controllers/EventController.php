@@ -16,17 +16,17 @@ class EventController extends Controller {
 
     public function index(): void {
         $user = $this->requireAuth();
-        $event = $this->eventModel->findByUserId($user['id']);
+        $events = $this->eventModel->getByUserId($user['id']);
 
         $this->render('event/index', [
             'user'    => $user,
-            'event'   => $event,
+            'events'  => $events,
             'success' => Session::flash('success'),
             'error'   => Session::flash('error')
         ]);
     }
 
-    public function update(): void {
+    public function create(): void {
         $user = $this->requireAuth();
         $data = $this->request->getBody();
 
@@ -39,11 +39,12 @@ class EventController extends Controller {
         $slug = strtolower(trim($data['slug'] ?? ''));
 
         if (empty($name) || empty($slug)) {
-            Session::flash('error', 'Event Name and Slug are required.');
+            Session::flash('error', 'Event Name and URL Slug are required.');
             $this->response->redirect(APP_URL . '/event');
         }
 
-        $this->eventModel->updateByUserId($user['id'], [
+        $this->eventModel->createEvent([
+            'user_id'          => $user['id'],
             'name'             => $name,
             'slug'             => $slug,
             'description'      => $data['description'] ?? '',
@@ -55,7 +56,22 @@ class EventController extends Controller {
             'status'           => $data['status'] ?? 'active'
         ]);
 
-        Session::flash('success', 'Event settings saved.');
+        Session::flash('success', 'New Event Type created successfully.');
+        $this->response->redirect(APP_URL . '/event');
+    }
+
+    public function delete(string $id): void {
+        $user = $this->requireAuth();
+        $eventId = (int)$id;
+
+        $event = $this->eventModel->findByIdAndUserId($eventId, $user['id']);
+        if ($event) {
+            $this->eventModel->delete($eventId);
+            Session::flash('success', 'Event type deleted successfully.');
+        } else {
+            Session::flash('error', 'Event type not found.');
+        }
+
         $this->response->redirect(APP_URL . '/event');
     }
 }

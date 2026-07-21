@@ -7,19 +7,39 @@ use App\Core\Model;
 class FormField extends Model {
     protected string $table = 'booking_form_fields';
 
-    public function getByUserId(int $userId): array {
-        $stmt = $this->db->prepare("SELECT * FROM `booking_form_fields` WHERE `user_id` = :user_id ORDER BY `display_order` ASC, `id` ASC");
-        $stmt->execute(['user_id' => $userId]);
+    public function getByUserId(int $userId, ?int $eventId = null): array {
+        if ($eventId !== null) {
+            $stmt = $this->db->prepare("
+                SELECT f.*, e.name as event_name 
+                FROM `booking_form_fields` f 
+                LEFT JOIN `events` e ON e.id = f.event_id 
+                WHERE f.`user_id` = :user_id AND (f.`event_id` IS NULL OR f.`event_id` = :event_id) 
+                ORDER BY f.`display_order` ASC, f.`id` ASC
+            ");
+            $stmt->execute(['user_id' => $userId, 'event_id' => $eventId]);
+        } else {
+            $stmt = $this->db->prepare("
+                SELECT f.*, e.name as event_name 
+                FROM `booking_form_fields` f 
+                LEFT JOIN `events` e ON e.id = f.event_id 
+                WHERE f.`user_id` = :user_id 
+                ORDER BY f.`display_order` ASC, f.`id` ASC
+            ");
+            $stmt->execute(['user_id' => $userId]);
+        }
         return $stmt->fetchAll();
     }
 
     public function createField(array $data): int {
+        $eventId = !empty($data['event_id']) ? (int)$data['event_id'] : null;
+
         $stmt = $this->db->prepare("
-            INSERT INTO `booking_form_fields` (`user_id`, `label`, `field_type`, `options`, `placeholder`, `help_text`, `is_required`, `display_order`)
-            VALUES (:user_id, :label, :field_type, :options, :placeholder, :help_text, :is_required, :display_order)
+            INSERT INTO `booking_form_fields` (`user_id`, `event_id`, `label`, `field_type`, `options`, `placeholder`, `help_text`, `is_required`, `display_order`)
+            VALUES (:user_id, :event_id, :label, :field_type, :options, :placeholder, :help_text, :is_required, :display_order)
         ");
         $stmt->execute([
             'user_id'       => $data['user_id'],
+            'event_id'      => $eventId,
             'label'         => trim($data['label']),
             'field_type'    => $data['field_type'],
             'options'       => !empty($data['options']) ? json_encode($data['options']) : null,

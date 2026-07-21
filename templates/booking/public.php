@@ -29,6 +29,22 @@
                 <p class="text-slate-600 text-sm leading-relaxed"><?= htmlspecialchars($profile['bio']) ?></p>
             <?php endif; ?>
 
+            <!-- Multi-Event Selector Tabs if host has >1 event -->
+            <?php if (count($allEvents) > 1): ?>
+                <div class="space-y-2 pt-2">
+                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Select Consultation Service:</span>
+                    <div class="space-y-1.5">
+                        <?php foreach ($allEvents as $evOption): ?>
+                            <a href="<?= APP_URL ?>/u/<?= htmlspecialchars($hostUser['username']) ?>?event=<?= htmlspecialchars($evOption['slug']) ?>"
+                               class="flex items-center justify-between p-3 rounded-xl border text-xs font-bold transition-all <?= ($event['id'] === $evOption['id']) ? 'bg-black text-white border-black shadow-sm' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100' ?>">
+                                <span><?= htmlspecialchars($evOption['name']) ?></span>
+                                <span class="<?= ($event['id'] === $evOption['id']) ? 'text-slate-300' : 'text-slate-400' ?>"><?= $evOption['duration_minutes'] ?>m</span>
+                            </a>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+
             <div class="border-t border-slate-200/80 pt-6 space-y-4">
                 <h3 class="text-lg font-bold text-slate-950"><?= htmlspecialchars($event['name'] ?? '30 Minute Meeting') ?></h3>
                 
@@ -84,6 +100,7 @@
                 <input type="hidden" id="selected-start-time" name="start_time" value="">
                 <input type="hidden" id="selected-end-time" name="end_time" value="">
                 <input type="hidden" id="selected-booking-date" name="booking_date" value="">
+                <input type="hidden" name="event_slug" value="<?= htmlspecialchars($event['slug'] ?? '') ?>">
 
                 <div id="form-error" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-2xl text-xs font-semibold"></div>
 
@@ -100,7 +117,7 @@
                     </div>
                 </div>
 
-                <!-- Custom Fields -->
+                <!-- Custom Fields Assigned to This Specific Event -->
                 <?php foreach ($customFields as $field): ?>
                     <div>
                         <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
@@ -144,6 +161,7 @@
 
     <script>
         const username = "<?= htmlspecialchars($hostUser['username']) ?>";
+        const eventSlug = "<?= htmlspecialchars($event['slug'] ?? '') ?>";
         const dateInput = document.getElementById('booking-date');
         const slotsContainer = document.getElementById('slots-container');
         const bookingForm = document.getElementById('booking-form');
@@ -154,7 +172,7 @@
             slotsContainer.innerHTML = '<p class="text-xs text-slate-400">Loading available slots...</p>';
             submitBtn.disabled = true;
 
-            fetch(`<?= APP_URL ?>/u/${username}/slots?date=${date}`)
+            fetch(`<?= APP_URL ?>/u/${username}/slots?date=${date}&event=${eventSlug}`)
                 .then(res => res.json())
                 .then(data => {
                     slotsContainer.innerHTML = '';

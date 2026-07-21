@@ -32,8 +32,10 @@ App::post('/profile', [ProfileController::class, 'update']);
 // Availability & Event Configuration
 App::get('/availability', [AvailabilityController::class, 'index']);
 App::post('/availability', [AvailabilityController::class, 'update']);
+
 App::get('/event', [EventController::class, 'index']);
-App::post('/event', [EventController::class, 'update']);
+App::post('/event', [EventController::class, 'create']);
+App::post('/event/delete/{id}', [EventController::class, 'delete']);
 
 // Custom Booking Form Builder
 App::get('/form-builder', [FormBuilderController::class, 'index']);

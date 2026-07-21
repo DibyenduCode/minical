@@ -116,6 +116,7 @@ CREATE TABLE `booking_logs` (
 CREATE TABLE `booking_form_fields` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `user_id` INT UNSIGNED NOT NULL,
+  `event_id` INT UNSIGNED NULL,
   `label` VARCHAR(150) NOT NULL,
   `field_type` ENUM('text', 'textarea', 'email', 'phone', 'number', 'date', 'select', 'radio', 'checkbox', 'yes_no', 'url') NOT NULL DEFAULT 'text',
   `options` TEXT NULL COMMENT 'JSON array for select/radio/checkbox options',
@@ -124,7 +125,8 @@ CREATE TABLE `booking_form_fields` (
   `is_required` TINYINT(1) NOT NULL DEFAULT 0,
   `display_order` INT NOT NULL DEFAULT 0,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`event_id`) REFERENCES `events`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Booking Form Responses Table
