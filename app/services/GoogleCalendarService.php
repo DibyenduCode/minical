@@ -64,8 +64,9 @@ class GoogleCalendarService {
         $endStr = str_replace(['-', ':'], '', $booking['booking_date'] . 'T' . $booking['end_time']);
         $dates = $startStr . '/' . $endStr;
 
-        $details = urlencode("Consultation Service: " . $event['name'] . "\nClient Name: " . $booking['customer_name'] . "\nClient Email: " . $booking['customer_email']);
+        $details = urlencode("Consultation Service: " . $event['name'] . "\nConsultant: " . $hostUser['name'] . "\nClient Name: " . $booking['customer_name'] . "\nClient Email: " . $booking['customer_email']);
+        $attendee = urlencode($booking['customer_email']);
 
-        return "https://calendar.google.com/calendar/render?action=TEMPLATE&text={$title}&dates={$dates}&details={$details}";
+        return "https://calendar.google.com/calendar/render?action=TEMPLATE&text={$title}&dates={$dates}&details={$details}&add={$attendee}";
     }
 }
