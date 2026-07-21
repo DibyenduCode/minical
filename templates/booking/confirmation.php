@@ -54,21 +54,7 @@
             </div>
         </div>
 
-        <!-- Google Meet Video Call Button -->
-        <?php if (!empty($booking['meeting_link'])): ?>
-            <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl space-y-2 text-left">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-bold text-emerald-800 uppercase tracking-wider">📹 Google Meet Video Room</span>
-                    <span class="text-[10px] font-extrabold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">Ready</span>
-                </div>
-                <a href="<?= htmlspecialchars($booking['meeting_link']) ?>" target="_blank"
-                   class="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center justify-center gap-2">
-                    <span>Join Google Meet Call</span>
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                </a>
-                <p class="text-[11px] text-emerald-700 font-mono truncate">Link: <?= htmlspecialchars($booking['meeting_link']) ?></p>
-            </div>
-        <?php endif; ?>
+
 
 
 
