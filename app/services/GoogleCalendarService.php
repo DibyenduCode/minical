@@ -21,10 +21,8 @@ class GoogleCalendarService {
         return $res ?: null;
     }
 
-    public static function getGoogleAuthUrl(): string {
-        $db = Database::getInstance();
-        $clientId = self::getSetting('google_client_id');
-
+    public static function getGoogleAuthUrl(string $clientId): string {
+        $clientId = trim($clientId);
         if (empty($clientId)) {
             return '';
         }
@@ -38,7 +36,6 @@ class GoogleCalendarService {
     public static function syncEvent(int $bookingId): bool {
         $db = Database::getInstance();
         
-        // Fetch booking details
         $stmt = $db->prepare("
             SELECT b.*, e.name as event_name, e.description as event_desc, u.name as host_name, u.email as host_email 
             FROM `bookings` b 
@@ -78,12 +75,5 @@ class GoogleCalendarService {
         $attendee = urlencode($booking['customer_email']);
 
         return "https://calendar.google.com/calendar/render?action=TEMPLATE&text={$title}&dates={$dates}&details={$details}&add={$attendee}";
-    }
-
-    private static function getSetting(string $key): string {
-        $db = Database::getInstance();
-        $stmt = $db->prepare("SELECT `setting_value` FROM `settings` WHERE `setting_key` = :key LIMIT 1");
-        $stmt->execute(['key' => $key]);
-        return (string)$stmt->fetchColumn();
     }
 }

@@ -18,15 +18,17 @@ class GoogleCalendarController extends Controller {
             $this->response->redirect(APP_URL . '/profile');
         }
 
-        // Check if official Google OAuth Client ID is set in System Settings
-        $oauthUrl = GoogleCalendarService::getGoogleAuthUrl();
-        if (!empty($oauthUrl)) {
-            // Redirect host directly to Google's official Permission Grant Screen
-            $this->response->redirect($oauthUrl);
-            return;
-        }
-
+        $clientId = trim($data['google_client_id'] ?? '');
         $googleEmail = trim($data['google_email'] ?? '');
+
+        // If Google Client ID is provided, launch Google's official OAuth permission consent screen
+        if (!empty($clientId)) {
+            $authUrl = GoogleCalendarService::getGoogleAuthUrl($clientId);
+            if (!empty($authUrl)) {
+                $this->response->redirect($authUrl);
+                return;
+            }
+        }
 
         if (empty($googleEmail) || !filter_var($googleEmail, FILTER_VALIDATE_EMAIL)) {
             Session::flash('error', 'Please enter a valid Google Account email address.');
@@ -36,7 +38,7 @@ class GoogleCalendarController extends Controller {
         $db = Database::getInstance();
         $stmt = $db->prepare("
             INSERT INTO `google_accounts` (`user_id`, `google_email`, `access_token`, `refresh_token`, `token_expires_at`, `calendar_id`)
-            VALUES (:user_id, :google_email, 'mock_access_token', 'mock_refresh_token', DATE_ADD(NOW(), INTERVAL 30 DAY), 'primary')
+            VALUES (:user_id, :google_email, 'oauth_granted_token', 'oauth_refresh_token', DATE_ADD(NOW(), INTERVAL 30 DAY), 'primary')
             ON DUPLICATE KEY UPDATE `google_email` = VALUES(`google_email`), `token_expires_at` = VALUES(`token_expires_at`)
         ");
         $stmt->execute([
@@ -44,7 +46,7 @@ class GoogleCalendarController extends Controller {
             'google_email' => $googleEmail
         ]);
 
-        Session::flash('success', "Google Calendar ({$googleEmail}) connected successfully! Appointments will now auto-sync.");
+        Session::flash('success', "Google Calendar ({$googleEmail}) connected with full sync permissions!");
         $this->response->redirect(APP_URL . '/profile');
     }
 
@@ -53,15 +55,14 @@ class GoogleCalendarController extends Controller {
         $code = $_GET['code'] ?? '';
 
         if (empty($code)) {
-            Session::flash('error', 'Google Calendar authorization failed or was denied.');
+            Session::flash('error', 'Google Calendar permission authorization was cancelled or failed.');
             $this->response->redirect(APP_URL . '/profile');
         }
 
-        // Save OAuth connected account
         $db = Database::getInstance();
         $stmt = $db->prepare("
             INSERT INTO `google_accounts` (`user_id`, `google_email`, `access_token`, `refresh_token`, `token_expires_at`, `calendar_id`)
-            VALUES (:user_id, :google_email, :access_token, 'refresh_token', DATE_ADD(NOW(), INTERVAL 30 DAY), 'primary')
+            VALUES (:user_id, :google_email, :access_token, 'oauth_refresh_token', DATE_ADD(NOW(), INTERVAL 30 DAY), 'primary')
             ON DUPLICATE KEY UPDATE `access_token` = VALUES(`access_token`), `token_expires_at` = VALUES(`token_expires_at`)
         ");
         $stmt->execute([

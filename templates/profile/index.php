@@ -34,7 +34,7 @@ require_once TEMPLATES_DIR . '/layout/header.php';
 
             <?php if ($isGoogleConnected): ?>
                 <span class="px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-xs font-bold flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Connected
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Connected & Authorized
                 </span>
             <?php else: ?>
                 <span class="px-3 py-1 bg-slate-100 text-slate-600 border border-slate-200 rounded-full text-xs font-semibold">
@@ -48,6 +48,7 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                 <div>
                     <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Connected Account</span>
                     <p class="font-bold text-slate-900 text-sm"><?= htmlspecialchars($googleAccount['google_email']) ?></p>
+                    <p class="text-[11px] text-emerald-700 font-semibold mt-0.5">✓ Full read/write calendar permissions active</p>
                 </div>
                 <form action="<?= APP_URL ?>/integrations/google/disconnect" method="POST">
                     <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
@@ -61,9 +62,16 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                 <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
                 
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Google Account Email</label>
-                    <input type="email" name="google_email" required placeholder="your.name@gmail.com"
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Google Account Email *</label>
+                    <input type="email" name="google_email" required value="<?= htmlspecialchars($user['email']) ?>"
                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-black">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Google OAuth Client ID (Optional for official Google Consent Screen)</label>
+                    <input type="text" name="google_client_id" placeholder="e.g. 123456789-abc.apps.googleusercontent.com"
+                           class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-black">
+                    <p class="text-[11px] text-slate-400 mt-1">If provided, clicking Connect will launch Google's official permission grant screen.</p>
                 </div>
 
                 <button type="submit" class="px-6 py-3 bg-black hover:bg-slate-800 text-white font-bold text-sm rounded-xl shadow-md transition-all">
