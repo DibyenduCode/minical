@@ -36,20 +36,21 @@ class Event extends Model {
 
     public function createEvent(array $data): int {
         $stmt = $this->db->prepare("
-            INSERT INTO `events` (`user_id`, `name`, `slug`, `description`, `duration_minutes`, `location_type`, `is_paid`, `price`, `currency`, `status`)
-            VALUES (:user_id, :name, :slug, :description, :duration_minutes, :location_type, :is_paid, :price, :currency, :status)
+            INSERT INTO `events` (`user_id`, `name`, `slug`, `description`, `duration_minutes`, `booking_window_days`, `location_type`, `is_paid`, `price`, `currency`, `status`)
+            VALUES (:user_id, :name, :slug, :description, :duration_minutes, :booking_window_days, :location_type, :is_paid, :price, :currency, :status)
         ");
         $stmt->execute([
-            'user_id'          => $data['user_id'],
-            'name'             => trim($data['name']),
-            'slug'             => strtolower(trim($data['slug'])),
-            'description'      => trim($data['description'] ?? ''),
-            'duration_minutes' => (int)($data['duration_minutes'] ?? 30),
-            'location_type'    => $data['location_type'] ?? 'online',
-            'is_paid'          => isset($data['is_paid']) ? 1 : 0,
-            'price'            => (float)($data['price'] ?? 0.00),
-            'currency'         => $data['currency'] ?? 'USD',
-            'status'           => $data['status'] ?? 'active'
+            'user_id'             => $data['user_id'],
+            'name'                => trim($data['name']),
+            'slug'                => strtolower(trim($data['slug'])),
+            'description'         => trim($data['description'] ?? ''),
+            'duration_minutes'    => (int)($data['duration_minutes'] ?? 30),
+            'booking_window_days' => (int)($data['booking_window_days'] ?? 30),
+            'location_type'       => $data['location_type'] ?? 'online',
+            'is_paid'             => isset($data['is_paid']) ? 1 : 0,
+            'price'               => (float)($data['price'] ?? 0.00),
+            'currency'            => $data['currency'] ?? 'USD',
+            'status'              => $data['status'] ?? 'active'
         ]);
         return (int)$this->db->lastInsertId();
     }
@@ -58,22 +59,24 @@ class Event extends Model {
         $stmt = $this->db->prepare("
             UPDATE `events` 
             SET `name` = :name, `slug` = :slug, `description` = :description, 
-                `duration_minutes` = :duration_minutes, `location_type` = :location_type,
-                `is_paid` = :is_paid, `price` = :price, `currency` = :currency, `status` = :status
+                `duration_minutes` = :duration_minutes, `booking_window_days` = :booking_window_days, 
+                `location_type` = :location_type, `is_paid` = :is_paid, `price` = :price, 
+                `currency` = :currency, `status` = :status
             WHERE `id` = :id AND `user_id` = :user_id
         ");
         return $stmt->execute([
-            'name'             => trim($data['name']),
-            'slug'             => strtolower(trim($data['slug'])),
-            'description'      => trim($data['description'] ?? ''),
-            'duration_minutes' => (int)($data['duration_minutes'] ?? 30),
-            'location_type'    => $data['location_type'] ?? 'online',
-            'is_paid'          => isset($data['is_paid']) ? 1 : 0,
-            'price'            => (float)($data['price'] ?? 0.00),
-            'currency'         => $data['currency'] ?? 'USD',
-            'status'           => $data['status'] ?? 'active',
-            'id'               => $id,
-            'user_id'          => $userId
+            'name'                => trim($data['name']),
+            'slug'                => strtolower(trim($data['slug'])),
+            'description'         => trim($data['description'] ?? ''),
+            'duration_minutes'    => (int)($data['duration_minutes'] ?? 30),
+            'booking_window_days' => (int)($data['booking_window_days'] ?? 30),
+            'location_type'       => $data['location_type'] ?? 'online',
+            'is_paid'             => isset($data['is_paid']) ? 1 : 0,
+            'price'               => (float)($data['price'] ?? 0.00),
+            'currency'            => $data['currency'] ?? 'USD',
+            'status'              => $data['status'] ?? 'active',
+            'id'                  => $id,
+            'user_id'             => $userId
         ]);
     }
 }

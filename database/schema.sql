@@ -65,22 +65,22 @@ CREATE TABLE `availability` (
   FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Events Table
+-- Event Types / Consultation Services Table
 CREATE TABLE `events` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   `user_id` INT UNSIGNED NOT NULL,
   `name` VARCHAR(150) NOT NULL,
-  `slug` VARCHAR(150) NOT NULL,
+  `slug` VARCHAR(100) NOT NULL,
   `description` TEXT NULL,
-  `duration_minutes` INT UNSIGNED NOT NULL DEFAULT 30,
-  `location_type` VARCHAR(50) NOT NULL DEFAULT 'online',
+  `duration_minutes` INT NOT NULL DEFAULT 30,
+  `booking_window_days` INT NOT NULL DEFAULT 30,
+  `location_type` ENUM('online', 'phone', 'in_person') NOT NULL DEFAULT 'online',
   `is_paid` TINYINT(1) NOT NULL DEFAULT 0,
-  `price` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  `price` DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
   `currency` VARCHAR(10) NOT NULL DEFAULT 'USD',
   `status` ENUM('active', 'inactive') NOT NULL DEFAULT 'active',
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  UNIQUE KEY `user_event_slug` (`user_id`, `slug`),
   FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

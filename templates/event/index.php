@@ -23,14 +23,14 @@ require_once TEMPLATES_DIR . '/layout/header.php';
     <div class="flex items-center justify-between bg-white p-6 rounded-3xl border border-slate-200/90 shadow-sm">
         <div>
             <h1 class="text-2xl font-extrabold text-slate-950 tracking-tight">Consultation Services & Event Types</h1>
-            <p class="text-slate-500 text-xs font-medium mt-1">Create and edit multiple booking services (e.g. Personal Counselling, Family Counselling, Child Counselling).</p>
+            <p class="text-slate-500 text-xs font-medium mt-1">Configure meeting titles, durations, advance booking notice limits, and prices.</p>
         </div>
         <button type="button" onclick="document.getElementById('new-event-form').classList.toggle('hidden')" class="px-5 py-2.5 bg-black hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-md transition-all">
             + New Event Type
         </button>
     </div>
 
-    <!-- Create New Event Form (Hidden by default) -->
+    <!-- Create New Event Form -->
     <div id="new-event-form" class="hidden bg-white border border-slate-200/90 rounded-3xl p-8 space-y-6 shadow-sm">
         <h2 class="text-lg font-bold text-slate-950 tracking-tight">Create New Consultation Service</h2>
 
@@ -51,7 +51,7 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                     <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Duration (Minutes)</label>
                     <select name="duration_minutes" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-black">
@@ -61,6 +61,18 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                         <option value="60">60 Minutes</option>
                         <option value="90">90 Minutes</option>
                         <option value="120">120 Minutes</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Max Advance Booking</label>
+                    <select name="booking_window_days" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-black">
+                        <option value="7">7 Days into Future</option>
+                        <option value="14">14 Days into Future</option>
+                        <option value="30" selected>30 Days into Future</option>
+                        <option value="60">60 Days into Future</option>
+                        <option value="90">90 Days into Future</option>
+                        <option value="180">180 Days into Future</option>
                     </select>
                 </div>
 
@@ -129,6 +141,7 @@ require_once TEMPLATES_DIR . '/layout/header.php';
             </div>
         <?php else: ?>
             <?php foreach ($events as $ev): ?>
+                <?php $winDays = (int)($ev['booking_window_days'] ?? 30); ?>
                 <div class="bg-white border border-slate-200/90 rounded-3xl p-6 shadow-sm hover:shadow-md transition-all flex flex-col justify-between space-y-6">
                     <div class="space-y-3">
                         <div class="flex items-center justify-between">
@@ -153,8 +166,8 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                             <p class="text-xs text-slate-600 line-clamp-2 leading-relaxed"><?= htmlspecialchars($ev['description']) ?></p>
                         <?php endif; ?>
 
-                        <div class="pt-2 flex items-center gap-3 text-xs font-semibold text-slate-500">
-                            <span>📍 <?= ucfirst($ev['location_type']) ?></span>
+                        <div class="pt-2 flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
+                            <span class="px-2 py-0.5 bg-slate-100 rounded text-[11px] font-bold text-slate-700">📅 <?= $winDays ?> Days Advance</span>
                             <span>•</span>
                             <a href="<?= APP_URL ?>/form-builder" class="text-black font-bold hover:underline">Form Questions →</a>
                         </div>
@@ -183,7 +196,7 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                             </div>
                         </div>
 
-                        <!-- Inline Edit Form (Hidden by default) -->
+                        <!-- Inline Edit Form -->
                         <div id="edit-event-form-<?= $ev['id'] ?>" class="hidden bg-slate-50 border border-slate-200 rounded-2xl p-4 text-left space-y-4 mt-3">
                             <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800">Edit Service Details</h4>
                             <form action="<?= APP_URL ?>/event/update/<?= $ev['id'] ?>" method="POST" class="space-y-4">
@@ -210,13 +223,22 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                                     </div>
 
                                     <div>
-                                        <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Location</label>
-                                        <select name="location_type" class="w-full px-2.5 py-2 text-xs bg-white border border-slate-200 rounded-lg">
-                                            <option value="online" <?= $ev['location_type'] === 'online' ? 'selected' : '' ?>>Online</option>
-                                            <option value="phone" <?= $ev['location_type'] === 'phone' ? 'selected' : '' ?>>Phone</option>
-                                            <option value="in_person" <?= $ev['location_type'] === 'in_person' ? 'selected' : '' ?>>In Person</option>
+                                        <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Advance Booking</label>
+                                        <select name="booking_window_days" class="w-full px-2.5 py-2 text-xs bg-white border border-slate-200 rounded-lg">
+                                            <?php foreach ([7, 14, 30, 60, 90, 180] as $w): ?>
+                                                <option value="<?= $w ?>" <?= $winDays == $w ? 'selected' : '' ?>><?= $w ?> Days</option>
+                                            <?php endforeach; ?>
                                         </select>
                                     </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Location</label>
+                                    <select name="location_type" class="w-full px-2.5 py-2 text-xs bg-white border border-slate-200 rounded-lg">
+                                        <option value="online" <?= $ev['location_type'] === 'online' ? 'selected' : '' ?>>Online</option>
+                                        <option value="phone" <?= $ev['location_type'] === 'phone' ? 'selected' : '' ?>>Phone</option>
+                                        <option value="in_person" <?= $ev['location_type'] === 'in_person' ? 'selected' : '' ?>>In Person</option>
+                                    </select>
                                 </div>
 
                                 <div>
