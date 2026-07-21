@@ -84,12 +84,12 @@ class EmailService {
         $headers[] = 'Content-type: text/html; charset=utf-8';
         $headers[] = 'From: ' . $siteName . ' <noreply@' . ($_SERVER['HTTP_HOST'] ?? 'minical.local') . '>';
 
-        // Send confirmation to Client
-        mail($booking['customer_email'], $subject, $htmlBody, implode("\r\n", $headers));
+        // Send confirmation to Client (Suppress warning on local development if mail server is not configured)
+        @mail($booking['customer_email'], $subject, $htmlBody, implode("\r\n", $headers));
 
         // Send notification to Host
         $hostSubject = "New Booking: " . $booking['customer_name'] . " - " . $booking['event_name'];
-        mail($booking['host_email'], $hostSubject, $htmlBody, implode("\r\n", $headers));
+        @mail($booking['host_email'], $hostSubject, $htmlBody, implode("\r\n", $headers));
 
         return true;
     }
