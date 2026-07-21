@@ -37,8 +37,13 @@ class AdminController extends Controller {
         $eventsCount = (int)$db->query("SELECT COUNT(*) FROM `events`")->fetchColumn();
         $revenueTotal = (float)$db->query("SELECT COALESCE(SUM(amount), 0) FROM `payments` WHERE status = 'success'")->fetchColumn();
 
-        // Recent 5 Users
-        $users = $db->query("SELECT * FROM `users` ORDER BY id DESC LIMIT 5")->fetchAll();
+        // Recent 5 Users with Custom Domains
+        $users = $db->query("
+            SELECT u.*, p.custom_domain 
+            FROM `users` u 
+            LEFT JOIN `profiles` p ON p.user_id = u.id 
+            ORDER BY u.id DESC LIMIT 5
+        ")->fetchAll();
 
         // Recent 5 Bookings
         $allBookings = $db->query("
@@ -125,10 +130,11 @@ class AdminController extends Controller {
         $db = Database::getInstance();
 
         $users = $db->query("
-            SELECT u.*, 
+            SELECT u.*, p.custom_domain,
                    (SELECT COUNT(*) FROM `bookings` b WHERE b.user_id = u.id) as total_bookings,
                    (SELECT COUNT(*) FROM `events` e WHERE e.user_id = u.id) as total_events
             FROM `users` u 
+            LEFT JOIN `profiles` p ON p.user_id = u.id 
             ORDER BY u.id DESC
         ")->fetchAll();
 

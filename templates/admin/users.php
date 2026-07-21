@@ -24,7 +24,7 @@ require_once TEMPLATES_DIR . '/admin/layout/header.php';
         <div class="flex items-center justify-between">
             <div>
                 <h1 class="text-2xl font-extrabold text-slate-950 tracking-tight">Registered Platform Users</h1>
-                <p class="text-slate-500 text-xs font-medium mt-1">Manage user accounts, status toggles, and administrative permissions.</p>
+                <p class="text-slate-500 text-xs font-medium mt-1">Manage user accounts, custom white-label domains, and administrative permissions.</p>
             </div>
             <span class="text-xs text-slate-500 font-bold bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200"><?= count($users) ?> Total Accounts</span>
         </div>
@@ -35,6 +35,7 @@ require_once TEMPLATES_DIR . '/admin/layout/header.php';
                     <tr>
                         <th class="px-6 py-4">User Details</th>
                         <th class="px-6 py-4">Booking Link</th>
+                        <th class="px-6 py-4">Custom Branded Domain</th>
                         <th class="px-6 py-4">Bookings</th>
                         <th class="px-6 py-4">Role</th>
                         <th class="px-6 py-4">Status</th>
@@ -52,6 +53,15 @@ require_once TEMPLATES_DIR . '/admin/layout/header.php';
                                 <a href="<?= APP_URL ?>/u/<?= htmlspecialchars($u['username']) ?>" target="_blank" class="hover:underline text-black font-semibold">
                                     /u/<?= htmlspecialchars($u['username']) ?>
                                 </a>
+                            </td>
+                            <td class="px-6 py-4">
+                                <?php if (!empty($u['custom_domain'])): ?>
+                                    <a href="http://<?= htmlspecialchars($u['custom_domain']) ?>" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 hover:underline">
+                                        <span>🌐 <?= htmlspecialchars($u['custom_domain']) ?></span>
+                                    </a>
+                                <?php else: ?>
+                                    <span class="text-xs text-slate-400 font-medium italic">None configured</span>
+                                <?php endif; ?>
                             </td>
                             <td class="px-6 py-4 text-xs font-bold text-slate-800"><?= $u['total_bookings'] ?> bookings</td>
                             <td class="px-6 py-4 uppercase text-[11px] font-bold text-slate-700"><?= $u['role'] ?></td>

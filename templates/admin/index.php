@@ -19,7 +19,7 @@ require_once TEMPLATES_DIR . '/admin/layout/header.php';
                 Super Admin Control Panel
             </div>
             <h1 class="text-3xl font-extrabold text-slate-950 tracking-tight">Platform Overview</h1>
-            <p class="text-slate-500 text-xs font-medium mt-1">High-level platform metrics, active user accounts, and system health.</p>
+            <p class="text-slate-500 text-xs font-medium mt-1">High-level platform metrics, active user accounts, and custom white-label domains.</p>
         </div>
         <div class="flex items-center gap-3">
             <a href="<?= APP_URL ?>/admin/users" class="px-5 py-2.5 bg-black hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-sm transition-all">
@@ -64,6 +64,7 @@ require_once TEMPLATES_DIR . '/admin/layout/header.php';
                     <tr>
                         <th class="px-6 py-3.5">User</th>
                         <th class="px-6 py-3.5">Username</th>
+                        <th class="px-6 py-3.5">Custom Domain</th>
                         <th class="px-6 py-3.5">Role</th>
                         <th class="px-6 py-3.5">Status</th>
                     </tr>
@@ -76,6 +77,15 @@ require_once TEMPLATES_DIR . '/admin/layout/header.php';
                                 <p class="text-xs text-slate-500"><?= htmlspecialchars($u['email']) ?></p>
                             </td>
                             <td class="px-6 py-3.5 font-mono text-xs text-slate-600">/u/<?= htmlspecialchars($u['username']) ?></td>
+                            <td class="px-6 py-3.5">
+                                <?php if (!empty($u['custom_domain'])): ?>
+                                    <span class="text-xs font-bold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-200">
+                                        🌐 <?= htmlspecialchars($u['custom_domain']) ?>
+                                    </span>
+                                <?php else: ?>
+                                    <span class="text-xs text-slate-400 italic">None</span>
+                                <?php endif; ?>
+                            </td>
                             <td class="px-6 py-3.5 uppercase text-[11px] font-bold text-slate-700"><?= $u['role'] ?></td>
                             <td class="px-6 py-3.5">
                                 <span class="px-2.5 py-1 rounded-full text-[11px] font-bold border <?= $u['status'] === 'active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-700 border-red-200' ?>">
