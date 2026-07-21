@@ -5,7 +5,6 @@ namespace App\Controllers;
 use App\Core\Controller;
 use App\Core\Database;
 use App\Core\Session;
-use App\Services\GoogleCalendarService;
 
 class GoogleCalendarController extends Controller {
 
@@ -27,9 +26,9 @@ class GoogleCalendarController extends Controller {
 
         $db = Database::getInstance();
         $stmt = $db->prepare("
-            INSERT INTO `google_accounts` (`user_id`, `google_email`, `access_token`, `refresh_token`, `expires_at`)
-            VALUES (:user_id, :google_email, 'mock_access_token', 'mock_refresh_token', DATE_ADD(NOW(), INTERVAL 30 DAY))
-            ON DUPLICATE KEY UPDATE `google_email` = VALUES(`google_email`), `expires_at` = VALUES(`expires_at`)
+            INSERT INTO `google_accounts` (`user_id`, `google_email`, `access_token`, `refresh_token`, `token_expires_at`, `calendar_id`)
+            VALUES (:user_id, :google_email, 'mock_access_token', 'mock_refresh_token', DATE_ADD(NOW(), INTERVAL 30 DAY), 'primary')
+            ON DUPLICATE KEY UPDATE `google_email` = VALUES(`google_email`), `token_expires_at` = VALUES(`token_expires_at`)
         ");
         $stmt->execute([
             'user_id'      => $user['id'],
