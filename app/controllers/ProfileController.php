@@ -7,7 +7,6 @@ use App\Core\Database;
 use App\Core\Session;
 use App\Models\Profile;
 use App\Models\User;
-use App\Services\GoogleCalendarService;
 
 class ProfileController extends Controller {
     private Profile $profileModel;
@@ -52,12 +51,43 @@ class ProfileController extends Controller {
         $name = trim($data['name'] ?? '');
         $phone = trim($data['phone'] ?? '');
         $timezone = trim($data['timezone'] ?? 'UTC');
+        $companyName = trim($data['company_name'] ?? '');
         $customDomain = trim($data['custom_domain'] ?? '');
         $bio = trim($data['bio'] ?? '');
 
         if (empty($name)) {
             Session::flash('error', 'Name cannot be empty.');
             $this->response->redirect(APP_URL . '/profile');
+        }
+
+        // Fetch current profile for avatar fallback
+        $profile = $this->profileModel->findByUserId($user['id']);
+        $avatarUrl = $profile['avatar'] ?? null;
+
+        // Process File Upload for Logo / Avatar
+        if (!empty($_FILES['avatar_file']['name'])) {
+            $file = $_FILES['avatar_file'];
+            $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            
+            if (!in_array($file['type'], $allowedTypes)) {
+                Session::flash('error', 'Only JPG, PNG, GIF, and WEBP image file formats are allowed.');
+                $this->response->redirect(APP_URL . '/profile');
+            }
+
+            $uploadDir = PUBLIC_DIR . '/uploads/logos/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+
+            $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+            $newFileName = 'logo_' . $user['id'] . '_' . time() . '.' . $ext;
+            $destination = $uploadDir . $newFileName;
+
+            if (move_uploaded_file($file['tmp_name'], $destination)) {
+                $avatarUrl = 'public/uploads/logos/' . $newFileName;
+            } else {
+                error_log("ProfileController Error: Failed to upload logo to " . $destination);
+            }
         }
 
         // Update user name
@@ -73,12 +103,13 @@ class ProfileController extends Controller {
         $this->profileModel->updateByUserId($user['id'], [
             'phone'         => $phone,
             'timezone'      => $timezone,
+            'company_name'  => $companyName,
             'custom_domain' => $customDomain,
             'bio'           => $bio,
-            'avatar_url'    => null
+            'avatar'        => $avatarUrl
         ]);
 
-        Session::flash('success', 'Profile & Custom Domain settings updated successfully.');
+        Session::flash('success', 'Branding & Profile settings updated successfully.');
         $this->response->redirect(APP_URL . '/profile');
     }
 }

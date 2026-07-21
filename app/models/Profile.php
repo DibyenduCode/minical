@@ -32,7 +32,6 @@ class Profile extends Model {
 
     public function updateByUserId(int $userId, array $data): bool {
         $customDomain = !empty($data['custom_domain']) ? strtolower(trim($data['custom_domain'])) : null;
-        // Strip http:// or https:// or trailing slashes if user typed full URL
         if ($customDomain) {
             $customDomain = preg_replace('#^https?://#', '', $customDomain);
             $customDomain = rtrim($customDomain, '/');
@@ -40,15 +39,16 @@ class Profile extends Model {
 
         $stmt = $this->db->prepare("
             UPDATE `profiles` 
-            SET `phone` = :phone, `timezone` = :timezone, `custom_domain` = :custom_domain, `bio` = :bio, `avatar_url` = :avatar_url
+            SET `phone` = :phone, `timezone` = :timezone, `company_name` = :company_name, `custom_domain` = :custom_domain, `bio` = :bio, `avatar` = :avatar
             WHERE `user_id` = :user_id
         ");
         return $stmt->execute([
             'phone'         => $data['phone'] ?? null,
             'timezone'      => $data['timezone'] ?? 'UTC',
+            'company_name'  => $data['company_name'] ?? null,
             'custom_domain' => $customDomain,
             'bio'           => $data['bio'] ?? null,
-            'avatar_url'    => $data['avatar_url'] ?? null,
+            'avatar'        => $data['avatar'] ?? null,
             'user_id'       => $userId
         ]);
     }

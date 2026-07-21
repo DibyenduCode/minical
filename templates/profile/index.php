@@ -23,11 +23,28 @@ require_once TEMPLATES_DIR . '/layout/header.php';
     <div class="bg-white border border-slate-200/90 rounded-3xl p-8 space-y-6 shadow-sm">
         <div>
             <h1 class="text-2xl font-extrabold text-slate-950 tracking-tight">Profile & Branding Settings</h1>
-            <p class="text-slate-500 text-xs font-medium mt-1">Manage your account details, timezone, and custom white-label domain.</p>
+            <p class="text-slate-500 text-xs font-medium mt-1">Manage your account details, company brand, logo, and custom domain.</p>
         </div>
 
-        <form action="<?= APP_URL ?>/profile" method="POST" class="space-y-6">
+        <form action="<?= APP_URL ?>/profile" method="POST" enctype="multipart/form-data" class="space-y-6">
             <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+
+            <!-- Brand Logo Upload Card -->
+            <div class="p-6 bg-slate-50 border border-slate-200/80 rounded-2xl flex flex-col sm:flex-row items-center gap-6">
+                <div class="relative w-20 h-20 bg-black text-white rounded-3xl flex items-center justify-center font-bold text-2xl overflow-hidden border border-slate-200 shadow-sm">
+                    <?php if (!empty($profile['avatar'])): ?>
+                        <img src="<?= APP_URL ?>/<?= htmlspecialchars($profile['avatar']) ?>" class="w-full h-full object-cover">
+                    <?php else: ?>
+                        <?= strtoupper(substr($user['name'], 0, 2)) ?>
+                    <?php endif; ?>
+                </div>
+
+                <div class="space-y-2 text-center sm:text-left flex-1">
+                    <h3 class="font-bold text-slate-900 text-sm">Brand Logo / Company Avatar</h3>
+                    <p class="text-slate-500 text-xs mt-0.5">Upload a square logo (JPG, PNG, WEBP) to brand your public booking link.</p>
+                    <input type="file" name="avatar_file" accept="image/*" class="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-black file:text-white file:cursor-pointer hover:file:bg-slate-800">
+                </div>
+            </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -45,11 +62,19 @@ require_once TEMPLATES_DIR . '/layout/header.php';
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Company / Brand Name</label>
+                    <input type="text" name="company_name" value="<?= htmlspecialchars($profile['company_name'] ?? '') ?>" placeholder="e.g. DK Tech"
+                           class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-black">
+                </div>
+
+                <div>
                     <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Phone Number</label>
                     <input type="text" name="phone" value="<?= htmlspecialchars($profile['phone'] ?? '') ?>" placeholder="+1 (555) 000-0000"
                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-black">
                 </div>
+            </div>
 
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Timezone</label>
                     <select name="timezone" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-black">
@@ -63,31 +88,22 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                         ?>
                     </select>
                 </div>
+
+                <div>
+                    <!-- Custom Branded Domain Section (Cal.com style) -->
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Custom Domain / Subdomain</label>
+                    <input type="text" name="custom_domain" value="<?= htmlspecialchars($profile['custom_domain'] ?? '') ?>" placeholder="booking.dibyendu.in"
+                           class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-black">
+                </div>
             </div>
 
-            <!-- Custom Branded Domain Section (Cal.com style) -->
-            <div class="p-6 bg-slate-50 border border-slate-200/90 rounded-2xl space-y-4">
-                <div>
-                    <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
-                        <span>🌐 Custom Branded Domain (Cal.com Style White-Label)</span>
-                    </h3>
-                    <p class="text-slate-500 text-xs mt-1">Serve your booking page on your own custom domain or subdomain (e.g., <code class="font-bold text-slate-800">booking.dibyendu.in</code>).</p>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Your Custom Domain / Subdomain</label>
-                    <input type="text" name="custom_domain" value="<?= htmlspecialchars($profile['custom_domain'] ?? '') ?>" placeholder="booking.dibyendu.in"
-                           class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-900 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-black">
-                </div>
-
-                <div class="p-4 bg-white border border-slate-200 rounded-xl space-y-2 text-xs text-slate-600">
-                    <p class="font-bold text-slate-900">DNS Setup Instructions for your domain registrar:</p>
-                    <ul class="list-disc list-inside space-y-1 text-slate-600 font-mono text-[11px]">
-                        <li>Record Type: <strong class="text-black">CNAME</strong></li>
-                        <li>Name / Host: <strong class="text-black">booking</strong> (or your subdomain name)</li>
-                        <li>Target / Value: <strong class="text-black">xyz.com</strong> (or your main platform domain)</li>
-                    </ul>
-                </div>
+            <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2 text-xs text-slate-600">
+                <p class="font-bold text-slate-900">DNS Setup Instructions for your domain registrar:</p>
+                <ul class="list-disc list-inside space-y-1 text-slate-600 font-mono text-[11px]">
+                    <li>Record Type: <strong class="text-black">CNAME</strong></li>
+                    <li>Name / Host: <strong class="text-black">booking</strong> (or your subdomain name)</li>
+                    <li>Target / Value: <strong class="text-black">xyz.com</strong> (or your main platform domain)</li>
+                </ul>
             </div>
 
             <div>
