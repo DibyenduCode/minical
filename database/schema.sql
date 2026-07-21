@@ -41,13 +41,15 @@ CREATE TABLE `users` (
 -- User Profiles Table
 CREATE TABLE `profiles` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  `user_id` INT UNSIGNED NOT NULL UNIQUE,
+  `user_id` INT UNSIGNED NOT NULL,
   `phone` VARCHAR(30) NULL,
   `timezone` VARCHAR(50) NOT NULL DEFAULT 'UTC',
+  `custom_domain` VARCHAR(255) NULL,
   `bio` TEXT NULL,
-  `avatar` VARCHAR(255) NULL,
+  `avatar_url` VARCHAR(255) NULL,
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY `user_profile` (`user_id`),
   FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

@@ -2,6 +2,9 @@
 
 namespace App\Core;
 
+use App\Models\Profile;
+use App\Controllers\PublicBookingController;
+
 class App {
     private static array $routes = [];
 
@@ -27,6 +30,27 @@ class App {
         
         $method = $request->getMethod();
         $path = $request->getUri();
+
+        // Check if incoming request is on a Custom Branded Domain (Cal.com White-Label Feature)
+        $httpHost = $_SERVER['HTTP_HOST'] ?? '';
+        $httpHostClean = explode(':', $httpHost)[0]; // strip port if present
+
+        // Skip custom domain check for localhost, 127.0.0.1, or main app domain
+        if (!in_array($httpHostClean, ['localhost', '127.0.0.1', 'xyz.com', 'www.xyz.com'])) {
+            try {
+                $profileModel = new Profile();
+                $matchedProfile = $profileModel->findByCustomDomain($httpHostClean);
+
+                if ($matchedProfile && !empty($matchedProfile['username'])) {
+                    // Automatically serve custom branded booking page on custom domain
+                    $controller = new PublicBookingController();
+                    $controller->showPublicBooking($matchedProfile['username']);
+                    return;
+                }
+            } catch (\Exception $e) {
+                // Ignore DB error during domain check fallback
+            }
+        }
 
         // 1. Direct route match
         if (isset(self::$routes[$method][$path])) {

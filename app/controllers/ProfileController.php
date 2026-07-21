@@ -41,6 +41,7 @@ class ProfileController extends Controller {
         $name = trim($data['name'] ?? '');
         $phone = trim($data['phone'] ?? '');
         $timezone = trim($data['timezone'] ?? 'UTC');
+        $customDomain = trim($data['custom_domain'] ?? '');
         $bio = trim($data['bio'] ?? '');
 
         if (empty($name)) {
@@ -59,13 +60,14 @@ class ProfileController extends Controller {
 
         // Update Profile
         $this->profileModel->updateByUserId($user['id'], [
-            'phone'    => $phone,
-            'timezone' => $timezone,
-            'bio'      => $bio,
-            'avatar'   => null
+            'phone'         => $phone,
+            'timezone'      => $timezone,
+            'custom_domain' => $customDomain,
+            'bio'           => $bio,
+            'avatar_url'    => null
         ]);
 
-        Session::flash('success', 'Profile updated successfully.');
+        Session::flash('success', 'Profile & Custom Domain settings updated successfully.');
         $this->response->redirect(APP_URL . '/profile');
     }
 }
