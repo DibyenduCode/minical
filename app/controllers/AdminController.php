@@ -81,6 +81,38 @@ class AdminController extends Controller {
         ]);
     }
 
+    public function domains(): void {
+        $adminUser = $this->requireAdmin();
+        $db = Database::getInstance();
+
+        // Users with Custom Domains
+        $domainUsers = $db->query("
+            SELECT u.*, p.custom_domain, p.timezone,
+                   (SELECT COUNT(*) FROM `bookings` b WHERE b.user_id = u.id) as total_bookings
+            FROM `users` u 
+            JOIN `profiles` p ON p.user_id = u.id 
+            WHERE p.custom_domain IS NOT NULL AND p.custom_domain != ''
+            ORDER BY u.id DESC
+        ")->fetchAll();
+
+        // All Users for Domain Mapping Reference
+        $allUsers = $db->query("
+            SELECT u.*, p.custom_domain 
+            FROM `users` u 
+            LEFT JOIN `profiles` p ON p.user_id = u.id 
+            ORDER BY u.id DESC
+        ")->fetchAll();
+
+        $this->renderAdmin('domains', [
+            'admin'       => $adminUser,
+            'adminTab'    => 'domains',
+            'domainUsers' => $domainUsers,
+            'allUsers'    => $allUsers,
+            'success'     => Session::flash('success'),
+            'error'       => Session::flash('error')
+        ]);
+    }
+
     public function createPlan(): void {
         $this->requireAdmin();
         $data = $this->request->getBody();
