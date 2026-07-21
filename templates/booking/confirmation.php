@@ -70,20 +70,7 @@
             </div>
         <?php endif; ?>
 
-        <!-- Google Calendar Integration Button & Badge -->
-        <div class="space-y-3 pt-2">
-            <?php if (!empty($googleConnected)): ?>
-                <div class="bg-blue-50 border border-blue-200 p-3 rounded-2xl flex items-center justify-center gap-2 text-blue-800 text-xs font-bold">
-                    <span>📅 Auto-synced with Host's Google Calendar</span>
-                </div>
-            <?php endif; ?>
 
-            <a href="<?= $googleCalendarUrl ?>" target="_blank"
-               class="w-full py-3.5 px-4 bg-black hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
-                <span>➕ Add to my Google Calendar</span>
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-            </a>
-        </div>
 
         <div class="pt-2">
             <a href="<?= APP_URL ?>/u/<?= htmlspecialchars($hostUser['username']) ?>" class="text-xs font-bold text-slate-500 hover:text-black transition-colors">
