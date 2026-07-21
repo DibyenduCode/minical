@@ -47,7 +47,7 @@ class Event extends Model {
             'duration_minutes'    => (int)($data['duration_minutes'] ?? 30),
             'booking_window_days' => (int)($data['booking_window_days'] ?? 30),
             'location_type'       => $data['location_type'] ?? 'online',
-            'is_paid'             => isset($data['is_paid']) ? 1 : 0,
+            'is_paid'             => (int)($data['is_paid'] ?? 0),
             'price'               => (float)($data['price'] ?? 0.00),
             'currency'            => $data['currency'] ?? 'USD',
             'status'              => $data['status'] ?? 'active'
@@ -71,7 +71,7 @@ class Event extends Model {
             'duration_minutes'    => (int)($data['duration_minutes'] ?? 30),
             'booking_window_days' => (int)($data['booking_window_days'] ?? 30),
             'location_type'       => $data['location_type'] ?? 'online',
-            'is_paid'             => isset($data['is_paid']) ? 1 : 0,
+            'is_paid'             => (int)($data['is_paid'] ?? 0),
             'price'               => (float)($data['price'] ?? 0.00),
             'currency'            => $data['currency'] ?? 'USD',
             'status'              => $data['status'] ?? 'active',
