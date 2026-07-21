@@ -141,7 +141,14 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                                         <?= ucfirst($b['status']) ?>
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 text-right">
+                                <td class="px-6 py-4 text-right space-x-2">
+                                    <?php if ($b['status'] !== 'cancelled' && !empty($b['meeting_link'])): ?>
+                                        <a href="<?= htmlspecialchars($b['meeting_link']) ?>" target="_blank"
+                                           class="inline-flex items-center gap-1 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 rounded-xl shadow-sm transition-all">
+                                            <span>📹 Join Meet</span>
+                                        </a>
+                                    <?php endif; ?>
+
                                     <?php if ($b['status'] !== 'cancelled'): ?>
                                         <form method="POST" action="<?= APP_URL ?>/dashboard/cancel" onsubmit="return confirm('Are you sure you want to cancel this booking?')" class="inline-block">
                                             <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
