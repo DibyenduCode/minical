@@ -1,0 +1,10 @@
+# Vendor & storage
+/vendor/
+/storage/logs/*
+/storage/cache/*
+!.gitkeep
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+*.log

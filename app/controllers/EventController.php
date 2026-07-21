@@ -1,0 +1,61 @@
+<?php
+
+namespace App\Controllers;
+
+use App\Core\Controller;
+use App\Core\Session;
+use App\Models\Event;
+
+class EventController extends Controller {
+    private Event $eventModel;
+
+    public function __construct() {
+        parent::__construct();
+        $this->eventModel = new Event();
+    }
+
+    public function index(): void {
+        $user = $this->requireAuth();
+        $event = $this->eventModel->findByUserId($user['id']);
+
+        $this->render('event/index', [
+            'user'    => $user,
+            'event'   => $event,
+            'success' => Session::flash('success'),
+            'error'   => Session::flash('error')
+        ]);
+    }
+
+    public function update(): void {
+        $user = $this->requireAuth();
+        $data = $this->request->getBody();
+
+        if (!Session::verifyCsrfToken($data['csrf_token'] ?? '')) {
+            Session::flash('error', 'Invalid security token.');
+            $this->response->redirect(APP_URL . '/event');
+        }
+
+        $name = trim($data['name'] ?? '');
+        $slug = strtolower(trim($data['slug'] ?? ''));
+
+        if (empty($name) || empty($slug)) {
+            Session::flash('error', 'Event Name and Slug are required.');
+            $this->response->redirect(APP_URL . '/event');
+        }
+
+        $this->eventModel->updateByUserId($user['id'], [
+            'name'             => $name,
+            'slug'             => $slug,
+            'description'      => $data['description'] ?? '',
+            'duration_minutes' => (int)($data['duration_minutes'] ?? 30),
+            'location_type'    => $data['location_type'] ?? 'online',
+            'is_paid'          => isset($data['is_paid']) ? 1 : 0,
+            'price'            => (float)($data['price'] ?? 0.00),
+            'currency'         => $data['currency'] ?? 'USD',
+            'status'           => $data['status'] ?? 'active'
+        ]);
+
+        Session::flash('success', 'Event settings saved.');
+        $this->response->redirect(APP_URL . '/event');
+    }
+}
