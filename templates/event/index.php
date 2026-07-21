@@ -158,7 +158,12 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                         </div>
 
                         <div>
-                            <h3 class="text-lg font-extrabold text-slate-950 tracking-tight"><?= htmlspecialchars($ev['name']) ?></h3>
+                            <h3 class="text-lg font-extrabold text-slate-950 tracking-tight flex items-center gap-2">
+                                <span><?= htmlspecialchars($ev['name']) ?></span>
+                                <?php if ($ev['status'] !== 'active'): ?>
+                                    <span class="text-[9px] bg-red-100 text-red-800 px-1.5 py-0.5 rounded uppercase font-bold">Inactive</span>
+                                <?php endif; ?>
+                            </h3>
                             <p class="text-xs text-slate-400 font-mono mt-0.5">/u/<?= htmlspecialchars($user['username']) ?>/<?= htmlspecialchars($ev['slug']) ?></p>
                         </div>
 
@@ -265,6 +270,14 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                                             <option value="INR" <?= $ev['currency'] === 'INR' ? 'selected' : '' ?>>INR (₹)</option>
                                         </select>
                                     </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Status</label>
+                                    <select name="status" class="w-full px-2.5 py-2 text-xs bg-white border border-slate-200 rounded-lg">
+                                        <option value="active" <?= $ev['status'] === 'active' ? 'selected' : '' ?>>Active</option>
+                                        <option value="inactive" <?= $ev['status'] === 'inactive' ? 'selected' : '' ?>>Inactive</option>
+                                    </select>
                                 </div>
 
                                 <div class="flex justify-end gap-2 pt-1">
