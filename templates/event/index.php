@@ -23,7 +23,7 @@ require_once TEMPLATES_DIR . '/layout/header.php';
     <div class="flex items-center justify-between bg-white p-6 rounded-3xl border border-slate-200/90 shadow-sm">
         <div>
             <h1 class="text-2xl font-extrabold text-slate-950 tracking-tight">Consultation Services & Event Types</h1>
-            <p class="text-slate-500 text-xs font-medium mt-1">Create multiple booking services (e.g. Personal Counselling, Family Counselling, Child Counselling).</p>
+            <p class="text-slate-500 text-xs font-medium mt-1">Create and edit multiple booking services (e.g. Personal Counselling, Family Counselling, Child Counselling).</p>
         </div>
         <button type="button" onclick="document.getElementById('new-event-form').classList.toggle('hidden')" class="px-5 py-2.5 bg-black hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-md transition-all">
             + New Event Type
@@ -140,7 +140,7 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                                     $<?= number_format($ev['price'], 2) ?> <?= htmlspecialchars($ev['currency']) ?>
                                 </span>
                             <?php else: ?>
-                                <span class="text-xs font-bold text-slate-500 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">Free</span>
+                                <span class="text-xs font-bold text-slate-500 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">$0.00 USD</span>
                             <?php endif; ?>
                         </div>
 
@@ -160,18 +160,101 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                         </div>
                     </div>
 
-                    <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
-                        <a href="<?= APP_URL ?>/u/<?= htmlspecialchars($user['username']) ?>?event=<?= $ev['slug'] ?>" target="_blank"
-                           class="text-xs font-bold text-black hover:underline flex items-center gap-1">
-                            <span>Preview Booking Link</span>
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-                        </a>
+                    <!-- Action Buttons: Preview, Edit, Delete -->
+                    <div class="pt-4 border-t border-slate-100 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <a href="<?= APP_URL ?>/u/<?= htmlspecialchars($user['username']) ?>?event=<?= $ev['slug'] ?>" target="_blank"
+                               class="text-xs font-bold text-black hover:underline flex items-center gap-1">
+                                <span>Preview Booking Link</span>
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                            </a>
 
-                        <form method="POST" action="<?= APP_URL ?>/event/delete/<?= $ev['id'] ?>" onsubmit="return confirm('Delete this consultation event?')">
-                            <button type="submit" class="text-xs font-semibold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-xl border border-red-200 transition-colors">
-                                Delete
-                            </button>
-                        </form>
+                            <div class="flex items-center gap-2">
+                                <button type="button" onclick="document.getElementById('edit-event-form-<?= $ev['id'] ?>').classList.toggle('hidden')"
+                                        class="text-xs font-semibold text-slate-800 hover:text-black bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl border border-slate-200 transition-colors">
+                                    Edit
+                                </button>
+
+                                <form method="POST" action="<?= APP_URL ?>/event/delete/<?= $ev['id'] ?>" onsubmit="return confirm('Delete this consultation event?')">
+                                    <button type="submit" class="text-xs font-semibold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-xl border border-red-200 transition-colors">
+                                        Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Inline Edit Form (Hidden by default) -->
+                        <div id="edit-event-form-<?= $ev['id'] ?>" class="hidden bg-slate-50 border border-slate-200 rounded-2xl p-4 text-left space-y-4 mt-3">
+                            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-800">Edit Service Details</h4>
+                            <form action="<?= APP_URL ?>/event/update/<?= $ev['id'] ?>" method="POST" class="space-y-4">
+                                <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Title</label>
+                                    <input type="text" name="name" value="<?= htmlspecialchars($ev['name']) ?>" required class="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-lg">
+                                </div>
+
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">URL Slug</label>
+                                    <input type="text" name="slug" value="<?= htmlspecialchars($ev['slug']) ?>" required class="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-lg">
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Duration</label>
+                                        <select name="duration_minutes" class="w-full px-2.5 py-2 text-xs bg-white border border-slate-200 rounded-lg">
+                                            <?php foreach ([15, 30, 45, 60, 90, 120] as $d): ?>
+                                                <option value="<?= $d ?>" <?= $ev['duration_minutes'] == $d ? 'selected' : '' ?>><?= $d ?> Mins</option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Location</label>
+                                        <select name="location_type" class="w-full px-2.5 py-2 text-xs bg-white border border-slate-200 rounded-lg">
+                                            <option value="online" <?= $ev['location_type'] === 'online' ? 'selected' : '' ?>>Online</option>
+                                            <option value="phone" <?= $ev['location_type'] === 'phone' ? 'selected' : '' ?>>Phone</option>
+                                            <option value="in_person" <?= $ev['location_type'] === 'in_person' ? 'selected' : '' ?>>In Person</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Description</label>
+                                    <textarea name="description" rows="2" class="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-lg"><?= htmlspecialchars($ev['description'] ?? '') ?></textarea>
+                                </div>
+
+                                <div class="flex items-center justify-between bg-white p-2.5 rounded-lg border border-slate-200">
+                                    <span class="text-xs font-bold text-slate-700">Require Payment</span>
+                                    <input type="checkbox" name="is_paid" value="1" <?= !empty($ev['is_paid']) ? 'checked' : '' ?> class="w-4 h-4 accent-black">
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Price</label>
+                                        <input type="number" step="0.01" name="price" value="<?= $ev['price'] ?>" class="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-lg">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Currency</label>
+                                        <select name="currency" class="w-full px-2.5 py-2 text-xs bg-white border border-slate-200 rounded-lg">
+                                            <option value="USD" <?= $ev['currency'] === 'USD' ? 'selected' : '' ?>>USD ($)</option>
+                                            <option value="EUR" <?= $ev['currency'] === 'EUR' ? 'selected' : '' ?>>EUR (€)</option>
+                                            <option value="GBP" <?= $ev['currency'] === 'GBP' ? 'selected' : '' ?>>GBP (£)</option>
+                                            <option value="INR" <?= $ev['currency'] === 'INR' ? 'selected' : '' ?>>INR (₹)</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="flex justify-end gap-2 pt-1">
+                                    <button type="button" onclick="document.getElementById('edit-event-form-<?= $ev['id'] ?>').classList.add('hidden')" class="px-3 py-1.5 text-xs font-bold text-slate-600 bg-slate-200 rounded-lg">
+                                        Cancel
+                                    </button>
+                                    <button type="submit" class="px-4 py-1.5 text-xs font-bold text-white bg-black hover:bg-slate-800 rounded-lg shadow-sm">
+                                        Save Changes
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
             <?php endforeach; ?>

@@ -35,6 +35,7 @@ App::post('/availability', [AvailabilityController::class, 'update']);
 
 App::get('/event', [EventController::class, 'index']);
 App::post('/event', [EventController::class, 'create']);
+App::post('/event/update/{id}', [EventController::class, 'update']);
 App::post('/event/delete/{id}', [EventController::class, 'delete']);
 
 // Custom Booking Form Builder

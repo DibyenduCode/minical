@@ -60,6 +60,40 @@ class EventController extends Controller {
         $this->response->redirect(APP_URL . '/event');
     }
 
+    public function update(string $id): void {
+        $user = $this->requireAuth();
+        $eventId = (int)$id;
+        $data = $this->request->getBody();
+
+        if (!Session::verifyCsrfToken($data['csrf_token'] ?? '')) {
+            Session::flash('error', 'Invalid security token.');
+            $this->response->redirect(APP_URL . '/event');
+        }
+
+        $name = trim($data['name'] ?? '');
+        $slug = strtolower(trim($data['slug'] ?? ''));
+
+        if (empty($name) || empty($slug)) {
+            Session::flash('error', 'Event Name and URL Slug are required.');
+            $this->response->redirect(APP_URL . '/event');
+        }
+
+        $this->eventModel->updateEvent($eventId, $user['id'], [
+            'name'             => $name,
+            'slug'             => $slug,
+            'description'      => $data['description'] ?? '',
+            'duration_minutes' => (int)($data['duration_minutes'] ?? 30),
+            'location_type'    => $data['location_type'] ?? 'online',
+            'is_paid'          => isset($data['is_paid']) ? 1 : 0,
+            'price'            => (float)($data['price'] ?? 0.00),
+            'currency'         => $data['currency'] ?? 'USD',
+            'status'           => $data['status'] ?? 'active'
+        ]);
+
+        Session::flash('success', 'Event type updated successfully.');
+        $this->response->redirect(APP_URL . '/event');
+    }
+
     public function delete(string $id): void {
         $user = $this->requireAuth();
         $eventId = (int)$id;
