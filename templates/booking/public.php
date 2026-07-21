@@ -27,10 +27,6 @@
                     <h2 class="text-xl font-bold text-slate-950 tracking-tight">
                         <?= !empty($profile['company_name']) ? htmlspecialchars($profile['company_name']) : htmlspecialchars($hostUser['name']) ?>
                     </h2>
-                    <?php if (!empty($profile['company_name'])): ?>
-                        <p class="text-[11px] text-slate-500 font-semibold mb-0.5"><?= htmlspecialchars($hostUser['name']) ?></p>
-                    <?php endif; ?>
-                    <p class="text-xs text-slate-400 font-mono">/u/<?= htmlspecialchars($hostUser['username']) ?></p>
                 </div>
             </div>
 
