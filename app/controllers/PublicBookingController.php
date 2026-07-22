@@ -112,8 +112,12 @@ class PublicBookingController extends Controller {
             $duration = 30;
         }
 
-        $startTime = new DateTime($dateStr . ' ' . $avail['start_time']);
-        $endTime = new DateTime($dateStr . ' ' . $avail['end_time']);
+        $profile = $this->profileModel->findByUserId($user['id']);
+        $tz = !empty($profile['timezone']) ? $profile['timezone'] : 'UTC';
+        $now = new DateTime('now', new DateTimeZone($tz));
+
+        $startTime = new DateTime($dateStr . ' ' . $avail['start_time'], new DateTimeZone($tz));
+        $endTime = new DateTime($dateStr . ' ' . $avail['end_time'], new DateTimeZone($tz));
         $interval = new DateInterval('PT' . $duration . 'M');
 
         $slots = [];
@@ -127,6 +131,12 @@ class PublicBookingController extends Controller {
 
             $slotEnd = $slotEndObj->format('H:i');
             $slotKey = $slotStart . '-' . $slotEnd;
+
+            // Prevent booking slots that are in the past
+            if ($curr <= $now) {
+                $curr->add($interval);
+                continue;
+            }
 
             // Check if slot overlaps with DB booking
             $isBookedInDb = isset($bookedMap[$slotKey]);
