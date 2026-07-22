@@ -21,8 +21,8 @@ class Plan extends Model {
 
     public function createPlan(array $data): int {
         $stmt = $this->db->prepare("
-            INSERT INTO `plans` (`name`, `slug`, `price`, `billing_cycle`, `description`, `features`, `badge`, `button_text`, `is_featured`, `display_order`, `status`)
-            VALUES (:name, :slug, :price, :billing_cycle, :description, :features, :badge, :button_text, :is_featured, :display_order, :status)
+            INSERT INTO `plans` (`name`, `slug`, `price`, `billing_cycle`, `description`, `features`, `badge`, `button_text`, `is_featured`, `display_order`, `status`, `max_events`, `allow_custom_domain`, `allow_google_calendar`)
+            VALUES (:name, :slug, :price, :billing_cycle, :description, :features, :badge, :button_text, :is_featured, :display_order, :status, :max_events, :allow_custom_domain, :allow_google_calendar)
         ");
 
         $featuresArr = [];
@@ -37,17 +37,20 @@ class Plan extends Model {
         }
 
         $stmt->execute([
-            'name'          => trim($data['name']),
-            'slug'          => strtolower(trim($data['slug'])),
-            'price'         => trim($data['price']),
-            'billing_cycle' => trim($data['billing_cycle'] ?? 'per month'),
-            'description'   => trim($data['description'] ?? ''),
-            'features'      => json_encode($featuresArr),
-            'badge'         => trim($data['badge'] ?? ''),
-            'button_text'   => trim($data['button_text'] ?? 'Get Started'),
-            'is_featured'   => isset($data['is_featured']) ? 1 : 0,
-            'display_order' => (int)($data['display_order'] ?? 0),
-            'status'        => $data['status'] ?? 'active'
+            'name'                  => trim($data['name']),
+            'slug'                  => strtolower(trim($data['slug'])),
+            'price'                 => trim($data['price']),
+            'billing_cycle'         => trim($data['billing_cycle'] ?? 'per month'),
+            'description'           => trim($data['description'] ?? ''),
+            'features'              => json_encode($featuresArr),
+            'badge'                 => trim($data['badge'] ?? ''),
+            'button_text'           => trim($data['button_text'] ?? 'Get Started'),
+            'is_featured'           => isset($data['is_featured']) ? 1 : 0,
+            'display_order'         => (int)($data['display_order'] ?? 0),
+            'status'                => $data['status'] ?? 'active',
+            'max_events'            => (int)($data['max_events'] ?? -1),
+            'allow_custom_domain'   => isset($data['allow_custom_domain']) ? 1 : 0,
+            'allow_google_calendar' => isset($data['allow_google_calendar']) ? 1 : 0
         ]);
 
         return (int)$this->db->lastInsertId();
@@ -58,7 +61,9 @@ class Plan extends Model {
             UPDATE `plans`
             SET `name` = :name, `slug` = :slug, `price` = :price, `billing_cycle` = :billing_cycle, 
                 `description` = :description, `features` = :features, `badge` = :badge, 
-                `button_text` = :button_text, `is_featured` = :is_featured, `display_order` = :display_order, `status` = :status
+                `button_text` = :button_text, `is_featured` = :is_featured, `display_order` = :display_order, 
+                `status` = :status, `max_events` = :max_events, `allow_custom_domain` = :allow_custom_domain, 
+                `allow_google_calendar` = :allow_google_calendar
             WHERE `id` = :id
         ");
 
@@ -74,18 +79,21 @@ class Plan extends Model {
         }
 
         return $stmt->execute([
-            'name'          => trim($data['name']),
-            'slug'          => strtolower(trim($data['slug'])),
-            'price'         => trim($data['price']),
-            'billing_cycle' => trim($data['billing_cycle'] ?? 'per month'),
-            'description'   => trim($data['description'] ?? ''),
-            'features'      => json_encode($featuresArr),
-            'badge'         => trim($data['badge'] ?? ''),
-            'button_text'   => trim($data['button_text'] ?? 'Get Started'),
-            'is_featured'   => isset($data['is_featured']) ? 1 : 0,
-            'display_order' => (int)($data['display_order'] ?? 0),
-            'status'        => $data['status'] ?? 'active',
-            'id'            => $id
+            'name'                  => trim($data['name']),
+            'slug'                  => strtolower(trim($data['slug'])),
+            'price'                 => trim($data['price']),
+            'billing_cycle'         => trim($data['billing_cycle'] ?? 'per month'),
+            'description'           => trim($data['description'] ?? ''),
+            'features'              => json_encode($featuresArr),
+            'badge'                 => trim($data['badge'] ?? ''),
+            'button_text'           => trim($data['button_text'] ?? 'Get Started'),
+            'is_featured'           => isset($data['is_featured']) ? 1 : 0,
+            'display_order'         => (int)($data['display_order'] ?? 0),
+            'status'                => $data['status'] ?? 'active',
+            'max_events'            => (int)($data['max_events'] ?? -1),
+            'allow_custom_domain'   => isset($data['allow_custom_domain']) ? 1 : 0,
+            'allow_google_calendar' => isset($data['allow_google_calendar']) ? 1 : 0,
+            'id'                    => $id
         ]);
     }
 }

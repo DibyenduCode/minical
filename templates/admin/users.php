@@ -39,6 +39,7 @@ require_once TEMPLATES_DIR . '/admin/layout/header.php';
                         <th class="px-6 py-4">Bookings</th>
                         <th class="px-6 py-4">Role</th>
                         <th class="px-6 py-4">Status</th>
+                        <th class="px-6 py-4">Subscription Plan</th>
                         <th class="px-6 py-4 text-right">Actions</th>
                     </tr>
                 </thead>
@@ -69,6 +70,22 @@ require_once TEMPLATES_DIR . '/admin/layout/header.php';
                                 <span class="px-2.5 py-1 rounded-full text-[11px] font-bold border <?= $u['status'] === 'active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-700 border-red-200' ?>">
                                     <?= ucfirst($u['status']) ?>
                                 </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <?php if ((int)$u['id'] !== (int)$admin['id']): ?>
+                                    <form action="<?= APP_URL ?>/admin/users/<?= $u['id'] ?>/update-plan" method="POST" class="inline-block">
+                                        <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+                                        <select name="plan" onchange="this.form.submit()" class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-black">
+                                            <?php foreach ($plans as $p): ?>
+                                                <option value="<?= htmlspecialchars($p['slug']) ?>" <?= ($u['plan'] ?? 'free') === $p['slug'] ? 'selected' : '' ?>>
+                                                    <?= htmlspecialchars($p['name']) ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </form>
+                                <?php else: ?>
+                                    <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-500 border border-slate-200">Unlimited (SA)</span>
+                                <?php endif; ?>
                             </td>
                             <td class="px-6 py-4 text-right space-x-2">
                                 <?php if ((int)$u['id'] !== (int)$admin['id']): ?>

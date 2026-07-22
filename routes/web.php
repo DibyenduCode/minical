@@ -66,6 +66,7 @@ App::get('/admin/bookings', [AdminController::class, 'bookings']);
 App::get('/admin/settings', [AdminController::class, 'settings']);
 App::post('/admin/users/{id}/toggle', [AdminController::class, 'toggleUserStatus']);
 App::post('/admin/users/{id}/delete', [AdminController::class, 'deleteUser']);
+App::post('/admin/users/{id}/update-plan', [AdminController::class, 'updateUserPlan']);
 App::post('/admin/settings', [AdminController::class, 'saveSettings']);
 
 // Public Booking Engine

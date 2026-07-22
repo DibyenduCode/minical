@@ -13,13 +13,13 @@ require_once TEMPLATES_DIR . '/layout/header.php';
         </div>
         <div>
             <?php
-            $isFreePlan = ($dbUser['plan'] ?? 'free') === 'free';
-            $hasReachedLimit = $isFreePlan && count($events) >= 1;
+            $maxEvents = isset($planDetails['max_events']) ? (int)$planDetails['max_events'] : -1;
+            $hasReachedLimit = ($maxEvents !== -1 && count($events) >= $maxEvents);
             ?>
             <?php if ($hasReachedLimit): ?>
                 <div class="flex items-center gap-3">
                     <span class="text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 px-3.5 py-2.5 rounded-xl">
-                        ⚠️ Free Plan Limit: 1 Event Type max
+                        ⚠️ Plan Limit: <?= $maxEvents ?> Event Type<?= $maxEvents > 1 ? 's' : '' ?> max
                     </span>
                     <a href="<?= APP_URL ?>/profile" class="px-4 py-2.5 bg-black hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-sm transition-all">
                         Upgrade Plan

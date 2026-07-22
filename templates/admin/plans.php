@@ -81,6 +81,29 @@ require_once TEMPLATES_DIR . '/admin/layout/header.php';
                           class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition-all"></textarea>
             </div>
 
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 border-t border-slate-100 pt-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Max Event Types Limit</label>
+                    <input type="number" name="max_events" value="-1" required
+                           class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition-all">
+                    <span class="block text-[10px] text-slate-400 font-semibold mt-1">Set to -1 for unlimited event types.</span>
+                </div>
+                
+                <div class="flex items-center gap-3 pt-6">
+                    <label class="flex items-center gap-2.5 cursor-pointer">
+                        <input type="checkbox" name="allow_custom_domain" value="1" checked class="w-5 h-5 accent-black rounded">
+                        <span class="text-xs font-bold text-slate-800">Allow Custom Domains</span>
+                    </label>
+                </div>
+
+                <div class="flex items-center gap-3 pt-6">
+                    <label class="flex items-center gap-2.5 cursor-pointer">
+                        <input type="checkbox" name="allow_google_calendar" value="1" checked class="w-5 h-5 accent-black rounded">
+                        <span class="text-xs font-bold text-slate-800">Allow Google Calendar Sync</span>
+                    </label>
+                </div>
+            </div>
+
             <div class="flex items-center gap-6 pt-1">
                 <label class="flex items-center gap-3 cursor-pointer">
                     <input type="checkbox" name="is_featured" value="1" class="w-5 h-5 accent-black rounded">
@@ -131,6 +154,22 @@ require_once TEMPLATES_DIR . '/admin/layout/header.php';
                                 </li>
                             <?php endforeach; ?>
                         </ul>
+
+                        <!-- Dynamic Plan Limits details -->
+                        <div class="space-y-1.5 text-[10px] font-bold border-t <?= !empty($p['is_featured']) ? 'border-slate-800 text-slate-400' : 'border-slate-200 text-slate-500' ?> pt-4 mt-4">
+                            <div class="flex justify-between">
+                                <span>Max Event Types:</span>
+                                <span class="<?= !empty($p['is_featured']) ? 'text-white' : 'text-slate-900' ?>"><?= (int)$p['max_events'] === -1 ? 'Unlimited' : $p['max_events'] ?></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Custom Domains:</span>
+                                <span class="<?= !empty($p['allow_custom_domain']) ? 'text-emerald-500' : 'text-red-500' ?>"><?= !empty($p['allow_custom_domain']) ? 'Allowed ✓' : 'Blocked ✕' ?></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Google Calendar Sync:</span>
+                                <span class="<?= !empty($p['allow_google_calendar']) ? 'text-emerald-500' : 'text-red-500' ?>"><?= !empty($p['allow_google_calendar']) ? 'Allowed ✓' : 'Blocked ✕' ?></span>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="pt-6">

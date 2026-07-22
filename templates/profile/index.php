@@ -93,12 +93,12 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                     <!-- Custom Branded Domain Section (Cal.com style) -->
                     <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                         Custom Domain / Subdomain
-                        <?php if (($dbUser['plan'] ?? 'free') !== 'pro'): ?>
-                            <span class="ml-1 text-[10px] text-indigo-600 bg-indigo-50 border border-indigo-200/60 px-1.5 py-0.5 rounded font-extrabold uppercase">Requires Pro</span>
+                        <?php if (empty($planDetails['allow_custom_domain'])): ?>
+                            <span class="ml-1 text-[10px] text-indigo-600 bg-indigo-50 border border-indigo-200/60 px-1.5 py-0.5 rounded font-extrabold uppercase">Requires Upgrade</span>
                         <?php endif; ?>
                     </label>
                     <input type="text" name="custom_domain" value="<?= htmlspecialchars($profile['custom_domain'] ?? '') ?>" placeholder="booking.dibyendu.in"
-                           <?= (($dbUser['plan'] ?? 'free') !== 'pro') ? 'disabled class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl text-slate-400 text-sm font-mono cursor-not-allowed"' : 'class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-black"' ?>>
+                           <?= empty($planDetails['allow_custom_domain']) ? 'disabled class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl text-slate-400 text-sm font-mono cursor-not-allowed"' : 'class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-black"' ?>>
                 </div>
             </div>
 

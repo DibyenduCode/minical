@@ -23,16 +23,22 @@ class ProfileController extends Controller {
         $dbUser = $this->userModel->findById($user['id']);
         $profile = $this->profileModel->findByUserId($user['id']);
 
+        $userPlanSlug = $dbUser['plan'] ?? 'free';
         $db = Database::getInstance();
-        $stmt = $db->prepare("SELECT * FROM `google_accounts` WHERE `user_id` = :user_id LIMIT 1");
-        $stmt->execute(['user_id' => $user['id']]);
-        $googleAccount = $stmt->fetch();
+        $stmt = $db->prepare("SELECT * FROM `plans` WHERE `slug` = :slug LIMIT 1");
+        $stmt->execute(['slug' => $userPlanSlug]);
+        $planDetails = $stmt->fetch();
+
+        $stmtGoogle = $db->prepare("SELECT * FROM `google_accounts` WHERE `user_id` = :user_id LIMIT 1");
+        $stmtGoogle->execute(['user_id' => $user['id']]);
+        $googleAccount = $stmtGoogle->fetch();
 
         $isGoogleConnected = !empty($googleAccount);
 
         $this->render('profile/index', [
             'user'              => $user,
             'dbUser'            => $dbUser,
+            'planDetails'       => $planDetails ?: null,
             'profile'           => $profile,
             'googleAccount'     => $googleAccount ?: null,
             'isGoogleConnected' => $isGoogleConnected,
@@ -51,8 +57,15 @@ class ProfileController extends Controller {
         }
 
         $dbUser = $this->userModel->findById($user['id']);
-        if (($dbUser['plan'] ?? 'free') !== 'pro') {
-            // Block custom domain for users not on the Pro plan!
+        $userPlanSlug = $dbUser['plan'] ?? 'free';
+        
+        $db = Database::getInstance();
+        $stmt = $db->prepare("SELECT * FROM `plans` WHERE `slug` = :slug LIMIT 1");
+        $stmt->execute(['slug' => $userPlanSlug]);
+        $planDetails = $stmt->fetch();
+        
+        $allowCustomDomain = isset($planDetails['allow_custom_domain']) ? (int)$planDetails['allow_custom_domain'] : 0;
+        if (!$allowCustomDomain) {
             $data['custom_domain'] = '';
         }
 

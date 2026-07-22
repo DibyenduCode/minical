@@ -131,17 +131,20 @@ class AdminController extends Controller {
         }
 
         $this->planModel->createPlan([
-            'name'          => $name,
-            'slug'          => strtolower(trim($data['slug'] ?? $name)),
-            'price'         => $price,
-            'billing_cycle' => $data['billing_cycle'] ?? 'per month',
-            'description'   => $data['description'] ?? '',
-            'features_raw'  => $data['features_raw'] ?? '',
-            'badge'         => $data['badge'] ?? '',
-            'button_text'   => $data['button_text'] ?? 'Get Started',
-            'is_featured'   => isset($data['is_featured']) ? 1 : 0,
-            'display_order' => (int)($data['display_order'] ?? 0),
-            'status'        => $data['status'] ?? 'active'
+            'name'                  => $name,
+            'slug'                  => strtolower(trim($data['slug'] ?? $name)),
+            'price'                 => $price,
+            'billing_cycle'         => $data['billing_cycle'] ?? 'per month',
+            'description'           => $data['description'] ?? '',
+            'features_raw'          => $data['features_raw'] ?? '',
+            'badge'                 => $data['badge'] ?? '',
+            'button_text'           => $data['button_text'] ?? 'Get Started',
+            'is_featured'           => isset($data['is_featured']) ? 1 : 0,
+            'display_order'         => (int)($data['display_order'] ?? 0),
+            'status'                => $data['status'] ?? 'active',
+            'max_events'            => (int)($data['max_events'] ?? -1),
+            'allow_custom_domain'   => isset($data['allow_custom_domain']) ? 1 : 0,
+            'allow_google_calendar' => isset($data['allow_google_calendar']) ? 1 : 0
         ]);
 
         Session::flash('success', 'New pricing plan created successfully.');
@@ -170,10 +173,13 @@ class AdminController extends Controller {
             ORDER BY u.id DESC
         ")->fetchAll();
 
+        $plans = $this->planModel->getAllPlans();
+
         $this->renderAdmin('users', [
             'admin'    => $adminUser,
             'adminTab' => 'users',
             'users'    => $users,
+            'plans'    => $plans,
             'success'  => Session::flash('success'),
             'error'    => Session::flash('error')
         ]);
@@ -286,5 +292,25 @@ class AdminController extends Controller {
 
         Session::flash('success', 'System configurations saved successfully.');
         $this->response->redirect(APP_URL . '/admin/settings');
+    }
+
+    public function updateUserPlan(string $id): void {
+        $this->requireAdmin();
+        $userId = (int)$id;
+        $data = $this->request->getBody();
+
+        if (!Session::verifyCsrfToken($data['csrf_token'] ?? '')) {
+            Session::flash('error', 'Invalid security token.');
+            $this->response->redirect(APP_URL . '/admin/users');
+        }
+
+        $plan = trim($data['plan'] ?? 'free');
+
+        $db = Database::getInstance();
+        $stmt = $db->prepare("UPDATE `users` SET `plan` = :plan WHERE `id` = :id");
+        $stmt->execute(['plan' => $plan, 'id' => $userId]);
+
+        Session::flash('success', 'User subscription plan updated successfully.');
+        $this->response->redirect(APP_URL . '/admin/users');
     }
 }
