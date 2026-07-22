@@ -48,19 +48,39 @@ foreach ($schedule as $row) {
                     $startTime = substr($dayData['start_time'], 0, 5);
                     $endTime = substr($dayData['end_time'], 0, 5);
                     ?>
-                    <div class="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-white transition-colors">
-                        <div class="flex items-center gap-3">
-                            <input type="checkbox" name="days[<?= $dayNum ?>][enabled]" value="1" <?= $isEnabled ? 'checked' : '' ?>
-                                   class="w-5 h-5 accent-black rounded cursor-pointer">
-                            <span class="font-bold text-slate-900 text-sm w-28"><?= $dayName ?></span>
+                    <div class="p-4 flex flex-col gap-3.5 hover:bg-white transition-colors">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div class="flex items-center gap-3">
+                                <input type="checkbox" name="days[<?= $dayNum ?>][enabled]" id="enabled-<?= $dayNum ?>" value="1" <?= $isEnabled ? 'checked' : '' ?>
+                                       class="w-5 h-5 accent-black rounded cursor-pointer" onchange="toggleDayRow(this, <?= $dayNum ?>)">
+                                <label for="enabled-<?= $dayNum ?>" class="font-bold text-slate-900 text-sm w-28 cursor-pointer select-none"><?= $dayName ?></label>
+                            </div>
+
+                            <div class="flex items-center gap-3">
+                                <input type="time" name="days[<?= $dayNum ?>][start_time]" value="<?= $startTime ?>"
+                                       class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-black">
+                                <span class="text-slate-400 text-xs font-medium">to</span>
+                                <input type="time" name="days[<?= $dayNum ?>][end_time]" value="<?= $endTime ?>"
+                                       class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-black">
+                            </div>
                         </div>
 
-                        <div class="flex items-center gap-3">
-                            <input type="time" name="days[<?= $dayNum ?>][start_time]" value="<?= $startTime ?>"
-                                   class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-black">
-                            <span class="text-slate-400 text-xs font-medium">to</span>
-                            <input type="time" name="days[<?= $dayNum ?>][end_time]" value="<?= $endTime ?>"
-                                   class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-black">
+                        <!-- Daily Break Time Row -->
+                        <div id="break-section-<?= $dayNum ?>" class="flex flex-col sm:flex-row sm:items-center gap-3 pl-8 text-xs <?= $isEnabled ? '' : 'hidden' ?>">
+                            <label class="flex items-center gap-2 cursor-pointer select-none">
+                                <input type="checkbox" name="days[<?= $dayNum ?>][break_enabled]" id="break-enabled-<?= $dayNum ?>" value="1" <?= !empty($dayData['break_start_time']) ? 'checked' : '' ?>
+                                       class="w-4 h-4 accent-black rounded cursor-pointer" onchange="toggleBreakTimes(this, <?= $dayNum ?>)">
+                                <span class="font-bold text-slate-500">Add Break / Lunch Time</span>
+                            </label>
+
+                            <div id="break-times-<?= $dayNum ?>" class="flex items-center gap-3 <?= !empty($dayData['break_start_time']) ? '' : 'hidden' ?>">
+                                <span class="text-slate-400 font-medium">from</span>
+                                <input type="time" name="days[<?= $dayNum ?>][break_start]" value="<?= !empty($dayData['break_start_time']) ? substr($dayData['break_start_time'], 0, 5) : '13:00' ?>"
+                                       class="px-2.5 py-1.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-black">
+                                <span class="text-slate-400 font-medium">to</span>
+                                <input type="time" name="days[<?= $dayNum ?>][break_end]" value="<?= !empty($dayData['break_end_time']) ? substr($dayData['break_end_time'], 0, 5) : '14:00' ?>"
+                                       class="px-2.5 py-1.5 bg-white border border-slate-200 rounded-xl text-slate-900 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-black">
+                            </div>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -74,5 +94,26 @@ foreach ($schedule as $row) {
         </form>
     </div>
 </div>
+
+<!-- JS for Interactive Availability Form toggling -->
+<script>
+    function toggleDayRow(checkbox, dayNum) {
+        const breakSection = document.getElementById('break-section-' + dayNum);
+        if (checkbox.checked) {
+            breakSection.classList.remove('hidden');
+        } else {
+            breakSection.classList.add('hidden');
+        }
+    }
+
+    function toggleBreakTimes(checkbox, dayNum) {
+        const breakTimes = document.getElementById('break-times-' + dayNum);
+        if (checkbox.checked) {
+            breakTimes.classList.remove('hidden');
+        } else {
+            breakTimes.classList.add('hidden');
+        }
+    }
+</script>
 
 <?php require_once TEMPLATES_DIR . '/layout/footer.php'; ?>

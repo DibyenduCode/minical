@@ -41,12 +41,22 @@ class AvailabilityController extends Controller {
             $startTime = $days[$day]['start_time'] ?? '09:00';
             $endTime = $days[$day]['end_time'] ?? '17:00';
 
+            $breakEnabled = isset($days[$day]['break_enabled']) ? 1 : 0;
+            $breakStartTime = null;
+            $breakEndTime = null;
+            if ($breakEnabled) {
+                $breakStartTime = ($days[$day]['break_start'] ?? '13:00') . ':00';
+                $breakEndTime = ($days[$day]['break_end'] ?? '14:00') . ':00';
+            }
+
             $this->availabilityModel->updateDay(
                 $user['id'],
                 $day,
                 $startTime . ':00',
                 $endTime . ':00',
-                $isEnabled
+                $isEnabled,
+                $breakStartTime,
+                $breakEndTime
             );
         }
 

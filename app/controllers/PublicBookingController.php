@@ -151,7 +151,17 @@ class PublicBookingController extends Controller {
                 }
             }
 
-            if (!$isBookedInDb && !$isBusyInGoogle) {
+            // Check if slot overlaps with daily break time
+            $isOverlapBreak = false;
+            if (!empty($avail['break_start_time']) && !empty($avail['break_end_time'])) {
+                $breakStart = substr($avail['break_start_time'], 0, 5);
+                $breakEnd = substr($avail['break_end_time'], 0, 5);
+                if ($slotStart < $breakEnd && $slotEnd > $breakStart) {
+                    $isOverlapBreak = true;
+                }
+            }
+
+            if (!$isBookedInDb && !$isBusyInGoogle && !$isOverlapBreak) {
                 $slots[] = [
                     'start_time' => $slotStart . ':00',
                     'end_time'   => $slotEnd . ':00',
@@ -191,6 +201,30 @@ class PublicBookingController extends Controller {
 
         if ($this->bookingModel->isSlotBooked($user['id'], $bookingDate, $startTime, $endTime)) {
             $this->response->json(['status' => 'error', 'message' => 'Selected slot is no longer available. Please choose another slot.'], 400);
+        }
+
+        // Validate daily break time overlap
+        $dayOfWeek = (int)date('w', strtotime($bookingDate));
+        $allAvail = $this->availabilityModel->getByUserId($user['id']);
+        $avail = null;
+        foreach ($allAvail as $a) {
+            if ((int)$a['day_of_week'] === $dayOfWeek) {
+                $avail = $a;
+                break;
+            }
+        }
+
+        if ($avail && !empty($avail['is_enabled'])) {
+            if (!empty($avail['break_start_time']) && !empty($avail['break_end_time'])) {
+                $bStart = substr($avail['break_start_time'], 0, 5);
+                $bEnd = substr($avail['break_end_time'], 0, 5);
+                $sStart = substr($startTime, 0, 5);
+                $sEnd = substr($endTime, 0, 5);
+
+                if ($sStart < $bEnd && $sEnd > $bStart) {
+                    $this->response->json(['status' => 'error', 'message' => 'Selected slot falls within host\'s break time.'], 400);
+                }
+            }
         }
 
         $bookingId = $this->bookingModel->createBooking([

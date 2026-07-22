@@ -20,18 +20,20 @@ class Availability extends Model {
         return $res ?: null;
     }
 
-    public function updateDay(int $userId, int $dayOfWeek, string $startTime, string $endTime, int $isEnabled): bool {
+    public function updateDay(int $userId, int $dayOfWeek, string $startTime, string $endTime, int $isEnabled, ?string $breakStartTime = null, ?string $breakEndTime = null): bool {
         $stmt = $this->db->prepare("
-            INSERT INTO `availability` (`user_id`, `day_of_week`, `start_time`, `end_time`, `is_enabled`)
-            VALUES (:user_id, :day_of_week, :start_time, :end_time, :is_enabled)
-            ON DUPLICATE KEY UPDATE `start_time` = VALUES(`start_time`), `end_time` = VALUES(`end_time`), `is_enabled` = VALUES(`is_enabled`)
+            INSERT INTO `availability` (`user_id`, `day_of_week`, `start_time`, `end_time`, `is_enabled`, `break_start_time`, `break_end_time`)
+            VALUES (:user_id, :day_of_week, :start_time, :end_time, :is_enabled, :break_start_time, :break_end_time)
+            ON DUPLICATE KEY UPDATE `start_time` = VALUES(`start_time`), `end_time` = VALUES(`end_time`), `is_enabled` = VALUES(`is_enabled`), `break_start_time` = VALUES(`break_start_time`), `break_end_time` = VALUES(`break_end_time`)
         ");
         return $stmt->execute([
-            'user_id'     => $userId,
-            'day_of_week' => $dayOfWeek,
-            'start_time'  => $startTime,
-            'end_time'    => $endTime,
-            'is_enabled'  => $isEnabled
+            'user_id'          => $userId,
+            'day_of_week'      => $dayOfWeek,
+            'start_time'       => $startTime,
+            'end_time'         => $endTime,
+            'is_enabled'       => $isEnabled,
+            'break_start_time' => $breakStartTime,
+            'break_end_time'   => $breakEndTime
         ]);
     }
 }
