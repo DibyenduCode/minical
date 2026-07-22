@@ -112,18 +112,21 @@ class Booking extends Model {
 
     public function createBooking(array $data): int {
         $stmt = $this->db->prepare("
-            INSERT INTO `bookings` (`user_id`, `event_id`, `customer_name`, `customer_email`, `booking_date`, `start_time`, `end_time`, `status`)
-            VALUES (:user_id, :event_id, :customer_name, :customer_email, :booking_date, :start_time, :end_time, :status)
+            INSERT INTO `bookings` (`user_id`, `event_id`, `customer_name`, `customer_email`, `booking_date`, `start_time`, `end_time`, `status`, `promo_code`, `discount_amount`, `final_price`)
+            VALUES (:user_id, :event_id, :customer_name, :customer_email, :booking_date, :start_time, :end_time, :status, :promo_code, :discount_amount, :final_price)
         ");
         $stmt->execute([
-            'user_id'        => $data['user_id'],
-            'event_id'       => $data['event_id'],
-            'customer_name'  => trim($data['customer_name']),
-            'customer_email' => strtolower(trim($data['customer_email'])),
-            'booking_date'   => $data['booking_date'],
-            'start_time'     => $data['start_time'],
-            'end_time'       => $data['end_time'],
-            'status'         => $data['status'] ?? 'confirmed'
+            'user_id'         => $data['user_id'],
+            'event_id'        => $data['event_id'],
+            'customer_name'   => trim($data['customer_name']),
+            'customer_email'  => strtolower(trim($data['customer_email'])),
+            'booking_date'    => $data['booking_date'],
+            'start_time'      => $data['start_time'],
+            'end_time'        => $data['end_time'],
+            'status'          => $data['status'] ?? 'confirmed',
+            'promo_code'      => $data['promo_code'] ?? null,
+            'discount_amount' => $data['discount_amount'] ?? 0.00,
+            'final_price'     => $data['final_price'] ?? 0.00
         ]);
 
         $bookingId = (int)$this->db->lastInsertId();

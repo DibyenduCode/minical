@@ -168,6 +168,20 @@
                     </div>
                 <?php endforeach; ?>
 
+                <?php if (!empty($event['is_paid'])): ?>
+                    <div class="border-t border-slate-100 pt-4 space-y-2">
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Promo Code (Optional)</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="promo_code_input" name="promo_code" placeholder="WELCOME20"
+                                   class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-black font-mono">
+                            <button type="button" onclick="applyPromoCode()" class="px-4 py-2.5 bg-black hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition-all shadow-sm">
+                                Apply
+                            </button>
+                        </div>
+                        <div id="promo-message" class="hidden text-xs font-bold mt-1.5"></div>
+                    </div>
+                <?php endif; ?>
+
                 <button type="submit" id="submit-btn" disabled
                         class="w-full py-3.5 px-4 bg-black hover:bg-slate-800 disabled:bg-slate-200 disabled:text-slate-400 text-white font-semibold text-sm rounded-xl shadow-md transition-all transform active:scale-[0.98]">
                     Confirm Booking
@@ -179,6 +193,48 @@
     <script>
         const username = "<?= htmlspecialchars($hostUser['username']) ?>";
         const eventSlug = "<?= htmlspecialchars($event['slug'] ?? '') ?>";
+        let isPromoApplied = false;
+        let originalPrice = <?= !empty($event['price']) ? (float)$event['price'] : 0.00 ?>;
+
+        function applyPromoCode() {
+            const input = document.getElementById('promo_code_input');
+            const message = document.getElementById('promo-message');
+            const code = input.value.trim().toUpperCase();
+
+            if (!code) {
+                message.className = 'text-xs font-bold mt-1.5 text-red-600';
+                message.innerText = 'Please enter a promo code.';
+                message.classList.remove('hidden');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('promo_code', code);
+            formData.append('price', originalPrice);
+
+            fetch(`<?= APP_URL ?>/u/${username}/apply-promo`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                message.classList.remove('hidden');
+                if (data.status === 'success') {
+                    isPromoApplied = true;
+                    message.className = 'text-xs font-bold mt-1.5 text-emerald-600';
+                    message.innerText = `${data.message} Discount: -$${data.discount.toFixed(2)} ${data.discount_text}. New Price: $${data.final_price.toFixed(2)}`;
+                    input.readOnly = true;
+                } else {
+                    message.className = 'text-xs font-bold mt-1.5 text-red-600';
+                    message.innerText = data.message || 'Failed to apply promo code.';
+                }
+            })
+            .catch(() => {
+                message.classList.remove('hidden');
+                message.className = 'text-xs font-bold mt-1.5 text-red-600';
+                message.innerText = 'Network error verifying promo code.';
+            });
+        }
         const dateInput = document.getElementById('booking-date');
         const slotsContainer = document.getElementById('slots-container');
         const bookingForm = document.getElementById('booking-form');

@@ -3,83 +3,79 @@
 namespace App\Controllers;
 
 use App\Core\Controller;
-use App\Models\Availability;
+use App\Core\Database;
 use App\Models\Booking;
 use App\Models\Event;
-use App\Models\FormField;
-use App\Models\Profile;
 use App\Models\User;
+use App\Models\Availability;
+use App\Models\BookingFormField;
 use App\Services\GoogleCalendarService;
-use DateTime;
-use DateTimeZone;
-use DateInterval;
 
 class PublicBookingController extends Controller {
-    private User $userModel;
-    private Profile $profileModel;
-    private Event $eventModel;
-    private Availability $availabilityModel;
     private Booking $bookingModel;
-    private FormField $fieldModel;
+    private Event $eventModel;
+    private User $userModel;
+    private Availability $availabilityModel;
+    private BookingFormField $fieldModel;
 
     public function __construct() {
         parent::__construct();
-        $this->userModel = new User();
-        $this->profileModel = new Profile();
-        $this->eventModel = new Event();
-        $this->availabilityModel = new Availability();
         $this->bookingModel = new Booking();
-        $this->fieldModel = new FormField();
+        $this->eventModel = new Event();
+        $this->userModel = new User();
+        $this->availabilityModel = new Availability();
+        $this->fieldModel = new BookingFormField();
     }
 
     public function showPublicBooking(string $username): void {
         $user = $this->userModel->findByUsername($username);
         if (!$user || $user['status'] !== 'active') {
-            $this->response->setStatusCode(404);
-            die("Host user not found.");
+            die("Host booking page not found or has been deactivated.");
         }
-
-        $profile = $this->profileModel->findByUserId($user['id']);
-        $allEvents = $this->eventModel->getByUserId($user['id']);
 
         $eventSlug = $_GET['event'] ?? '';
-        $selectedEvent = null;
-
+        $event = null;
         if (!empty($eventSlug)) {
-            $selectedEvent = $this->eventModel->findBySlugAndUserId($eventSlug, $user['id']);
+            $event = $this->eventModel->findBySlugAndUserId($eventSlug, $user['id']);
+        } else {
+            $events = $this->eventModel->getByUserId($user['id']);
+            if (!empty($events)) {
+                $event = $events[0];
+            }
         }
 
-        if (!$selectedEvent && !empty($allEvents)) {
-            $selectedEvent = $allEvents[0];
+        if (!$event || $event['status'] !== 'active') {
+            die("No active consultation service available.");
         }
 
-        $customFields = $selectedEvent ? $this->fieldModel->getByUserId($user['id'], $selectedEvent['id']) : [];
+        $profile = $dbUser = $this->userModel->findById($user['id']);
+        $customFields = $this->fieldModel->getByUserId($user['id'], $event['id']);
 
         $this->render('booking/public', [
             'hostUser'     => $user,
             'profile'      => $profile,
-            'allEvents'    => $allEvents,
-            'event'        => $selectedEvent,
+            'event'        => $event,
             'customFields' => $customFields
         ]);
     }
 
     public function getAvailableSlots(string $username): void {
         $user = $this->userModel->findByUsername($username);
-        if (!$user) {
-            $this->response->json(['status' => 'error', 'message' => 'User not found'], 404);
+        if (!$user || $user['status'] !== 'active') {
+            $this->response->json(['slots' => []]);
+            return;
         }
 
         $dateStr = $_GET['date'] ?? date('Y-m-d');
-        $dateObj = DateTime::createFromFormat('Y-m-d', $dateStr);
+        $eventSlug = $_GET['event'] ?? '';
 
-        if (!$dateObj) {
-            $this->response->json(['status' => 'error', 'message' => 'Invalid date format'], 400);
+        $event = !empty($eventSlug) ? $this->eventModel->findBySlugAndUserId($eventSlug, $user['id']) : $this->eventModel->findByUserId($user['id']);
+        if (!$event) {
+            $this->response->json(['slots' => []]);
+            return;
         }
 
-        $dayOfWeek = (int)$dateObj->format('w');
-        
-        // Fetch host working hours availability
+        $dayOfWeek = (int)date('w', strtotime($dateStr));
         $allAvail = $this->availabilityModel->getByUserId($user['id']);
         $avail = null;
         foreach ($allAvail as $a) {
@@ -89,63 +85,58 @@ class PublicBookingController extends Controller {
             }
         }
 
-        if (!$avail || empty($avail['is_enabled'])) {
-            $this->response->json(['date' => $dateStr, 'slots' => []]);
+        if (!$avail || !$avail['is_enabled']) {
+            $this->response->json(['slots' => []]);
             return;
         }
 
-        // 1. Fetch DB Existing Bookings
-        $existingBookings = $this->bookingModel->getBookedSlots($user['id'], $dateStr);
-        $bookedMap = [];
-        foreach ($existingBookings as $b) {
-            $key = substr($b['start_time'], 0, 5) . '-' . substr($b['end_time'], 0, 5);
-            $bookedMap[$key] = true;
-        }
-
-        // 2. Read Busy Slots from connected Google Calendar to prevent double bookings
-        $googleBusy = GoogleCalendarService::getBusySlots($user['id'], $dateStr, $dateStr);
-
-        $eventSlug = $_GET['event'] ?? '';
-        $event = !empty($eventSlug) ? $this->eventModel->findBySlugAndUserId($eventSlug, $user['id']) : $this->eventModel->findByUserId($user['id']);
-
         $duration = (int)($event['duration_minutes'] ?? 30);
-        if ($duration <= 0) {
-            $duration = 30;
-        }
+        $startStr = $avail['start_time'];
+        $endStr = $avail['end_time'];
 
-        $profile = $this->profileModel->findByUserId($user['id']);
-        $tz = !empty($profile['timezone']) ? $profile['timezone'] : 'UTC';
-        $now = new DateTime('now', new DateTimeZone($tz));
-
-        $startTime = new DateTime($dateStr . ' ' . $avail['start_time'], new DateTimeZone($tz));
-        $endTime = new DateTime($dateStr . ' ' . $avail['end_time'], new DateTimeZone($tz));
-        $interval = new DateInterval('PT' . $duration . 'M');
+        $startTime = new \DateTime($dateStr . ' ' . $startStr);
+        $endTime = new \DateTime($dateStr . ' ' . $endStr);
 
         $slots = [];
         $curr = clone $startTime;
+        $interval = new \DateInterval('PT' . $duration . 'M');
+
+        // Fetch bookings for this host on this day
+        $db = Database::getInstance();
+        $stmt = $db->prepare("SELECT start_time, end_time FROM `bookings` WHERE `user_id` = :user_id AND `booking_date` = :date AND `status` != 'cancelled'");
+        $stmt->execute(['user_id' => $user['id'], 'date' => $dateStr]);
+        $existingBookings = $stmt->fetchAll();
+
+        // Fetch Google Calendar busy events if integrated
+        $googleBusyEvents = GoogleCalendarService::getBusySlots((int)$user['id'], $dateStr);
 
         while ($curr < $endTime) {
-            $slotStart = $curr->format('H:i');
-            $slotEndObj = (clone $curr)->add($interval);
-
-            if ($slotEndObj > $endTime) break;
-
-            $slotEnd = $slotEndObj->format('H:i');
-            $slotKey = $slotStart . '-' . $slotEnd;
-
-            // Prevent booking slots that are in the past
-            if ($curr <= $now) {
-                $curr->add($interval);
-                continue;
+            $slotEndObj = clone $curr;
+            $slotEndObj->add($interval);
+            if ($slotEndObj > $endTime) {
+                break;
             }
 
-            // Check if slot overlaps with DB booking
-            $isBookedInDb = isset($bookedMap[$slotKey]);
+            $slotStart = $curr->format('H:i');
+            $slotEnd = $slotEndObj->format('H:i');
 
-            // Check if slot overlaps with Google Calendar Busy event
+            // Check if slot overlaps with booked consultations
+            $isBookedInDb = false;
+            foreach ($existingBookings as $eb) {
+                $ebStart = substr($eb['start_time'], 0, 5);
+                $ebEnd = substr($eb['end_time'], 0, 5);
+                if ($slotStart < $ebEnd && $slotEnd > $ebStart) {
+                    $isBookedInDb = true;
+                    break;
+                }
+            }
+
+            // Check if slot overlaps with Google Calendar busy slots
             $isBusyInGoogle = false;
-            foreach ($googleBusy as $gb) {
-                if ($slotStart < $gb['end_time'] && $slotEnd > $gb['start_time']) {
+            foreach ($googleBusyEvents as $gSlot) {
+                $gStart = $gSlot['start']->format('H:i');
+                $gEnd = $gSlot['end']->format('H:i');
+                if ($slotStart < $gEnd && $slotEnd > $gStart) {
                     $isBusyInGoogle = true;
                     break;
                 }
@@ -174,10 +165,69 @@ class PublicBookingController extends Controller {
         $this->response->json(['date' => $dateStr, 'slots' => $slots]);
     }
 
+    public function applyPromo(string $username): void {
+        $data = $this->request->getBody();
+        $code = strtoupper(trim($data['promo_code'] ?? ''));
+        $price = (float)($data['price'] ?? 0);
+
+        if (empty($code)) {
+            $this->response->json(['status' => 'error', 'message' => 'Please enter a promo code.'], 400);
+            return;
+        }
+
+        $db = Database::getInstance();
+        $stmt = $db->prepare("SELECT * FROM `promo_codes` WHERE `code` = :code LIMIT 1");
+        $stmt->execute(['code' => $code]);
+        $promo = $stmt->fetch();
+
+        if (!$promo) {
+            $this->response->json(['status' => 'error', 'message' => 'Invalid promo code.'], 400);
+            return;
+        }
+
+        if ($promo['status'] !== 'active') {
+            $this->response->json(['status' => 'error', 'message' => 'This promo code is inactive.'], 400);
+            return;
+        }
+
+        if (!empty($promo['expires_at']) && strtotime($promo['expires_at']) < time()) {
+            $this->response->json(['status' => 'error', 'message' => 'This promo code has expired.'], 400);
+            return;
+        }
+
+        if (!empty($promo['max_uses']) && $promo['used_count'] >= $promo['max_uses']) {
+            $this->response->json(['status' => 'error', 'message' => 'This promo code limit has been reached.'], 400);
+            return;
+        }
+
+        // Calculate discount
+        $discount = 0.00;
+        if ($promo['discount_type'] === 'percentage') {
+            $discount = round($price * ($promo['discount_value'] / 100), 2);
+        } else {
+            $discount = (float)$promo['discount_value'];
+        }
+
+        if ($discount > $price) {
+            $discount = $price;
+        }
+
+        $finalPrice = max(0, $price - $discount);
+
+        $this->response->json([
+            'status'        => 'success',
+            'message'       => 'Promo code applied successfully!',
+            'discount'      => $discount,
+            'final_price'   => $finalPrice,
+            'discount_text' => $promo['discount_type'] === 'percentage' ? "({$promo['discount_value']}% Off)" : "(\${$promo['discount_value']} Off)"
+        ]);
+    }
+
     public function submitBooking(string $username): void {
         $user = $this->userModel->findByUsername($username);
         if (!$user || $user['status'] !== 'active') {
             $this->response->json(['status' => 'error', 'message' => 'Invalid host.'], 400);
+            return;
         }
 
         $data = $this->request->getBody();
@@ -191,16 +241,19 @@ class PublicBookingController extends Controller {
 
         if (empty($customerName) || empty($customerEmail) || empty($bookingDate) || empty($startTime) || empty($endTime)) {
             $this->response->json(['status' => 'error', 'message' => 'Please fill in all required booking fields.'], 400);
+            return;
         }
 
         $event = !empty($eventSlug) ? $this->eventModel->findBySlugAndUserId($eventSlug, $user['id']) : $this->eventModel->findByUserId($user['id']);
 
         if (!$event) {
             $this->response->json(['status' => 'error', 'message' => 'Selected consultation event not found.'], 400);
+            return;
         }
 
         if ($this->bookingModel->isSlotBooked($user['id'], $bookingDate, $startTime, $endTime)) {
             $this->response->json(['status' => 'error', 'message' => 'Selected slot is no longer available. Please choose another slot.'], 400);
+            return;
         }
 
         // Validate daily break time overlap
@@ -223,19 +276,59 @@ class PublicBookingController extends Controller {
 
                 if ($sStart < $bEnd && $sEnd > $bStart) {
                     $this->response->json(['status' => 'error', 'message' => 'Selected slot falls within host\'s break time.'], 400);
+                    return;
                 }
             }
         }
 
+        $promoCode = strtoupper(trim($data['promo_code'] ?? ''));
+        $discountAmount = 0.00;
+        $finalPrice = !empty($event['is_paid']) ? (float)$event['price'] : 0.00;
+
+        if (!empty($promoCode) && !empty($event['is_paid'])) {
+            $db = Database::getInstance();
+            $stmt = $db->prepare("SELECT * FROM `promo_codes` WHERE `code` = :code LIMIT 1");
+            $stmt->execute(['code' => $promoCode]);
+            $promo = $stmt->fetch();
+
+            if ($promo && $promo['status'] === 'active') {
+                $isExpired = !empty($promo['expires_at']) && strtotime($promo['expires_at']) < time();
+                $isLimitReached = !empty($promo['max_uses']) && $promo['used_count'] >= $promo['max_uses'];
+
+                if (!$isExpired && !$isLimitReached) {
+                    if ($promo['discount_type'] === 'percentage') {
+                        $discountAmount = round($finalPrice * ($promo['discount_value'] / 100), 2);
+                    } else {
+                        $discountAmount = (float)$promo['discount_value'];
+                    }
+
+                    if ($discountAmount > $finalPrice) {
+                        $discountAmount = $finalPrice;
+                    }
+
+                    $finalPrice = max(0, $finalPrice - $discountAmount);
+
+                    // Increment promo code used count
+                    $up = $db->prepare("UPDATE `promo_codes` SET `used_count` = `used_count` + 1 WHERE `id` = :id");
+                    $up->execute(['id' => $promo['id']]);
+                }
+            }
+        }
+
+        $bookingStatus = $event['is_paid'] && $finalPrice > 0 ? 'awaiting_payment' : 'confirmed';
+
         $bookingId = $this->bookingModel->createBooking([
-            'user_id'       => $user['id'],
-            'event_id'      => $event['id'],
-            'customer_name'  => $customerName,
-            'customer_email' => $customerEmail,
-            'booking_date'  => $bookingDate,
-            'start_time'    => $startTime,
-            'end_time'      => $endTime,
-            'status'        => $event['is_paid'] ? 'awaiting_payment' : 'confirmed'
+            'user_id'         => $user['id'],
+            'event_id'        => $event['id'],
+            'customer_name'   => $customerName,
+            'customer_email'  => $customerEmail,
+            'booking_date'    => $bookingDate,
+            'start_time'      => $startTime,
+            'end_time'        => $endTime,
+            'status'          => $bookingStatus,
+            'promo_code'      => !empty($promoCode) ? $promoCode : null,
+            'discount_amount' => $discountAmount,
+            'final_price'     => $finalPrice
         ]);
 
         // Save Custom Form Field Responses

@@ -71,6 +71,9 @@ App::post('/admin/plans/delete/{id}', [AdminController::class, 'deletePlan']);
 App::get('/admin/users', [AdminController::class, 'users']);
 App::get('/admin/bookings', [AdminController::class, 'bookings']);
 App::get('/admin/settings', [AdminController::class, 'settings']);
+App::get('/admin/promo-codes', [AdminController::class, 'promos']);
+App::post('/admin/promo-codes', [AdminController::class, 'createPromo']);
+App::post('/admin/promo-codes/delete/{id}', [AdminController::class, 'deletePromo']);
 App::post('/admin/users/{id}/toggle', [AdminController::class, 'toggleUserStatus']);
 App::post('/admin/users/{id}/delete', [AdminController::class, 'deleteUser']);
 App::post('/admin/users/{id}/change-password', [AdminController::class, 'changeUserPassword']);
@@ -80,6 +83,7 @@ App::post('/admin/settings', [AdminController::class, 'saveSettings']);
 // Public Booking Engine
 App::get('/u/{username}', [PublicBookingController::class, 'showPublicBooking']);
 App::get('/u/{username}/slots', [PublicBookingController::class, 'getAvailableSlots']);
+App::post('/u/{username}/apply-promo', [PublicBookingController::class, 'applyPromo']);
 App::post('/u/{username}/book', [PublicBookingController::class, 'submitBooking']);
 App::get('/booking/confirmation/{id}', [PublicBookingController::class, 'showConfirmation']);
 

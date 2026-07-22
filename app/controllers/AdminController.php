@@ -452,4 +452,76 @@ class AdminController extends Controller {
         Session::flash('success', 'User password has been updated successfully.');
         $this->response->redirect(APP_URL . '/admin/users');
     }
+
+    public function promos(): void {
+        $adminUser = $this->requireAdmin();
+        $db = Database::getInstance();
+
+        $promoCodes = $db->query("SELECT * FROM `promo_codes` ORDER BY id DESC")->fetchAll();
+
+        $this->renderAdmin('promos', [
+            'admin'      => $adminUser,
+            'adminTab'   => 'promos',
+            'promoCodes' => $promoCodes,
+            'success'    => Session::flash('success'),
+            'error'      => Session::flash('error')
+        ]);
+    }
+
+    public function createPromo(): void {
+        $this->requireAdmin();
+        $data = $this->request->getBody();
+
+        if (!Session::verifyCsrfToken($data['csrf_token'] ?? '')) {
+            Session::flash('error', 'Invalid security token.');
+            $this->response->redirect(APP_URL . '/admin/promo-codes');
+        }
+
+        $code = strtoupper(trim($data['code'] ?? ''));
+        $discountType = $data['discount_type'] ?? 'percentage';
+        $discountValue = (float)($data['discount_value'] ?? 0);
+        $maxUses = !empty($data['max_uses']) ? (int)$data['max_uses'] : null;
+        $expiresAt = !empty($data['expires_at']) ? $data['expires_at'] : null;
+
+        if (empty($code) || $discountValue <= 0) {
+            Session::flash('error', 'Promo code and positive discount value are required.');
+            $this->response->redirect(APP_URL . '/admin/promo-codes');
+        }
+
+        $db = Database::getInstance();
+        
+        $chk = $db->prepare("SELECT id FROM `promo_codes` WHERE `code` = :code LIMIT 1");
+        $chk->execute(['code' => $code]);
+        if ($chk->fetch()) {
+            Session::flash('error', 'Promo code already exists.');
+            $this->response->redirect(APP_URL . '/admin/promo-codes');
+        }
+
+        $stmt = $db->prepare("
+            INSERT INTO `promo_codes` (`code`, `discount_type`, `discount_value`, `max_uses`, `expires_at`, `status`)
+            VALUES (:code, :discount_type, :discount_value, :max_uses, :expires_at, 'active')
+        ");
+        $stmt->execute([
+            'code'           => $code,
+            'discount_type'  => $discountType,
+            'discount_value' => $discountValue,
+            'max_uses'       => $maxUses,
+            'expires_at'     => $expiresAt
+        ]);
+
+        Session::flash('success', 'Promo code created successfully.');
+        $this->response->redirect(APP_URL . '/admin/promo-codes');
+    }
+
+    public function deletePromo(string $id): void {
+        $this->requireAdmin();
+        $promoId = (int)$id;
+
+        $db = Database::getInstance();
+        $stmt = $db->prepare("DELETE FROM `promo_codes` WHERE `id` = :id");
+        $stmt->execute(['id' => $promoId]);
+
+        Session::flash('success', 'Promo code deleted successfully.');
+        $this->response->redirect(APP_URL . '/admin/promo-codes');
+    }
 }
