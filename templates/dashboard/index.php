@@ -4,6 +4,9 @@ $activeTab = "dashboard";
 require_once TEMPLATES_DIR . '/layout/header.php';
 ?>
 
+<!-- Load Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <div class="max-w-7xl mx-auto space-y-8">
     <!-- Flash Messages -->
     <?php if (!empty($success)): ?>
@@ -67,6 +70,67 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                 </div>
             </div>
             <p class="text-3xl font-extrabold text-slate-950 mt-4">$<?= number_format($stats['revenue'], 2) ?></p>
+        </div>
+    </div>
+
+    <!-- Analytics Report Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Chart Panel -->
+        <div class="bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm flex flex-col justify-between">
+            <div>
+                <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1">Status Distribution</h2>
+                <p class="text-slate-500 text-xs font-medium">Visual proportion of appointment statuses.</p>
+            </div>
+            <div class="py-6 flex justify-center items-center">
+                <div class="relative w-44 h-44">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+            <div class="text-center">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Appointments: <?= $stats['total'] ?></span>
+            </div>
+        </div>
+
+        <!-- Details Overview List -->
+        <div class="lg:col-span-2 bg-white border border-slate-200/80 rounded-3xl p-6 shadow-sm flex flex-col justify-between space-y-4">
+            <div>
+                <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1">Status Overview Report</h2>
+                <p class="text-slate-500 text-xs font-medium">Live breakdown and comparative percentage stats.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 my-2">
+                <?php
+                $breakdown = $stats['status_breakdown'] ?? [];
+                $total = array_sum($breakdown);
+
+                $statusLabels = [
+                    'confirmed' => ['label' => 'Confirmed', 'color' => 'bg-emerald-500', 'bar' => 'bg-emerald-500'],
+                    'completed' => ['label' => 'Completed', 'color' => 'bg-blue-500', 'bar' => 'bg-blue-500'],
+                    'cancelled' => ['label' => 'Cancelled', 'color' => 'bg-red-500', 'bar' => 'bg-red-500'],
+                    'pending'   => ['label' => 'Pending', 'color' => 'bg-amber-500', 'bar' => 'bg-amber-500'],
+                    'awaiting_payment' => ['label' => 'Awaiting Payment', 'color' => 'bg-slate-400', 'bar' => 'bg-slate-400']
+                ];
+                ?>
+                <?php foreach ($statusLabels as $statusKey => $cfg): ?>
+                    <?php
+                    $count = $breakdown[$statusKey] ?? 0;
+                    $pct = $total > 0 ? round(($count / $total) * 100) : 0;
+                    ?>
+                    <div class="bg-slate-50 border border-slate-100 rounded-2xl p-4 flex flex-col justify-between gap-2">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full <?= $cfg['color'] ?>"></span>
+                                <span class="text-xs font-bold text-slate-700"><?= $cfg['label'] ?></span>
+                            </div>
+                            <span class="text-xs font-extrabold text-slate-900"><?= $count ?></span>
+                        </div>
+                        <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+                            <div class="h-full <?= $cfg['bar'] ?>" style="width: <?= $pct ?>%"></div>
+                        </div>
+                        <span class="text-[10px] text-slate-400 font-semibold"><?= $pct ?>% of total bookings</span>
+                    </div>
+                <?php endforeach; ?>
+            </div>
         </div>
     </div>
 
@@ -221,8 +285,48 @@ require_once TEMPLATES_DIR . '/layout/header.php';
     </div>
 </div>
 
-<!-- JS for Collapsible responses and SweetAlert2 Confirmations -->
+<!-- JS for Collapsible responses, SweetAlert2 Confirmations, and Chart.js -->
 <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const ctx = document.getElementById('statusChart').getContext('2d');
+        const data = {
+            labels: ['Confirmed', 'Completed', 'Cancelled', 'Pending', 'Awaiting Payment'],
+            datasets: [{
+                data: [
+                    <?= (int)($breakdown['confirmed'] ?? 0) ?>,
+                    <?= (int)($breakdown['completed'] ?? 0) ?>,
+                    <?= (int)($breakdown['cancelled'] ?? 0) ?>,
+                    <?= (int)($breakdown['pending'] ?? 0) ?>,
+                    <?= (int)($breakdown['awaiting_payment'] ?? 0) ?>
+                ],
+                backgroundColor: [
+                    '#10b981', // Emerald 500
+                    '#3b82f6', // Blue 500
+                    '#ef4444', // Red 500
+                    '#f59e0b', // Amber 500
+                    '#94a3b8'  // Slate 400
+                ],
+                borderWidth: 0,
+                hoverOffset: 4
+            }]
+        };
+        const config = {
+            type: 'doughnut',
+            data: data,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                cutout: '75%'
+            }
+        };
+        new Chart(ctx, config);
+    });
+
     function toggleResponses(bookingId) {
         const row = document.getElementById('responses-row-' + bookingId);
         if (row) {

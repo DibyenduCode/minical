@@ -44,13 +44,29 @@ class Booking extends Model {
         $stmt->execute(['user_id' => $userId]);
         $pendingPayments = (int)$stmt->fetchColumn();
 
+        // Status counts breakdown
+        $stmt = $this->db->prepare("SELECT `status`, COUNT(*) as cnt FROM `bookings` WHERE `user_id` = :user_id GROUP BY `status`");
+        $stmt->execute(['user_id' => $userId]);
+        $statusRows = $stmt->fetchAll();
+        $statusBreakdown = [
+            'confirmed' => 0,
+            'completed' => 0,
+            'cancelled' => 0,
+            'pending' => 0,
+            'awaiting_payment' => 0
+        ];
+        foreach ($statusRows as $row) {
+            $statusBreakdown[$row['status']] = (int)$row['cnt'];
+        }
+
         return [
             'today' => $todayBookings,
             'upcoming' => $upcomingBookings,
             'total' => $totalBookings,
             'cancelled' => $cancelledBookings,
             'revenue' => $revenue,
-            'pending_payments' => $pendingPayments
+            'pending_payments' => $pendingPayments,
+            'status_breakdown' => $statusBreakdown
         ];
     }
 
