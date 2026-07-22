@@ -104,6 +104,7 @@ class PublicBookingController extends Controller {
         }
 
         $duration = (int)($event['duration_minutes'] ?? 30);
+        $buffer = (int)($event['buffer_minutes'] ?? 0);
         $startStr = $avail['start_time'];
         $endStr = $avail['end_time'];
 
@@ -112,11 +113,17 @@ class PublicBookingController extends Controller {
 
         $slots = [];
         $curr = clone $startTime;
-        $interval = new \DateInterval('PT' . $duration . 'M');
+        $durationInterval = new \DateInterval('PT' . $duration . 'M');
+        $stepInterval = new \DateInterval('PT' . ($duration + $buffer) . 'M');
 
-        // Fetch bookings for this host on this day
+        // Fetch bookings for this host on this day with buffer minutes
         $db = Database::getInstance();
-        $stmt = $db->prepare("SELECT start_time, end_time FROM `bookings` WHERE `user_id` = :user_id AND `booking_date` = :date AND `status` != 'cancelled'");
+        $stmt = $db->prepare("
+            SELECT b.start_time, b.end_time, e.buffer_minutes 
+            FROM `bookings` b 
+            JOIN `events` e ON e.id = b.event_id 
+            WHERE b.user_id = :user_id AND b.booking_date = :date AND b.status != 'cancelled'
+        ");
         $stmt->execute(['user_id' => $user['id'], 'date' => $dateStr]);
         $existingBookings = $stmt->fetchAll();
 
@@ -125,7 +132,7 @@ class PublicBookingController extends Controller {
 
         while ($curr < $endTime) {
             $slotEndObj = clone $curr;
-            $slotEndObj->add($interval);
+            $slotEndObj->add($durationInterval);
             if ($slotEndObj > $endTime) {
                 break;
             }
@@ -136,7 +143,7 @@ class PublicBookingController extends Controller {
             if ($dateStr === $now->format('Y-m-d')) {
                 $slotStartDateTime = new \DateTime($dateStr . ' ' . $slotStart, $hostTz);
                 if ($slotStartDateTime <= $now) {
-                    $curr->add($interval);
+                    $curr->add($stepInterval);
                     continue;
                 }
             }
@@ -146,6 +153,13 @@ class PublicBookingController extends Controller {
             foreach ($existingBookings as $eb) {
                 $ebStart = substr($eb['start_time'], 0, 5);
                 $ebEnd = substr($eb['end_time'], 0, 5);
+                
+                if (!empty($eb['buffer_minutes'])) {
+                    $ebEndObj = new \DateTime($dateStr . ' ' . $ebEnd);
+                    $ebEndObj->add(new \DateInterval('PT' . (int)$eb['buffer_minutes'] . 'M'));
+                    $ebEnd = $ebEndObj->format('H:i');
+                }
+
                 if ($slotStart < $ebEnd && $slotEnd > $ebStart) {
                     $isBookedInDb = true;
                     break;
@@ -180,7 +194,7 @@ class PublicBookingController extends Controller {
                     'display'    => $curr->format('h:i A') . ' - ' . $slotEndObj->format('h:i A')
                 ];
             }
-            $curr->add($interval);
+            $curr->add($stepInterval);
         }
 
         $this->response->json(['date' => $dateStr, 'slots' => $slots]);

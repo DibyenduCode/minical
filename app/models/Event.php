@@ -36,8 +36,8 @@ class Event extends Model {
 
     public function createEvent(array $data): int {
         $stmt = $this->db->prepare("
-            INSERT INTO `events` (`user_id`, `name`, `slug`, `description`, `duration_minutes`, `booking_window_days`, `location_type`, `is_paid`, `price`, `currency`, `status`)
-            VALUES (:user_id, :name, :slug, :description, :duration_minutes, :booking_window_days, :location_type, :is_paid, :price, :currency, :status)
+            INSERT INTO `events` (`user_id`, `name`, `slug`, `description`, `duration_minutes`, `buffer_minutes`, `booking_window_days`, `location_type`, `is_paid`, `price`, `currency`, `status`)
+            VALUES (:user_id, :name, :slug, :description, :duration_minutes, :buffer_minutes, :booking_window_days, :location_type, :is_paid, :price, :currency, :status)
         ");
         $stmt->execute([
             'user_id'             => $data['user_id'],
@@ -45,6 +45,7 @@ class Event extends Model {
             'slug'                => strtolower(trim($data['slug'])),
             'description'         => trim($data['description'] ?? ''),
             'duration_minutes'    => (int)($data['duration_minutes'] ?? 30),
+            'buffer_minutes'      => (int)($data['buffer_minutes'] ?? 0),
             'booking_window_days' => (int)($data['booking_window_days'] ?? 30),
             'location_type'       => $data['location_type'] ?? 'online',
             'is_paid'             => (int)($data['is_paid'] ?? 0),
@@ -59,7 +60,7 @@ class Event extends Model {
         $stmt = $this->db->prepare("
             UPDATE `events` 
             SET `name` = :name, `slug` = :slug, `description` = :description, 
-                `duration_minutes` = :duration_minutes, `booking_window_days` = :booking_window_days, 
+                `duration_minutes` = :duration_minutes, `buffer_minutes` = :buffer_minutes, `booking_window_days` = :booking_window_days, 
                 `location_type` = :location_type, `is_paid` = :is_paid, `price` = :price, 
                 `currency` = :currency, `status` = :status
             WHERE `id` = :id AND `user_id` = :user_id
@@ -69,6 +70,7 @@ class Event extends Model {
             'slug'                => strtolower(trim($data['slug'])),
             'description'         => trim($data['description'] ?? ''),
             'duration_minutes'    => (int)($data['duration_minutes'] ?? 30),
+            'buffer_minutes'      => (int)($data['buffer_minutes'] ?? 0),
             'booking_window_days' => (int)($data['booking_window_days'] ?? 30),
             'location_type'       => $data['location_type'] ?? 'online',
             'is_paid'             => (int)($data['is_paid'] ?? 0),

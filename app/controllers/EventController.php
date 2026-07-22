@@ -79,6 +79,7 @@ class EventController extends Controller {
             'slug'                => $slug,
             'description'         => $data['description'] ?? '',
             'duration_minutes'    => (int)($data['duration_minutes'] ?? 30),
+            'buffer_minutes'      => (int)($data['buffer_minutes'] ?? 0),
             'booking_window_days' => (int)($data['booking_window_days'] ?? 30),
             'location_type'       => $data['location_type'] ?? 'online',
             'is_paid'             => isset($data['is_paid']) ? 1 : 0,
@@ -103,11 +104,12 @@ class EventController extends Controller {
 
         $event = $this->eventModel->findById($eventId);
         if ($event && (int)$event['user_id'] === (int)$user['id']) {
-            $this->eventModel->updateEvent($eventId, [
+            $this->eventModel->updateEvent($eventId, $user['id'], [
                 'name'                => trim($data['name']),
                 'slug'                => strtolower(trim($data['slug'])),
                 'description'         => $data['description'] ?? '',
                 'duration_minutes'    => (int)($data['duration_minutes'] ?? 30),
+                'buffer_minutes'      => (int)($data['buffer_minutes'] ?? 0),
                 'booking_window_days' => (int)($data['booking_window_days'] ?? 30),
                 'location_type'       => $data['location_type'] ?? 'online',
                 'is_paid'             => isset($data['is_paid']) ? 1 : 0,

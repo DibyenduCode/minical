@@ -55,7 +55,7 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1">Duration</label>
                     <select name="duration_minutes"
@@ -66,6 +66,20 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                         <option value="60">60 Mins</option>
                         <option value="90">90 Mins</option>
                         <option value="120">120 Mins</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Buffer Time (Padding)</label>
+                    <select name="buffer_minutes"
+                            class="w-full px-3 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-black">
+                        <option value="0" selected>No Buffer</option>
+                        <option value="10">10 Mins</option>
+                        <option value="15">15 Mins</option>
+                        <option value="20">20 Mins</option>
+                        <option value="30">30 Mins</option>
+                        <option value="45">45 Mins</option>
+                        <option value="60">60 Mins (1h)</option>
                     </select>
                 </div>
 
@@ -229,12 +243,21 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                                 <input type="text" name="slug" value="<?= htmlspecialchars($ev['slug']) ?>" required class="w-full px-3 py-2 text-xs bg-white border border-slate-200 rounded-lg">
                             </div>
 
-                            <div class="grid grid-cols-2 gap-2">
+                            <div class="grid grid-cols-3 gap-2">
                                 <div>
                                     <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Duration</label>
                                     <select name="duration_minutes" class="w-full px-2.5 py-2 text-xs bg-white border border-slate-200 rounded-lg">
                                         <?php foreach ([15, 30, 45, 60, 90, 120] as $d): ?>
                                             <option value="<?= $d ?>" <?= $ev['duration_minutes'] == $d ? 'selected' : '' ?>><?= $d ?> Mins</option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase text-slate-600 mb-1">Buffer Time</label>
+                                    <select name="buffer_minutes" class="w-full px-2.5 py-2 text-xs bg-white border border-slate-200 rounded-lg">
+                                        <?php foreach ([0, 10, 15, 20, 30, 45, 60] as $bM): ?>
+                                            <option value="<?= $bM ?>" <?= ($ev['buffer_minutes'] ?? 0) == $bM ? 'selected' : '' ?>><?= $bM == 0 ? 'No Buffer' : $bM . ' Mins' ?></option>
                                         <?php endforeach; ?>
                                     </select>
                                 </div>
