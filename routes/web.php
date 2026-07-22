@@ -25,6 +25,11 @@ App::get('/register', [AuthController::class, 'showRegister']);
 App::post('/register', [AuthController::class, 'register']);
 App::get('/logout', [AuthController::class, 'logout']);
 
+App::get('/forgot-password', [AuthController::class, 'showForgotPassword']);
+App::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+App::get('/reset-password/{token}', [AuthController::class, 'showResetPassword']);
+App::post('/reset-password', [AuthController::class, 'resetPassword']);
+
 // User Dashboard & Settings Routes
 App::get('/dashboard', [DashboardController::class, 'index']);
 App::get('/bookings', [DashboardController::class, 'bookingsList']);

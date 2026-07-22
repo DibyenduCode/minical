@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign in - MiniCal</title>
+    <title>Forgot Password - MiniCal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -16,8 +16,8 @@
             <div class="inline-flex items-center justify-center w-12 h-12 bg-black text-white rounded-2xl mb-2 font-black text-xl shadow-sm">
                 MC
             </div>
-            <h1 class="text-2xl font-extrabold text-slate-950 tracking-tight">Welcome back to MiniCal</h1>
-            <p class="text-slate-500 text-xs font-medium">Sign in to manage your appointments and schedule</p>
+            <h1 class="text-2xl font-extrabold text-slate-950 tracking-tight">Reset Password</h1>
+            <p class="text-slate-500 text-xs font-medium">Enter your email and we'll send you a password reset link</p>
         </div>
 
         <?php if (!empty($error)): ?>
@@ -34,33 +34,24 @@
             </div>
         <?php endif; ?>
 
-        <form action="<?= APP_URL ?>/login" method="POST" class="space-y-4">
+        <form action="<?= APP_URL ?>/forgot-password" method="POST" class="space-y-4">
             <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
 
             <div>
                 <label for="email" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Email address</label>
-                <input type="email" id="email" name="email" required placeholder="admin@minical.local"
-                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition-all">
-            </div>
-
-            <div>
-                <div class="flex items-center justify-between mb-1.5">
-                    <label for="password" class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Password</label>
-                    <a href="<?= APP_URL ?>/forgot-password" class="text-xs font-bold text-slate-600 hover:text-black hover:underline">Forgot password?</a>
-                </div>
-                <input type="password" id="password" name="password" required placeholder="••••••••"
+                <input type="email" id="email" name="email" required placeholder="name@domain.com"
                     class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition-all">
             </div>
 
             <button type="submit"
                 class="w-full py-3.5 px-4 bg-black hover:bg-slate-800 text-white font-bold text-sm rounded-xl shadow-md transition-all transform active:scale-[0.98] mt-2">
-                Sign in
+                Send Reset Link
             </button>
         </form>
 
         <div class="pt-4 border-t border-slate-100 text-center">
-            <p class="text-slate-500 text-xs font-medium">Don't have an account? 
-                <a href="<?= APP_URL ?>/register" class="text-black font-bold hover:underline">Create one for free</a>
+            <p class="text-slate-500 text-xs font-medium">Remembered your password? 
+                <a href="<?= APP_URL ?>/login" class="text-black font-bold hover:underline">Sign in</a>
             </p>
         </div>
     </div>
