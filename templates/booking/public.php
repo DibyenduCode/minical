@@ -176,16 +176,35 @@
                 <?php endforeach; ?>
 
                 <?php if (!empty($event['is_paid'])): ?>
-                    <div class="border-t border-slate-100 pt-4 space-y-2">
-                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Promo Code (Optional)</label>
-                        <div class="flex gap-2">
-                            <input type="text" id="promo_code_input" name="promo_code" placeholder="WELCOME20"
-                                   class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-black font-mono">
-                            <button type="button" onclick="applyPromoCode()" class="px-4 py-2.5 bg-black hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition-all shadow-sm">
-                                Apply
-                            </button>
+                    <div class="border-t border-slate-100 pt-4 space-y-4">
+                        <div class="space-y-2">
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Promo Code (Optional)</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="promo_code_input" name="promo_code" placeholder="WELCOME20"
+                                       class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-black font-mono">
+                                <button type="button" onclick="applyPromoCode()" class="px-4 py-2.5 bg-black hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition-all shadow-sm">
+                                    Apply
+                                </button>
+                            </div>
+                            <div id="promo-message" class="hidden text-xs font-bold mt-1.5"></div>
                         </div>
-                        <div id="promo-message" class="hidden text-xs font-bold mt-1.5"></div>
+
+                        <!-- Checkout Summary breakdown -->
+                        <div id="checkout-summary" class="hidden border border-slate-200 bg-slate-50/50 p-4 rounded-2xl space-y-2.5 text-xs font-semibold font-sans">
+                            <div class="flex justify-between items-center text-slate-500">
+                                <span>Price</span>
+                                <span id="summary-original-price" class="text-slate-900 font-bold">$0.00</span>
+                            </div>
+                            <div class="flex justify-between items-center text-slate-500">
+                                <span>Discount (Coupon)</span>
+                                <span id="summary-discount" class="text-emerald-600 font-bold">-$0.00</span>
+                            </div>
+                            <hr class="border-slate-200 border-dashed">
+                            <div class="flex justify-between items-center text-slate-800">
+                                <span>Need to pay</span>
+                                <span id="summary-final-price" class="text-slate-950 font-black text-sm">$0.00</span>
+                            </div>
+                        </div>
                     </div>
                 <?php endif; ?>
 
@@ -200,18 +219,29 @@
     <script>
         const username = "<?= htmlspecialchars($hostUser['username']) ?>";
         const eventSlug = "<?= htmlspecialchars($event['slug'] ?? '') ?>";
+        const currency = "<?= htmlspecialchars($event['currency'] ?? 'USD') ?>";
         let isPromoApplied = false;
         let originalPrice = <?= !empty($event['price']) ? (float)$event['price'] : 0.00 ?>;
+
+        const currencySymbols = {
+            'USD': '$',
+            'EUR': '€',
+            'GBP': '£',
+            'INR': '₹'
+        };
+        const symbol = currencySymbols[currency] || (currency + ' ');
 
         function applyPromoCode() {
             const input = document.getElementById('promo_code_input');
             const message = document.getElementById('promo-message');
+            const summary = document.getElementById('checkout-summary');
             const code = input.value.trim().toUpperCase();
 
             if (!code) {
                 message.className = 'text-xs font-bold mt-1.5 text-red-600';
                 message.innerText = 'Please enter a promo code.';
                 message.classList.remove('hidden');
+                if (summary) summary.classList.add('hidden');
                 return;
             }
 
@@ -229,17 +259,27 @@
                 if (data.status === 'success') {
                     isPromoApplied = true;
                     message.className = 'text-xs font-bold mt-1.5 text-emerald-600';
-                    message.innerText = `${data.message} Discount: -$${data.discount.toFixed(2)} ${data.discount_text}. New Price: $${data.final_price.toFixed(2)}`;
+                    message.innerText = `${data.message} ${data.discount_text}`;
                     input.readOnly = true;
+
+                    // Update and show Checkout Summary Breakdown
+                    if (summary) {
+                        document.getElementById('summary-original-price').innerText = `${symbol}${originalPrice.toFixed(2)}`;
+                        document.getElementById('summary-discount').innerText = `-${symbol}${data.discount.toFixed(2)}`;
+                        document.getElementById('summary-final-price').innerText = `${symbol}${data.final_price.toFixed(2)}`;
+                        summary.classList.remove('hidden');
+                    }
                 } else {
                     message.className = 'text-xs font-bold mt-1.5 text-red-600';
                     message.innerText = data.message || 'Failed to apply promo code.';
+                    if (summary) summary.classList.add('hidden');
                 }
             })
             .catch(() => {
                 message.classList.remove('hidden');
                 message.className = 'text-xs font-bold mt-1.5 text-red-600';
                 message.innerText = 'Network error verifying promo code.';
+                if (summary) summary.classList.add('hidden');
             });
         }
         const dateInput = document.getElementById('booking-date');
