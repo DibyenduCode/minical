@@ -45,12 +45,12 @@ class Plan extends Model {
             'features'              => json_encode($featuresArr),
             'badge'                 => trim($data['badge'] ?? ''),
             'button_text'           => trim($data['button_text'] ?? 'Get Started'),
-            'is_featured'           => isset($data['is_featured']) ? 1 : 0,
+            'is_featured'           => !empty($data['is_featured']) ? 1 : 0,
             'display_order'         => (int)($data['display_order'] ?? 0),
             'status'                => $data['status'] ?? 'active',
             'max_events'            => (int)($data['max_events'] ?? -1),
-            'allow_custom_domain'   => isset($data['allow_custom_domain']) ? 1 : 0,
-            'allow_google_calendar' => isset($data['allow_google_calendar']) ? 1 : 0
+            'allow_custom_domain'   => !empty($data['allow_custom_domain']) ? 1 : 0,
+            'allow_google_calendar' => !empty($data['allow_google_calendar']) ? 1 : 0
         ]);
 
         return (int)$this->db->lastInsertId();
@@ -87,12 +87,12 @@ class Plan extends Model {
             'features'              => json_encode($featuresArr),
             'badge'                 => trim($data['badge'] ?? ''),
             'button_text'           => trim($data['button_text'] ?? 'Get Started'),
-            'is_featured'           => isset($data['is_featured']) ? 1 : 0,
+            'is_featured'           => !empty($data['is_featured']) ? 1 : 0,
             'display_order'         => (int)($data['display_order'] ?? 0),
             'status'                => $data['status'] ?? 'active',
             'max_events'            => (int)($data['max_events'] ?? -1),
-            'allow_custom_domain'   => isset($data['allow_custom_domain']) ? 1 : 0,
-            'allow_google_calendar' => isset($data['allow_google_calendar']) ? 1 : 0,
+            'allow_custom_domain'   => !empty($data['allow_custom_domain']) ? 1 : 0,
+            'allow_google_calendar' => !empty($data['allow_google_calendar']) ? 1 : 0,
             'id'                    => $id
         ]);
     }
