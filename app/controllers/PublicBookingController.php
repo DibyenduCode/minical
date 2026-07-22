@@ -113,7 +113,7 @@ class PublicBookingController extends Controller {
         $existingBookings = $stmt->fetchAll();
 
         // Fetch Google Calendar busy events if integrated
-        $googleBusyEvents = GoogleCalendarService::getBusySlots((int)$user['id'], $dateStr);
+        $googleBusyEvents = GoogleCalendarService::getBusySlots((int)$user['id'], $dateStr, $dateStr);
 
         while ($curr < $endTime) {
             $slotEndObj = clone $curr;
@@ -139,8 +139,8 @@ class PublicBookingController extends Controller {
             // Check if slot overlaps with Google Calendar busy slots
             $isBusyInGoogle = false;
             foreach ($googleBusyEvents as $gSlot) {
-                $gStart = $gSlot['start']->format('H:i');
-                $gEnd = $gSlot['end']->format('H:i');
+                $gStart = substr($gSlot['start_time'], 0, 5);
+                $gEnd = substr($gSlot['end_time'], 0, 5);
                 if ($slotStart < $gEnd && $slotEnd > $gStart) {
                     $isBusyInGoogle = true;
                     break;
