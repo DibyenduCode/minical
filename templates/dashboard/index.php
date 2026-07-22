@@ -150,7 +150,7 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-right space-x-2">
-                                    <?php if ($b['status'] !== 'cancelled' && !empty($b['meeting_link'])): ?>
+                                    <?php if ($b['status'] !== 'cancelled' && $b['status'] !== 'completed' && !empty($b['meeting_link'])): ?>
                                         <a href="<?= htmlspecialchars($b['meeting_link']) ?>" target="_blank"
                                            class="inline-flex items-center gap-1 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 rounded-xl shadow-sm transition-all">
                                             <span>📹 Join Meet</span>
