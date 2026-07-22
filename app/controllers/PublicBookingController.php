@@ -9,6 +9,7 @@ use App\Models\Event;
 use App\Models\User;
 use App\Models\Availability;
 use App\Models\FormField;
+use App\Models\Profile;
 use App\Services\GoogleCalendarService;
 
 class PublicBookingController extends Controller {
@@ -17,6 +18,7 @@ class PublicBookingController extends Controller {
     private User $userModel;
     private Availability $availabilityModel;
     private FormField $fieldModel;
+    private Profile $profileModel;
 
     public function __construct() {
         parent::__construct();
@@ -25,6 +27,7 @@ class PublicBookingController extends Controller {
         $this->userModel = new User();
         $this->availabilityModel = new Availability();
         $this->fieldModel = new FormField();
+        $this->profileModel = new Profile();
     }
 
     public function showPublicBooking(string $username): void {
@@ -48,7 +51,7 @@ class PublicBookingController extends Controller {
             die("No active consultation service available.");
         }
 
-        $profile = $dbUser = $this->userModel->findById($user['id']);
+        $profile = $this->profileModel->findByUserId($user['id']);
         $customFields = $this->fieldModel->getByUserId($user['id'], $event['id']);
         $allEvents = $this->eventModel->getByUserId($user['id']);
         $allEvents = array_filter($allEvents, function($ev) {
