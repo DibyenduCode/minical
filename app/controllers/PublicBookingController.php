@@ -50,12 +50,17 @@ class PublicBookingController extends Controller {
 
         $profile = $dbUser = $this->userModel->findById($user['id']);
         $customFields = $this->fieldModel->getByUserId($user['id'], $event['id']);
+        $allEvents = $this->eventModel->getByUserId($user['id']);
+        $allEvents = array_filter($allEvents, function($ev) {
+            return $ev['status'] === 'active';
+        });
 
         $this->render('booking/public', [
             'hostUser'     => $user,
             'profile'      => $profile,
             'event'        => $event,
-            'customFields' => $customFields
+            'customFields' => $customFields,
+            'allEvents'    => $allEvents
         ]);
     }
 
