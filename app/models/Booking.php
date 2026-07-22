@@ -119,6 +119,17 @@ class Booking extends Model {
         return $res;
     }
 
+    public function completeBooking(int $bookingId): bool {
+        $stmt = $this->db->prepare("UPDATE `bookings` SET `status` = 'completed' WHERE `id` = :id");
+        $res = $stmt->execute(['id' => $bookingId]);
+
+        if ($res) {
+            $stmtLog = $this->db->prepare("INSERT INTO `booking_logs` (`booking_id`, `action`, `note`) VALUES (:booking_id, 'completed', 'Booking marked as completed by host')");
+            $stmtLog->execute(['booking_id' => $bookingId]);
+        }
+        return $res;
+    }
+
     public function getExistingBookingsForDate(int $userId, string $date): array {
         $stmt = $this->db->prepare("
             SELECT `start_time`, `end_time` FROM `bookings` 

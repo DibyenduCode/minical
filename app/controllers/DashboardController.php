@@ -63,4 +63,26 @@ class DashboardController extends Controller {
 
         $this->response->redirect(APP_URL . '/dashboard');
     }
+
+    public function completeBooking(): void {
+        $user = $this->requireAuth();
+        $data = $this->request->getBody();
+
+        if (!Session::verifyCsrfToken($data['csrf_token'] ?? '')) {
+            Session::flash('error', 'Invalid security token.');
+            $this->response->redirect(APP_URL . '/dashboard');
+        }
+
+        $bookingId = (int)($data['booking_id'] ?? 0);
+
+        $booking = $this->bookingModel->findById($bookingId);
+        if ($booking && (int)$booking['user_id'] === (int)$user['id']) {
+            $this->bookingModel->completeBooking($bookingId);
+            Session::flash('success', 'Booking has been marked as completed.');
+        } else {
+            Session::flash('error', 'Booking not found.');
+        }
+
+        $this->response->redirect(APP_URL . '/dashboard');
+    }
 }

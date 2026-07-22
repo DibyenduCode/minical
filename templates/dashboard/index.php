@@ -149,7 +149,17 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                                         </a>
                                     <?php endif; ?>
 
-                                    <?php if ($b['status'] !== 'cancelled'): ?>
+                                    <?php if ($b['status'] === 'confirmed' || $b['status'] === 'pending' || $b['status'] === 'paid'): ?>
+                                        <form method="POST" action="<?= APP_URL ?>/dashboard/complete" onsubmit="return confirm('Mark this session as completed?')" class="inline-block">
+                                            <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+                                            <input type="hidden" name="booking_id" value="<?= $b['id'] ?>">
+                                            <button type="submit" class="text-xs text-emerald-700 hover:text-emerald-800 font-semibold px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-colors border border-emerald-200/60">
+                                                Complete
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
+
+                                    <?php if ($b['status'] !== 'cancelled' && $b['status'] !== 'completed'): ?>
                                         <form method="POST" action="<?= APP_URL ?>/dashboard/cancel" onsubmit="return confirm('Are you sure you want to cancel this booking?')" class="inline-block">
                                             <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
                                             <input type="hidden" name="booking_id" value="<?= $b['id'] ?>">
