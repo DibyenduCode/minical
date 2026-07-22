@@ -74,6 +74,14 @@ class PublicBookingController extends Controller {
         $dateStr = $_GET['date'] ?? date('Y-m-d');
         $eventSlug = $_GET['event'] ?? '';
 
+        $db = Database::getInstance();
+        $stmtProfile = $db->prepare("SELECT timezone FROM `profiles` WHERE `user_id` = :user_id LIMIT 1");
+        $stmtProfile->execute(['user_id' => $user['id']]);
+        $profileTimezone = $stmtProfile->fetchColumn() ?: 'UTC';
+
+        $hostTz = new \DateTimeZone($profileTimezone);
+        $now = new \DateTime('now', $hostTz);
+
         $event = !empty($eventSlug) ? $this->eventModel->findBySlugAndUserId($eventSlug, $user['id']) : $this->eventModel->findByUserId($user['id']);
         if (!$event) {
             $this->response->json(['slots' => []]);
@@ -124,6 +132,14 @@ class PublicBookingController extends Controller {
 
             $slotStart = $curr->format('H:i');
             $slotEnd = $slotEndObj->format('H:i');
+
+            if ($dateStr === $now->format('Y-m-d')) {
+                $slotStartDateTime = new \DateTime($dateStr . ' ' . $slotStart, $hostTz);
+                if ($slotStartDateTime <= $now) {
+                    $curr->add($interval);
+                    continue;
+                }
+            }
 
             // Check if slot overlaps with booked consultations
             $isBookedInDb = false;
