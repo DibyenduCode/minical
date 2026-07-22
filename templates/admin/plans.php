@@ -172,7 +172,10 @@ require_once TEMPLATES_DIR . '/admin/layout/header.php';
                         </div>
                     </div>
 
-                    <div class="pt-6">
+                    <div class="pt-6 flex flex-col gap-2">
+                        <button type="button" onclick="openEditPlanModal(<?= $p['id'] ?>)" class="w-full py-2 text-xs font-bold text-slate-800 hover:text-black bg-slate-100 hover:bg-slate-200 rounded-xl border border-slate-200 transition-colors">
+                            Edit Plan
+                        </button>
                         <form id="delete-plan-form-<?= $p['id'] ?>" method="POST" action="<?= APP_URL ?>/admin/plans/delete/<?= $p['id'] ?>">
                             <button type="button" onclick="confirmDeletePlan(<?= $p['id'] ?>)" class="w-full py-2 text-xs font-bold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-xl border border-red-200 transition-colors">
                                 Delete Plan
@@ -185,8 +188,138 @@ require_once TEMPLATES_DIR . '/admin/layout/header.php';
     </div>
 </div>
 
+<!-- Edit Plan Modals -->
+<?php foreach ($plans as $p): ?>
+    <?php $features = !empty($p['features']) ? json_decode($p['features'], true) : []; ?>
+    <div id="edit-plan-modal-<?= $p['id'] ?>" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm hidden">
+        <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto space-y-4 text-left">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 class="font-bold text-slate-900 text-lg">Edit Plan: <?= htmlspecialchars($p['name']) ?></h3>
+                <button type="button" onclick="closeEditPlanModal(<?= $p['id'] ?>)" class="text-slate-400 hover:text-slate-600 font-bold">✕</button>
+            </div>
+            
+            <form action="<?= APP_URL ?>/admin/plans/edit/<?= $p['id'] ?>" method="POST" class="space-y-4">
+                <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-700 uppercase">Plan Name *</label>
+                        <input type="text" name="name" value="<?= htmlspecialchars($p['name']) ?>" required
+                               class="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs focus:outline-none focus:ring-2 focus:ring-black">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-700 uppercase">Slug</label>
+                        <input type="text" name="slug" value="<?= htmlspecialchars($p['slug']) ?>" required
+                               class="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs focus:outline-none focus:ring-2 focus:ring-black">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-700 uppercase">Price *</label>
+                        <input type="text" name="price" value="<?= htmlspecialchars($p['price']) ?>" required
+                               class="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs focus:outline-none focus:ring-2 focus:ring-black">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-700 uppercase">Billing Cycle</label>
+                        <input type="text" name="billing_cycle" value="<?= htmlspecialchars($p['billing_cycle']) ?>"
+                               class="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs focus:outline-none focus:ring-2 focus:ring-black">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-700 uppercase">Badge Tag</label>
+                        <input type="text" name="badge" value="<?= htmlspecialchars($p['badge']) ?>"
+                               class="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs focus:outline-none focus:ring-2 focus:ring-black">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-700 uppercase">Button Text</label>
+                        <input type="text" name="button_text" value="<?= htmlspecialchars($p['button_text']) ?>"
+                               class="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs focus:outline-none focus:ring-2 focus:ring-black">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-700 uppercase">Display Order</label>
+                        <input type="number" name="display_order" value="<?= (int)$p['display_order'] ?>"
+                               class="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs focus:outline-none focus:ring-2 focus:ring-black">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-700 uppercase">Status</label>
+                        <select name="status" class="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs focus:outline-none focus:ring-2 focus:ring-black">
+                            <option value="active" <?= $p['status'] === 'active' ? 'selected' : '' ?>>Active</option>
+                            <option value="inactive" <?= $p['status'] === 'inactive' ? 'selected' : '' ?>>Inactive</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-700 uppercase">Plan Description</label>
+                    <textarea name="description" rows="2" class="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs focus:outline-none focus:ring-2 focus:ring-black"><?= htmlspecialchars($p['description']) ?></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-700 uppercase">Features Checklist (One per line)</label>
+                    <textarea name="features_raw" rows="3" class="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-black"><?= htmlspecialchars(implode("\n", $features)) ?></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-slate-100 pt-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-700 uppercase">Max Event Types Limit</label>
+                        <input type="number" name="max_events" value="<?= (int)$p['max_events'] ?>" required
+                               class="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs focus:outline-none focus:ring-2 focus:ring-black">
+                    </div>
+                    
+                    <div class="flex items-center gap-2 pt-4">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" name="allow_custom_domain" value="1" <?= !empty($p['allow_custom_domain']) ? 'checked' : '' ?> class="w-4 h-4 accent-black rounded">
+                            <span class="text-xs font-bold text-slate-800">Allow Custom Domains</span>
+                        </label>
+                    </div>
+
+                    <div class="flex items-center gap-2 pt-4">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" name="allow_google_calendar" value="1" <?= !empty($p['allow_google_calendar']) ? 'checked' : '' ?> class="w-4 h-4 accent-black rounded">
+                            <span class="text-xs font-bold text-slate-800">Allow Calendar Sync</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" name="is_featured" value="1" <?= !empty($p['is_featured']) ? 'checked' : '' ?> class="w-4 h-4 accent-black rounded">
+                        <span class="text-xs font-bold text-slate-800">Highlight as Featured Dark Card</span>
+                    </label>
+                </div>
+
+                <div class="pt-2 flex justify-end gap-2 border-t border-slate-100 pt-3">
+                    <button type="button" onclick="closeEditPlanModal(<?= $p['id'] ?>)" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-black hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition-all shadow-md">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+<?php endforeach; ?>
+
 <!-- SweetAlert2 Deletion Confirmation script -->
 <script>
+    function openEditPlanModal(planId) {
+        const modal = document.getElementById('edit-plan-modal-' + planId);
+        if (modal) {
+            modal.classList.remove('hidden');
+        }
+    }
+
+    function closeEditPlanModal(planId) {
+        const modal = document.getElementById('edit-plan-modal-' + planId);
+        if (modal) {
+            modal.classList.add('hidden');
+        }
+    }
+
     function confirmDeletePlan(planId) {
         Swal.fire({
             title: 'Delete Plan Tier?',

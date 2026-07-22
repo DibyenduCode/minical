@@ -160,6 +160,45 @@ class AdminController extends Controller {
         $this->response->redirect(APP_URL . '/admin/plans');
     }
 
+    public function editPlan(string $id): void {
+        $this->requireAdmin();
+        $planId = (int)$id;
+        $data = $this->request->getBody();
+
+        if (!Session::verifyCsrfToken($data['csrf_token'] ?? '')) {
+            Session::flash('error', 'Invalid security token.');
+            $this->response->redirect(APP_URL . '/admin/plans');
+        }
+
+        $name = trim($data['name'] ?? '');
+        $price = trim($data['price'] ?? '0');
+
+        if (empty($name)) {
+            Session::flash('error', 'Plan Name is required.');
+            $this->response->redirect(APP_URL . '/admin/plans');
+        }
+
+        $this->planModel->updatePlan($planId, [
+            'name'                  => $name,
+            'slug'                  => strtolower(trim($data['slug'] ?? $name)),
+            'price'                 => $price,
+            'billing_cycle'         => $data['billing_cycle'] ?? 'per month',
+            'description'           => $data['description'] ?? '',
+            'features_raw'          => $data['features_raw'] ?? '',
+            'badge'                 => $data['badge'] ?? '',
+            'button_text'           => $data['button_text'] ?? 'Get Started',
+            'is_featured'           => isset($data['is_featured']) ? 1 : 0,
+            'display_order'         => (int)($data['display_order'] ?? 0),
+            'status'                => $data['status'] ?? 'active',
+            'max_events'            => (int)($data['max_events'] ?? -1),
+            'allow_custom_domain'   => isset($data['allow_custom_domain']) ? 1 : 0,
+            'allow_google_calendar' => isset($data['allow_google_calendar']) ? 1 : 0
+        ]);
+
+        Session::flash('success', 'Pricing plan updated successfully.');
+        $this->response->redirect(APP_URL . '/admin/plans');
+    }
+
     public function users(): void {
         $adminUser = $this->requireAdmin();
         $db = Database::getInstance();

@@ -59,6 +59,7 @@ App::get('/admin', [AdminController::class, 'index']);
 App::get('/admin/domains', [AdminController::class, 'domains']);
 App::get('/admin/plans', [AdminController::class, 'plans']);
 App::post('/admin/plans', [AdminController::class, 'createPlan']);
+App::post('/admin/plans/edit/{id}', [AdminController::class, 'editPlan']);
 App::post('/admin/plans/delete/{id}', [AdminController::class, 'deletePlan']);
 
 App::get('/admin/users', [AdminController::class, 'users']);
