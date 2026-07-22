@@ -8,7 +8,7 @@ use App\Models\Booking;
 use App\Models\Event;
 use App\Models\User;
 use App\Models\Availability;
-use App\Models\BookingFormField;
+use App\Models\FormField;
 use App\Services\GoogleCalendarService;
 
 class PublicBookingController extends Controller {
@@ -16,7 +16,7 @@ class PublicBookingController extends Controller {
     private Event $eventModel;
     private User $userModel;
     private Availability $availabilityModel;
-    private BookingFormField $fieldModel;
+    private FormField $fieldModel;
 
     public function __construct() {
         parent::__construct();
@@ -24,7 +24,7 @@ class PublicBookingController extends Controller {
         $this->eventModel = new Event();
         $this->userModel = new User();
         $this->availabilityModel = new Availability();
-        $this->fieldModel = new BookingFormField();
+        $this->fieldModel = new FormField();
     }
 
     public function showPublicBooking(string $username): void {
