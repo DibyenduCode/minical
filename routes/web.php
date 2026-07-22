@@ -37,6 +37,7 @@ App::post('/dashboard/cancel', [DashboardController::class, 'cancelBooking']);
 App::post('/dashboard/complete', [DashboardController::class, 'completeBooking']);
 App::get('/profile', [ProfileController::class, 'index']);
 App::post('/profile', [ProfileController::class, 'update']);
+App::post('/profile/change-password', [ProfileController::class, 'changePassword']);
 
 // Integrations & Apps Routes
 App::get('/integrations', [IntegrationController::class, 'index']);
@@ -72,6 +73,7 @@ App::get('/admin/bookings', [AdminController::class, 'bookings']);
 App::get('/admin/settings', [AdminController::class, 'settings']);
 App::post('/admin/users/{id}/toggle', [AdminController::class, 'toggleUserStatus']);
 App::post('/admin/users/{id}/delete', [AdminController::class, 'deleteUser']);
+App::post('/admin/users/{id}/change-password', [AdminController::class, 'changeUserPassword']);
 App::post('/admin/users/{id}/update-plan', [AdminController::class, 'updateUserPlan']);
 App::post('/admin/settings', [AdminController::class, 'saveSettings']);
 

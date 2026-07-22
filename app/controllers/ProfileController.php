@@ -137,4 +137,47 @@ class ProfileController extends Controller {
         Session::flash('success', 'Branding & Profile settings updated successfully.');
         $this->response->redirect(APP_URL . '/profile');
     }
+
+    public function changePassword(): void {
+        $user = $this->requireAuth();
+        $data = $this->request->getBody();
+
+        if (!Session::verifyCsrfToken($data['csrf_token'] ?? '')) {
+            Session::flash('error', 'Invalid security token.');
+            $this->response->redirect(APP_URL . '/profile');
+        }
+
+        $currentPassword = $data['current_password'] ?? '';
+        $newPassword = $data['new_password'] ?? '';
+        $confirmPassword = $data['confirm_password'] ?? '';
+
+        if (empty($currentPassword) || empty($newPassword) || empty($confirmPassword)) {
+            Session::flash('error', 'Please fill in all password fields.');
+            $this->response->redirect(APP_URL . '/profile');
+        }
+
+        if (strlen($newPassword) < 6) {
+            Session::flash('error', 'New password must be at least 6 characters long.');
+            $this->response->redirect(APP_URL . '/profile');
+        }
+
+        if ($newPassword !== $confirmPassword) {
+            Session::flash('error', 'New password confirmation does not match.');
+            $this->response->redirect(APP_URL . '/profile');
+        }
+
+        $dbUser = $this->userModel->findById($user['id']);
+        if (!$this->userModel->verifyPassword($currentPassword, $dbUser['password_hash'])) {
+            Session::flash('error', 'Current password is incorrect.');
+            $this->response->redirect(APP_URL . '/profile');
+        }
+
+        $newHash = password_hash($newPassword, PASSWORD_BCRYPT);
+        $db = Database::getInstance();
+        $stmt = $db->prepare("UPDATE `users` SET `password_hash` = :hash WHERE `id` = :id");
+        $stmt->execute(['hash' => $newHash, 'id' => $user['id']]);
+
+        Session::flash('success', 'Your password has been updated successfully.');
+        $this->response->redirect(APP_URL . '/profile');
+    }
 }

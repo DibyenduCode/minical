@@ -415,4 +415,41 @@ class AdminController extends Controller {
         Session::flash('success', 'User subscription plan updated successfully.');
         $this->response->redirect(APP_URL . '/admin/users');
     }
+
+    public function changeUserPassword(string $id): void {
+        $this->requireAdmin();
+        $userId = (int)$id;
+        $data = $this->request->getBody();
+
+        if (!Session::verifyCsrfToken($data['csrf_token'] ?? '')) {
+            Session::flash('error', 'Invalid security token.');
+            $this->response->redirect(APP_URL . '/admin/users');
+        }
+
+        $newPassword = $data['new_password'] ?? '';
+        $confirmPassword = $data['confirm_password'] ?? '';
+
+        if (empty($newPassword) || empty($confirmPassword)) {
+            Session::flash('error', 'Please fill in all password fields.');
+            $this->response->redirect(APP_URL . '/admin/users');
+        }
+
+        if (strlen($newPassword) < 6) {
+            Session::flash('error', 'New password must be at least 6 characters long.');
+            $this->response->redirect(APP_URL . '/admin/users');
+        }
+
+        if ($newPassword !== $confirmPassword) {
+            Session::flash('error', 'Passwords do not match.');
+            $this->response->redirect(APP_URL . '/admin/users');
+        }
+
+        $db = Database::getInstance();
+        $newHash = password_hash($newPassword, PASSWORD_BCRYPT);
+        $stmt = $db->prepare("UPDATE `users` SET `password_hash` = :hash WHERE `id` = :id");
+        $stmt->execute(['hash' => $newHash, 'id' => $userId]);
+
+        Session::flash('success', 'User password has been updated successfully.');
+        $this->response->redirect(APP_URL . '/admin/users');
+    }
 }

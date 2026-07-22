@@ -124,6 +124,10 @@ require_once TEMPLATES_DIR . '/admin/layout/header.php';
                                         </button>
                                     </form>
 
+                                    <button type="button" onclick="openChangePasswordModal(<?= $u['id'] ?>)" class="text-xs text-indigo-600 hover:text-indigo-700 font-semibold px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors border border-indigo-200/60">
+                                        Password
+                                    </button>
+
                                     <form id="delete-user-form-<?= $u['id'] ?>" method="POST" action="<?= APP_URL ?>/admin/users/<?= $u['id'] ?>/delete" class="inline-block">
                                         <button type="button" onclick="confirmDeleteUser(<?= $u['id'] ?>)" class="text-xs text-red-600 hover:text-red-700 font-semibold px-3 py-1.5 bg-red-50 hover:bg-red-100 rounded-lg transition-colors border border-red-200/60">
                                             Delete
@@ -183,8 +187,57 @@ require_once TEMPLATES_DIR . '/admin/layout/header.php';
     </div>
 </div>
 
+<!-- Change User Password Modals -->
+<?php foreach ($users as $u): ?>
+    <?php if ((int)$u['id'] !== (int)$admin['id']): ?>
+        <div id="change-password-modal-<?= $u['id'] ?>" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm hidden">
+            <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl max-w-sm w-full mx-4 space-y-4 text-left">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h3 class="font-bold text-slate-900 text-sm">Change Password for <?= htmlspecialchars($u['name']) ?></h3>
+                    <button type="button" onclick="closeChangePasswordModal(<?= $u['id'] ?>)" class="text-slate-400 hover:text-slate-600 font-bold">✕</button>
+                </div>
+                
+                <form action="<?= APP_URL ?>/admin/users/<?= $u['id'] ?>/change-password" method="POST" class="space-y-4">
+                    <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+                    
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-700 uppercase">New Password</label>
+                        <input type="password" name="new_password" required placeholder="••••••••"
+                               class="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs focus:outline-none focus:ring-2 focus:ring-black">
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-700 uppercase">Confirm Password</label>
+                        <input type="password" name="confirm_password" required placeholder="••••••••"
+                               class="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs focus:outline-none focus:ring-2 focus:ring-black">
+                    </div>
+
+                    <div class="pt-2 flex justify-end gap-2 border-t border-slate-100 pt-3">
+                        <button type="button" onclick="closeChangePasswordModal(<?= $u['id'] ?>)" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-4 py-2 bg-black hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition-all shadow-md">
+                            Update Password
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    <?php endif; ?>
+<?php endforeach; ?>
+
 <!-- SweetAlert2 Deletion Confirmation script -->
 <script>
+    function openChangePasswordModal(userId) {
+        const modal = document.getElementById('change-password-modal-' + userId);
+        if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeChangePasswordModal(userId) {
+        const modal = document.getElementById('change-password-modal-' + userId);
+        if (modal) modal.classList.add('hidden');
+    }
+
     function confirmDeleteUser(userId) {
         Swal.fire({
             title: 'Delete User?',

@@ -139,6 +139,42 @@ require_once TEMPLATES_DIR . '/layout/header.php';
             </div>
         </form>
     </div>
+
+    <!-- Change Password Section -->
+    <div class="bg-white border border-slate-200/90 rounded-3xl p-8 space-y-6 shadow-sm mt-8">
+        <div>
+            <h2 class="text-lg font-bold text-slate-900">Update Password</h2>
+            <p class="text-slate-500 text-xs mt-1">Ensure your account is using a long, random password to stay secure.</p>
+        </div>
+
+        <form action="<?= APP_URL ?>/profile/change-password" method="POST" class="space-y-4 max-w-md">
+            <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+
+            <div>
+                <label for="current_password" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Current Password</label>
+                <input type="password" id="current_password" name="current_password" required placeholder="••••••••"
+                       class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-black">
+            </div>
+
+            <div>
+                <label for="new_password" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">New Password</label>
+                <input type="password" id="new_password" name="new_password" required placeholder="••••••••"
+                       class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-black">
+            </div>
+
+            <div>
+                <label for="confirm_password" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Confirm New Password</label>
+                <input type="password" id="confirm_password" name="confirm_password" required placeholder="••••••••"
+                       class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-black">
+            </div>
+
+            <div class="pt-2">
+                <button type="submit" class="px-6 py-3 bg-black hover:bg-slate-800 text-white font-semibold text-sm rounded-xl shadow-md transition-all">
+                    Update Password
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <?php require_once TEMPLATES_DIR . '/layout/footer.php'; ?>
