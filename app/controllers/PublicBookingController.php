@@ -74,9 +74,6 @@ class PublicBookingController extends Controller {
             return;
         }
 
-        $dateStr = $_GET['date'] ?? date('Y-m-d');
-        $eventSlug = $_GET['event'] ?? '';
-
         $db = Database::getInstance();
         $stmtProfile = $db->prepare("SELECT timezone FROM `profiles` WHERE `user_id` = :user_id LIMIT 1");
         $stmtProfile->execute(['user_id' => $user['id']]);
@@ -84,6 +81,9 @@ class PublicBookingController extends Controller {
 
         $hostTz = new \DateTimeZone($profileTimezone);
         $now = new \DateTime('now', $hostTz);
+
+        $dateStr = $_GET['date'] ?? $now->format('Y-m-d');
+        $eventSlug = $_GET['event'] ?? '';
 
         $event = !empty($eventSlug) ? $this->eventModel->findBySlugAndUserId($eventSlug, $user['id']) : $this->eventModel->findByUserId($user['id']);
         if (!$event) {

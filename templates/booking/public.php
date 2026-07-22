@@ -88,9 +88,16 @@
                 <h3 class="text-lg font-bold text-slate-950 mb-4">Select Date & Time</h3>
                 
                 <?php
-                $minDate = date('Y-m-d');
+                $hostTimezoneStr = $profile['timezone'] ?? 'UTC';
+                $hostTz = new \DateTimeZone($hostTimezoneStr);
+                $nowHost = new \DateTime('now', $hostTz);
+                
+                $minDate = $nowHost->format('Y-m-d');
                 $maxWindowDays = (int)($event['booking_window_days'] ?? 30);
-                $maxDate = date('Y-m-d', strtotime("+{$maxWindowDays} days"));
+                
+                $maxDateObj = clone $nowHost;
+                $maxDateObj->modify("+{$maxWindowDays} days");
+                $maxDate = $maxDateObj->format('Y-m-d');
                 ?>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
