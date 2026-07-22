@@ -12,10 +12,25 @@ require_once TEMPLATES_DIR . '/layout/header.php';
             <p class="text-slate-500 text-xs font-medium mt-1">Create and configure your consultation services, pricing, and scheduling rules.</p>
         </div>
         <div>
-            <button type="button" onclick="document.getElementById('new-event-form').classList.toggle('hidden')"
-                    class="px-5 py-3 bg-black hover:bg-slate-800 text-white text-xs font-bold rounded-2xl shadow-md transition-all flex items-center gap-2">
-                <span class="text-sm">+</span> New Event Type
-            </button>
+            <?php
+            $isFreePlan = ($dbUser['plan'] ?? 'free') === 'free';
+            $hasReachedLimit = $isFreePlan && count($events) >= 1;
+            ?>
+            <?php if ($hasReachedLimit): ?>
+                <div class="flex items-center gap-3">
+                    <span class="text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 px-3.5 py-2.5 rounded-xl">
+                        ⚠️ Free Plan Limit: 1 Event Type max
+                    </span>
+                    <a href="<?= APP_URL ?>/profile" class="px-4 py-2.5 bg-black hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-sm transition-all">
+                        Upgrade Plan
+                    </a>
+                </div>
+            <?php else: ?>
+                <button type="button" onclick="document.getElementById('new-event-form').classList.toggle('hidden')"
+                        class="px-5 py-3 bg-black hover:bg-slate-800 text-white text-xs font-bold rounded-2xl shadow-md transition-all flex items-center gap-2">
+                    <span class="text-sm">+</span> New Event Type
+                </button>
+            <?php endif; ?>
         </div>
     </div>
 

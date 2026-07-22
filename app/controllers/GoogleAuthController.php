@@ -12,6 +12,12 @@ class GoogleAuthController extends Controller {
     public function connect(): void {
         $user = $this->requireAuth();
         
+        $dbUser = (new \App\Models\User())->findById($user['id']);
+        if (($dbUser['plan'] ?? 'free') === 'free') {
+            Session::flash('error', 'Google Calendar Sync is not available on the Free plan. Please upgrade.');
+            $this->response->redirect(APP_URL . '/integrations');
+        }
+        
         // Generate secure random CSRF state token
         $state = bin2hex(random_bytes(16));
         Session::set('oauth_google_state', $state);

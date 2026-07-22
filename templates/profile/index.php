@@ -91,9 +91,14 @@ require_once TEMPLATES_DIR . '/layout/header.php';
 
                 <div>
                     <!-- Custom Branded Domain Section (Cal.com style) -->
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Custom Domain / Subdomain</label>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Custom Domain / Subdomain
+                        <?php if (($dbUser['plan'] ?? 'free') !== 'pro'): ?>
+                            <span class="ml-1 text-[10px] text-indigo-600 bg-indigo-50 border border-indigo-200/60 px-1.5 py-0.5 rounded font-extrabold uppercase">Requires Pro</span>
+                        <?php endif; ?>
+                    </label>
                     <input type="text" name="custom_domain" value="<?= htmlspecialchars($profile['custom_domain'] ?? '') ?>" placeholder="booking.dibyendu.in"
-                           class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-black">
+                           <?= (($dbUser['plan'] ?? 'free') !== 'pro') ? 'disabled class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl text-slate-400 text-sm font-mono cursor-not-allowed"' : 'class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-black"' ?>>
                 </div>
             </div>
 
@@ -110,6 +115,18 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                 <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Bio / Description</label>
                 <textarea name="bio" rows="3" placeholder="Tell clients about yourself..."
                           class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-black"><?= htmlspecialchars($profile['bio'] ?? '') ?></textarea>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-slate-100 pt-6">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Subscription Plan</label>
+                    <select name="plan" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-black">
+                        <option value="free" <?= ($dbUser['plan'] ?? 'free') === 'free' ? 'selected' : '' ?>>Free Plan</option>
+                        <option value="growth" <?= ($dbUser['plan'] ?? 'free') === 'growth' ? 'selected' : '' ?>>Growth Plan</option>
+                        <option value="pro" <?= ($dbUser['plan'] ?? 'free') === 'pro' ? 'selected' : '' ?>>Pro Plan</option>
+                    </select>
+                    <span class="block text-[10px] text-slate-400 font-semibold mt-1">Change your tier to unlock Google Calendar, Stripe payments, and custom domains.</span>
+                </div>
             </div>
 
             <div class="pt-2 flex justify-end">

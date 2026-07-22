@@ -115,9 +115,18 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                         </button>
                     </form>
                 <?php else: ?>
-                    <a href="<?= APP_URL ?>/integrations/google/connect" class="w-full py-3 bg-black hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-md transition-all text-center">
-                        Connect Google Calendar
-                    </a>
+                    <?php if (($dbUser['plan'] ?? 'free') === 'free'): ?>
+                        <div class="w-full flex flex-col gap-2">
+                            <button disabled class="w-full py-3 bg-slate-100 text-slate-400 font-bold text-xs rounded-xl border border-slate-200 cursor-not-allowed text-center flex items-center justify-center gap-1.5">
+                                🔒 Locked (Growth/Pro Plan)
+                            </button>
+                            <span class="text-[10px] text-slate-400 font-semibold text-center">Google Calendar requires the Growth or Pro plan.</span>
+                        </div>
+                    <?php else: ?>
+                        <a href="<?= APP_URL ?>/integrations/google/connect" class="w-full py-3 bg-black hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-md transition-all text-center">
+                            Connect Google Calendar
+                        </a>
+                    <?php endif; ?>
                 <?php endif; ?>
             </div>
         </div>
@@ -164,9 +173,15 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                         Bundled with Google OAuth
                     </button>
                 <?php else: ?>
-                    <a href="<?= APP_URL ?>/integrations/google/connect" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl border border-slate-200 transition-colors block text-center">
-                        Connect Google Account
-                    </a>
+                    <?php if (($dbUser['plan'] ?? 'free') === 'free'): ?>
+                        <button disabled class="w-full py-2.5 bg-slate-100 text-slate-400 font-bold text-xs rounded-xl border border-slate-200 cursor-not-allowed text-center">
+                            🔒 Locked (Growth/Pro Plan)
+                        </button>
+                    <?php else: ?>
+                        <a href="<?= APP_URL ?>/integrations/google/connect" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl border border-slate-200 transition-colors block text-center">
+                            Connect Google Account
+                        </a>
+                    <?php endif; ?>
                 <?php endif; ?>
             </div>
         </div>

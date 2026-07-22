@@ -11,6 +11,7 @@ class IntegrationController extends Controller {
 
     public function index(): void {
         $user = $this->requireAuth();
+        $dbUser = (new \App\Models\User())->findById($user['id']);
 
         $googleAccount = GoogleCalendarService::getConnectedAccount($user['id']);
         $isGoogleConnected = GoogleCalendarService::isConnected($user['id']);
@@ -18,6 +19,7 @@ class IntegrationController extends Controller {
 
         $this->render('integrations/index', [
             'user'              => $user,
+            'dbUser'            => $dbUser,
             'googleAccount'     => $googleAccount,
             'isGoogleConnected' => $isGoogleConnected,
             'calendars'         => $calendars,

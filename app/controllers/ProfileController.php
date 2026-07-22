@@ -20,6 +20,7 @@ class ProfileController extends Controller {
 
     public function index(): void {
         $user = $this->requireAuth();
+        $dbUser = $this->userModel->findById($user['id']);
         $profile = $this->profileModel->findByUserId($user['id']);
 
         $db = Database::getInstance();
@@ -31,6 +32,7 @@ class ProfileController extends Controller {
 
         $this->render('profile/index', [
             'user'              => $user,
+            'dbUser'            => $dbUser,
             'profile'           => $profile,
             'googleAccount'     => $googleAccount ?: null,
             'isGoogleConnected' => $isGoogleConnected,
@@ -46,6 +48,12 @@ class ProfileController extends Controller {
         if (!Session::verifyCsrfToken($data['csrf_token'] ?? '')) {
             Session::flash('error', 'Invalid security token.');
             $this->response->redirect(APP_URL . '/profile');
+        }
+
+        $dbUser = $this->userModel->findById($user['id']);
+        if (($dbUser['plan'] ?? 'free') !== 'pro') {
+            // Block custom domain for users not on the Pro plan!
+            $data['custom_domain'] = '';
         }
 
         $name = trim($data['name'] ?? '');
@@ -90,13 +98,19 @@ class ProfileController extends Controller {
             }
         }
 
-        // Update user name
+        // Update user name and plan
+        $plan = trim($data['plan'] ?? 'free');
         $db = Database::getInstance();
-        $stmt = $db->prepare("UPDATE `users` SET `name` = :name WHERE `id` = :id");
-        $stmt->execute(['name' => $name, 'id' => $user['id']]);
+        $stmt = $db->prepare("UPDATE `users` SET `name` = :name, `plan` = :plan WHERE `id` = :id");
+        $stmt->execute([
+            'name' => $name,
+            'plan' => $plan,
+            'id'   => $user['id']
+        ]);
 
-        // Update session user name
+        // Update session user name and plan
         $user['name'] = $name;
+        $user['plan'] = $plan;
         Session::set('user', $user);
 
         // Update Profile
