@@ -35,10 +35,13 @@ class ProfileController extends Controller {
 
         $isGoogleConnected = !empty($googleAccount);
 
+        $plans = $db->query("SELECT * FROM `plans` WHERE `slug` != 'system' ORDER BY id ASC")->fetchAll();
+
         $this->render('profile/index', [
             'user'              => $user,
             'dbUser'            => $dbUser,
             'planDetails'       => $planDetails ?: null,
+            'plans'             => $plans,
             'profile'           => $profile,
             'googleAccount'     => $googleAccount ?: null,
             'isGoogleConnected' => $isGoogleConnected,
@@ -178,6 +181,148 @@ class ProfileController extends Controller {
         $stmt->execute(['hash' => $newHash, 'id' => $user['id']]);
 
         Session::flash('success', 'Your password has been updated successfully.');
+        $this->response->redirect(APP_URL . '/profile');
+    }
+
+    public function verifyPlanPromo(): void {
+        $user = $this->requireAuth();
+        $data = $this->request->getBody();
+
+        $code = strtoupper(trim($data['promo_code'] ?? ''));
+        $planSlug = trim($data['plan_slug'] ?? '');
+
+        if (empty($code) || empty($planSlug)) {
+            $this->response->json(['status' => 'error', 'message' => 'Please enter a promo code and select a plan.'], 400);
+            return;
+        }
+
+        $db = Database::getInstance();
+        $stmtPlan = $db->prepare("SELECT * FROM `plans` WHERE `slug` = :slug LIMIT 1");
+        $stmtPlan->execute(['slug' => $planSlug]);
+        $plan = $stmtPlan->fetch();
+
+        if (!$plan) {
+            $this->response->json(['status' => 'error', 'message' => 'Selected plan tier is invalid.'], 400);
+            return;
+        }
+
+        $price = (float)$plan['price'];
+
+        $stmtPromo = $db->prepare("SELECT * FROM `promo_codes` WHERE `code` = :code LIMIT 1");
+        $stmtPromo->execute(['code' => $code]);
+        $promo = $stmtPromo->fetch();
+
+        if (!$promo) {
+            $this->response->json(['status' => 'error', 'message' => 'Invalid promo code.'], 400);
+            return;
+        }
+
+        if ($promo['status'] !== 'active') {
+            $this->response->json(['status' => 'error', 'message' => 'This promo code is inactive.'], 400);
+            return;
+        }
+
+        if (!empty($promo['expires_at']) && strtotime($promo['expires_at']) < time()) {
+            $this->response->json(['status' => 'error', 'message' => 'This promo code has expired.'], 400);
+            return;
+        }
+
+        if (!empty($promo['max_uses']) && $promo['used_count'] >= $promo['max_uses']) {
+            $this->response->json(['status' => 'error', 'message' => 'This promo code limit has been reached.'], 400);
+            return;
+        }
+
+        if (!empty($promo['plan_slug']) && $promo['plan_slug'] !== $planSlug) {
+            $this->response->json(['status' => 'error', 'message' => 'This promo code does not apply to the selected plan.'], 400);
+            return;
+        }
+
+        $discount = 0.00;
+        if ($promo['discount_type'] === 'percentage') {
+            $discount = round($price * ($promo['discount_value'] / 100), 2);
+        } else {
+            $discount = (float)$promo['discount_value'];
+        }
+
+        if ($discount > $price) {
+            $discount = $price;
+        }
+
+        $finalPrice = max(0, $price - $discount);
+
+        $this->response->json([
+            'status'        => 'success',
+            'message'       => 'Promo code applied successfully!',
+            'discount'      => $discount,
+            'final_price'   => $finalPrice,
+            'discount_text' => $promo['discount_type'] === 'percentage' ? "({$promo['discount_value']}% Off)" : "(\${$promo['discount_value']} Off)"
+        ]);
+    }
+
+    public function upgradePlan(): void {
+        $user = $this->requireAuth();
+        $data = $this->request->getBody();
+
+        if (!Session::verifyCsrfToken($data['csrf_token'] ?? '')) {
+            Session::flash('error', 'Invalid security token.');
+            $this->response->redirect(APP_URL . '/profile');
+        }
+
+        $planSlug = trim($data['plan_slug'] ?? '');
+        $promoCode = strtoupper(trim($data['promo_code'] ?? ''));
+
+        if (empty($planSlug)) {
+            Session::flash('error', 'Please select a plan to upgrade.');
+            $this->response->redirect(APP_URL . '/profile');
+        }
+
+        $db = Database::getInstance();
+        $stmtPlan = $db->prepare("SELECT * FROM `plans` WHERE `slug` = :slug LIMIT 1");
+        $stmtPlan->execute(['slug' => $planSlug]);
+        $plan = $stmtPlan->fetch();
+
+        if (!$plan || $plan['slug'] === 'system') {
+            Session::flash('error', 'Invalid subscription plan selected.');
+            $this->response->redirect(APP_URL . '/profile');
+        }
+
+        if (!empty($promoCode)) {
+            $stmtPromo = $db->prepare("SELECT * FROM `promo_codes` WHERE `code` = :code LIMIT 1");
+            $stmtPromo->execute(['code' => $promoCode]);
+            $promo = $stmtPromo->fetch();
+
+            if (!$promo || $promo['status'] !== 'active') {
+                Session::flash('error', 'Invalid or inactive promo code.');
+                $this->response->redirect(APP_URL . '/profile');
+            }
+
+            if (!empty($promo['expires_at']) && strtotime($promo['expires_at']) < time()) {
+                Session::flash('error', 'Expired promo code.');
+                $this->response->redirect(APP_URL . '/profile');
+            }
+
+            if (!empty($promo['max_uses']) && $promo['used_count'] >= $promo['max_uses']) {
+                Session::flash('error', 'Promo code usage limit reached.');
+                $this->response->redirect(APP_URL . '/profile');
+            }
+
+            if (!empty($promo['plan_slug']) && $promo['plan_slug'] !== $planSlug) {
+                Session::flash('error', 'This promo code does not apply to the selected plan.');
+                $this->response->redirect(APP_URL . '/profile');
+            }
+
+            $up = $db->prepare("UPDATE `promo_codes` SET `used_count` = `used_count` + 1 WHERE `id` = :id");
+            $up->execute(['id' => $promo['id']]);
+        }
+
+        $update = $db->prepare("UPDATE `users` SET `plan` = :plan WHERE `id` = :id");
+        $update->execute(['plan' => $planSlug, 'id' => $user['id']]);
+
+        $updatedUser = $this->userModel->findById($user['id']);
+        unset($updatedUser['password_hash']);
+        Session::set('user', $updatedUser);
+
+        Session::flash('success', "Congratulations! Your subscription has been upgraded to the " . htmlspecialchars($plan['name']) . " tier.");
         $this->response->redirect(APP_URL . '/profile');
     }
 }

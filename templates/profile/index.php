@@ -140,6 +140,48 @@ require_once TEMPLATES_DIR . '/layout/header.php';
         </form>
     </div>
 
+    <!-- Upgrade Subscription Section -->
+    <div class="bg-white border border-slate-200/90 rounded-3xl p-8 space-y-6 shadow-sm mt-8">
+        <div>
+            <h2 class="text-lg font-bold text-slate-900">Manage Subscription Tier</h2>
+            <p class="text-slate-500 text-xs mt-1">Upgrade your subscription plan to unlock premium features and higher limits.</p>
+        </div>
+
+        <form action="<?= APP_URL ?>/profile/upgrade-plan" method="POST" class="space-y-4 max-w-md">
+            <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+
+            <div>
+                <label for="plan_select" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Select Plan Tier</label>
+                <select id="plan_select" name="plan_slug" onchange="resetPromoVerification()" required
+                        class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-black font-semibold">
+                    <?php foreach ($plans as $p): ?>
+                        <option value="<?= htmlspecialchars($p['slug']) ?>" <?= ($dbUser['plan'] ?? 'free') === $p['slug'] ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($p['name']) ?> Plan - $<?= number_format($p['price'], 2) ?>/<?= htmlspecialchars($p['billing_cycle']) ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div class="space-y-2">
+                <label for="profile_promo_code" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Promo Code (Optional)</label>
+                <div class="flex gap-2">
+                    <input type="text" id="profile_promo_code" name="promo_code" placeholder="WELCOME20"
+                           class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-black font-mono">
+                    <button type="button" onclick="verifyProfilePromo()" class="px-5 py-3 bg-black hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition-all shadow-sm">
+                        Apply
+                    </button>
+                </div>
+                <div id="profile-promo-msg" class="hidden text-xs font-bold mt-1.5"></div>
+            </div>
+
+            <div class="pt-2">
+                <button type="submit" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-xl shadow-md transition-all">
+                    Upgrade Subscription
+                </button>
+            </div>
+        </form>
+    </div>
+
     <!-- Change Password Section -->
     <div class="bg-white border border-slate-200/90 rounded-3xl p-8 space-y-6 shadow-sm mt-8">
         <div>
@@ -176,5 +218,55 @@ require_once TEMPLATES_DIR . '/layout/header.php';
         </form>
     </div>
 </div>
+
+<script>
+    function resetPromoVerification() {
+        const msg = document.getElementById('profile-promo-msg');
+        msg.classList.add('hidden');
+        document.getElementById('profile_promo_code').value = '';
+        document.getElementById('profile_promo_code').readOnly = false;
+    }
+
+    function verifyProfilePromo() {
+        const input = document.getElementById('profile_promo_code');
+        const planSelect = document.getElementById('plan_select');
+        const message = document.getElementById('profile-promo-msg');
+        const code = input.value.trim().toUpperCase();
+        const planSlug = planSelect.value;
+
+        if (!code) {
+            message.className = 'text-xs font-bold mt-1.5 text-red-600';
+            message.innerText = 'Please enter a promo code.';
+            message.classList.remove('hidden');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('promo_code', code);
+        formData.append('plan_slug', planSlug);
+
+        fetch(`<?= APP_URL ?>/profile/verify-promo`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            message.classList.remove('hidden');
+            if (data.status === 'success') {
+                message.className = 'text-xs font-bold mt-1.5 text-emerald-600';
+                message.innerText = `${data.message} Discount: -$${data.discount.toFixed(2)} ${data.discount_text}. Final Price: $${data.final_price.toFixed(2)}`;
+                input.readOnly = true;
+            } else {
+                message.className = 'text-xs font-bold mt-1.5 text-red-600';
+                message.innerText = data.message || 'Failed to verify promo code.';
+            }
+        })
+        .catch(() => {
+            message.classList.remove('hidden');
+            message.className = 'text-xs font-bold mt-1.5 text-red-600';
+            message.innerText = 'Network error verifying promo code.';
+        });
+    }
+</script>
 
 <?php require_once TEMPLATES_DIR . '/layout/footer.php'; ?>

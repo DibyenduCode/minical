@@ -458,11 +458,13 @@ class AdminController extends Controller {
         $db = Database::getInstance();
 
         $promoCodes = $db->query("SELECT * FROM `promo_codes` ORDER BY id DESC")->fetchAll();
+        $plans = $this->planModel->getAllPlans();
 
         $this->renderAdmin('promos', [
             'admin'      => $adminUser,
             'adminTab'   => 'promos',
             'promoCodes' => $promoCodes,
+            'plans'      => $plans,
             'success'    => Session::flash('success'),
             'error'      => Session::flash('error')
         ]);
@@ -480,6 +482,7 @@ class AdminController extends Controller {
         $code = strtoupper(trim($data['code'] ?? ''));
         $discountType = $data['discount_type'] ?? 'percentage';
         $discountValue = (float)($data['discount_value'] ?? 0);
+        $planSlug = !empty($data['plan_slug']) ? trim($data['plan_slug']) : null;
         $maxUses = !empty($data['max_uses']) ? (int)$data['max_uses'] : null;
         $expiresAt = !empty($data['expires_at']) ? $data['expires_at'] : null;
 
@@ -498,13 +501,14 @@ class AdminController extends Controller {
         }
 
         $stmt = $db->prepare("
-            INSERT INTO `promo_codes` (`code`, `discount_type`, `discount_value`, `max_uses`, `expires_at`, `status`)
-            VALUES (:code, :discount_type, :discount_value, :max_uses, :expires_at, 'active')
+            INSERT INTO `promo_codes` (`code`, `discount_type`, `discount_value`, `plan_slug`, `max_uses`, `expires_at`, `status`)
+            VALUES (:code, :discount_type, :discount_value, :plan_slug, :max_uses, :expires_at, 'active')
         ");
         $stmt->execute([
             'code'           => $code,
             'discount_type'  => $discountType,
             'discount_value' => $discountValue,
+            'plan_slug'      => $planSlug,
             'max_uses'       => $maxUses,
             'expires_at'     => $expiresAt
         ]);

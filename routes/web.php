@@ -38,6 +38,8 @@ App::post('/dashboard/complete', [DashboardController::class, 'completeBooking']
 App::get('/profile', [ProfileController::class, 'index']);
 App::post('/profile', [ProfileController::class, 'update']);
 App::post('/profile/change-password', [ProfileController::class, 'changePassword']);
+App::post('/profile/verify-promo', [ProfileController::class, 'verifyPlanPromo']);
+App::post('/profile/upgrade-plan', [ProfileController::class, 'upgradePlan']);
 
 // Integrations & Apps Routes
 App::get('/integrations', [IntegrationController::class, 'index']);

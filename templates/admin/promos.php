@@ -59,6 +59,18 @@ require_once TEMPLATES_DIR . '/admin/layout/header.php';
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 font-sans">Applicable To</label>
+                    <select name="plan_slug" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition-all font-semibold">
+                        <option value="">All / Paid Appointments Only</option>
+                        <?php foreach ($plans as $p): ?>
+                            <?php if ($p['slug'] !== 'system'): ?>
+                                <option value="<?= htmlspecialchars($p['slug']) ?>"><?= htmlspecialchars($p['name']) ?> Plan Upgrade</option>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div>
                     <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 font-sans">Expiration Date (Optional)</label>
                     <input type="date" name="expires_at"
                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition-all font-semibold">
@@ -89,6 +101,7 @@ require_once TEMPLATES_DIR . '/admin/layout/header.php';
                     <tr>
                         <th class="px-6 py-4">Promo Code</th>
                         <th class="px-6 py-4">Discount</th>
+                        <th class="px-6 py-4">Applicable To</th>
                         <th class="px-6 py-4">Status</th>
                         <th class="px-6 py-4">Usage Stats</th>
                         <th class="px-6 py-4">Expires At</th>
@@ -98,7 +111,7 @@ require_once TEMPLATES_DIR . '/admin/layout/header.php';
                 <tbody class="divide-y divide-slate-100 font-medium">
                     <?php if (empty($promoCodes)): ?>
                         <tr>
-                            <td colspan="6" class="px-6 py-8 text-center text-xs text-slate-400 italic">No promo codes created yet.</td>
+                            <td colspan="7" class="px-6 py-8 text-center text-xs text-slate-400 italic">No promo codes created yet.</td>
                         </tr>
                     <?php else: ?>
                         <?php foreach ($promoCodes as $pc): ?>
@@ -111,6 +124,13 @@ require_once TEMPLATES_DIR . '/admin/layout/header.php';
                                         <?= (float)$pc['discount_value'] ?>% Off
                                     <?php else: ?>
                                         $<?= number_format($pc['discount_value'], 2) ?> Off
+                                    <?php endif; ?>
+                                </td>
+                                <td class="px-6 py-4 text-xs font-bold text-slate-800">
+                                    <?php if (empty($pc['plan_slug'])): ?>
+                                        <span class="px-2 py-1 rounded bg-slate-100 text-slate-600">All / Bookings</span>
+                                    <?php else: ?>
+                                        <span class="px-2 py-1 rounded bg-indigo-50 text-indigo-700 capitalize"><?= htmlspecialchars($pc['plan_slug']) ?> Plan</span>
                                     <?php endif; ?>
                                 </td>
                                 <td class="px-6 py-4">
