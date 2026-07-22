@@ -118,9 +118,10 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                                         <p class="font-bold text-slate-900 text-sm"><?= htmlspecialchars($b['customer_name']) ?></p>
                                         <p class="text-xs text-slate-500"><?= htmlspecialchars($b['customer_email']) ?></p>
                                         <?php if (!empty($b['responses'])): ?>
-                                            <span class="inline-flex items-center gap-1 mt-1 text-[10px] font-extrabold text-indigo-700 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-md w-max">
+                                            <button type="button" onclick="toggleResponses(<?= $b['id'] ?>)" 
+                                                    class="inline-flex items-center gap-1 mt-1 text-[10px] font-extrabold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 hover:text-indigo-900 border border-indigo-100 px-2 py-0.5 rounded-md w-max transition-colors cursor-pointer select-none">
                                                 💬 Has Custom Answers
-                                            </span>
+                                            </button>
                                         <?php endif; ?>
                                     </div>
                                 </td>
@@ -178,17 +179,20 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                                 </td>
                             </tr>
                             
-                            <!-- Expandable Custom Form Field Responses Row -->
+                            <!-- Collapsible Custom Form Field Responses Row -->
                             <?php if (!empty($b['responses'])): ?>
-                                <tr class="bg-slate-50/50">
-                                    <td colspan="5" class="px-8 py-3.5 border-t border-slate-100">
+                                <tr id="responses-row-<?= $b['id'] ?>" class="bg-slate-50/50 hidden border-t border-b border-slate-100">
+                                    <td colspan="5" class="px-8 py-4">
                                         <div class="space-y-2">
-                                            <p class="text-[10px] font-extrabold uppercase text-indigo-800 tracking-wider">Client Custom Form Responses:</p>
-                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2.5">
+                                            <div class="flex items-center justify-between">
+                                                <p class="text-[10px] font-extrabold uppercase text-indigo-800 tracking-wider">Client Custom Form Responses:</p>
+                                                <button type="button" onclick="toggleResponses(<?= $b['id'] ?>)" class="text-[10px] font-bold text-slate-400 hover:text-slate-600">✕ Close Details</button>
+                                            </div>
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 pt-1">
                                                 <?php foreach ($b['responses'] as $resp): ?>
-                                                    <div class="text-xs">
-                                                        <span class="block font-bold text-slate-700"><?= htmlspecialchars($resp['field_label']) ?></span>
-                                                        <span class="text-slate-600 font-medium"><?= nl2br(htmlspecialchars($resp['value'])) ?></span>
+                                                    <div class="text-xs bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                                                        <span class="block font-bold text-slate-800 mb-1"><?= htmlspecialchars($resp['field_label']) ?></span>
+                                                        <span class="text-slate-600 font-medium leading-relaxed"><?= nl2br(htmlspecialchars($resp['value'])) ?></span>
                                                     </div>
                                                 <?php endforeach; ?>
                                             </div>
@@ -204,5 +208,15 @@ require_once TEMPLATES_DIR . '/layout/header.php';
         </div>
     </div>
 </div>
+
+<!-- Toggler JS for Collapsible responses -->
+<script>
+    function toggleResponses(bookingId) {
+        const row = document.getElementById('responses-row-' + bookingId);
+        if (row) {
+            row.classList.toggle('hidden');
+        }
+    }
+</script>
 
 <?php require_once TEMPLATES_DIR . '/layout/footer.php'; ?>
