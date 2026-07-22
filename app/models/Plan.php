@@ -27,7 +27,8 @@ class Plan extends Model {
 
         $featuresArr = [];
         if (!empty($data['features_raw'])) {
-            $lines = explode("\n", $data['features_raw']);
+            $normalized = str_replace(["\r\n", "\r"], "\n", $data['features_raw']);
+            $lines = explode("\n", $normalized);
             foreach ($lines as $line) {
                 $trimmed = trim($line);
                 if (!empty($trimmed)) {
@@ -69,7 +70,8 @@ class Plan extends Model {
 
         $featuresArr = [];
         if (!empty($data['features_raw'])) {
-            $lines = explode("\n", $data['features_raw']);
+            $normalized = str_replace(["\r\n", "\r"], "\n", $data['features_raw']);
+            $lines = explode("\n", $normalized);
             foreach ($lines as $line) {
                 $trimmed = trim($line);
                 if (!empty($trimmed)) {

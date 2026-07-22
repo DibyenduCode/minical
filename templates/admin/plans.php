@@ -259,7 +259,7 @@ require_once TEMPLATES_DIR . '/admin/layout/header.php';
 
                 <div>
                     <label class="block text-[10px] font-bold text-slate-700 uppercase">Features Checklist (One per line)</label>
-                    <textarea name="features_raw" rows="3" class="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-black"><?= htmlspecialchars(implode("\n", $features)) ?></textarea>
+                    <textarea name="features_raw" rows="3" class="w-full mt-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-black"><?= htmlspecialchars(implode("\n", array_map('html_entity_decode', $features))) ?></textarea>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-slate-100 pt-4">
