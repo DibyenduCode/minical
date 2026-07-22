@@ -8,7 +8,18 @@ class Booking extends Model {
     protected string $table = 'bookings';
 
     public function getDashboardStats(int $userId): array {
-        $today = date('Y-m-d');
+        // Fetch host timezone from profile
+        $stmtProfile = $this->db->prepare("SELECT timezone FROM `profiles` WHERE `user_id` = :user_id LIMIT 1");
+        $stmtProfile->execute(['user_id' => $userId]);
+        $profileTimezone = $stmtProfile->fetchColumn() ?: 'UTC';
+
+        try {
+            $tz = new \DateTimeZone($profileTimezone);
+        } catch (\Exception $e) {
+            $tz = new \DateTimeZone('UTC');
+        }
+        $now = new \DateTime('now', $tz);
+        $today = $now->format('Y-m-d');
 
         // Today's Bookings
         $stmt = $this->db->prepare("SELECT COUNT(*) FROM `bookings` WHERE `user_id` = :user_id AND `booking_date` = :today AND `status` != 'cancelled'");
@@ -30,11 +41,11 @@ class Booking extends Model {
         $stmt->execute(['user_id' => $userId]);
         $cancelledBookings = (int)$stmt->fetchColumn();
 
-        // Revenue
+        // Revenue (sum of final_price for confirmed/completed bookings of paid events)
         $stmt = $this->db->prepare("
-            SELECT COALESCE(SUM(p.amount), 0) FROM `payments` p 
-            JOIN `bookings` b ON b.id = p.booking_id 
-            WHERE b.user_id = :user_id AND p.status = 'success'
+            SELECT COALESCE(SUM(b.final_price), 0) FROM `bookings` b
+            JOIN `events` e ON e.id = b.event_id
+            WHERE b.user_id = :user_id AND b.status IN ('confirmed', 'completed') AND e.is_paid = 1
         ");
         $stmt->execute(['user_id' => $userId]);
         $revenue = (float)$stmt->fetchColumn();
