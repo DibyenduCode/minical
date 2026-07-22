@@ -11,6 +11,7 @@ use App\Models\Profile;
 use App\Models\User;
 use App\Services\GoogleCalendarService;
 use DateTime;
+use DateTimeZone;
 use DateInterval;
 
 class PublicBookingController extends Controller {
