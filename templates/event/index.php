@@ -193,8 +193,8 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                                     Edit
                                 </button>
 
-                                <form method="POST" action="<?= APP_URL ?>/event/delete/<?= $ev['id'] ?>" onsubmit="return confirm('Delete this consultation event?')">
-                                    <button type="submit" class="text-xs font-semibold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-xl border border-red-200 transition-colors">
+                                <form id="delete-event-form-<?= $ev['id'] ?>" method="POST" action="<?= APP_URL ?>/event/delete/<?= $ev['id'] ?>">
+                                    <button type="button" onclick="confirmDeleteEvent(<?= $ev['id'] ?>)" class="text-xs font-semibold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-xl border border-red-200 transition-colors">
                                         Delete
                                     </button>
                                 </form>
@@ -296,5 +296,28 @@ require_once TEMPLATES_DIR . '/layout/header.php';
         <?php endif; ?>
     </div>
 </div>
+
+<!-- SweetAlert2 Deletion Confirmation script -->
+<script>
+    function confirmDeleteEvent(eventId) {
+        Swal.fire({
+            title: 'Delete Event Type?',
+            text: "Are you sure you want to delete this consultation service? This action cannot be undone.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626', // Red 600
+            cancelButtonColor: '#64748b',  // Slate 500
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel',
+            customClass: {
+                popup: 'rounded-3xl border border-slate-200 shadow-xl font-sans text-left'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('delete-event-form-' + eventId).submit();
+            }
+        });
+    }
+</script>
 
 <?php require_once TEMPLATES_DIR . '/layout/footer.php'; ?>

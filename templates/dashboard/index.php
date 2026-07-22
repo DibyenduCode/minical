@@ -158,20 +158,20 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                                     <?php endif; ?>
 
                                     <?php if ($b['status'] === 'confirmed' || $b['status'] === 'pending' || $b['status'] === 'paid'): ?>
-                                        <form method="POST" action="<?= APP_URL ?>/dashboard/complete" onsubmit="return confirm('Mark this session as completed?')" class="inline-block">
+                                        <form id="complete-form-<?= $b['id'] ?>" method="POST" action="<?= APP_URL ?>/dashboard/complete" class="inline-block">
                                             <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
                                             <input type="hidden" name="booking_id" value="<?= $b['id'] ?>">
-                                            <button type="submit" class="text-xs text-emerald-700 hover:text-emerald-800 font-semibold px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-colors border border-emerald-200/60">
+                                            <button type="button" onclick="confirmComplete(<?= $b['id'] ?>)" class="text-xs text-emerald-700 hover:text-emerald-800 font-semibold px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-colors border border-emerald-200/60">
                                                 Complete
                                             </button>
                                         </form>
                                     <?php endif; ?>
 
                                     <?php if ($b['status'] !== 'cancelled' && $b['status'] !== 'completed'): ?>
-                                        <form method="POST" action="<?= APP_URL ?>/dashboard/cancel" onsubmit="return confirm('Are you sure you want to cancel this booking?')" class="inline-block">
+                                        <form id="cancel-form-<?= $b['id'] ?>" method="POST" action="<?= APP_URL ?>/dashboard/cancel" class="inline-block">
                                             <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
                                             <input type="hidden" name="booking_id" value="<?= $b['id'] ?>">
-                                            <button type="submit" class="text-xs text-red-600 hover:text-red-700 font-semibold px-3 py-1.5 bg-red-50 hover:bg-red-100 rounded-lg transition-colors border border-red-200/60">
+                                            <button type="button" onclick="confirmCancel(<?= $b['id'] ?>)" class="text-xs text-red-600 hover:text-red-700 font-semibold px-3 py-1.5 bg-red-50 hover:bg-red-100 rounded-lg transition-colors border border-red-200/60">
                                                 Cancel
                                             </button>
                                         </form>
@@ -221,13 +221,53 @@ require_once TEMPLATES_DIR . '/layout/header.php';
     </div>
 </div>
 
-<!-- Toggler JS for Collapsible responses -->
+<!-- JS for Collapsible responses and SweetAlert2 Confirmations -->
 <script>
     function toggleResponses(bookingId) {
         const row = document.getElementById('responses-row-' + bookingId);
         if (row) {
             row.classList.toggle('hidden');
         }
+    }
+
+    function confirmComplete(bookingId) {
+        Swal.fire({
+            title: 'Mark as Completed?',
+            text: "Are you sure you want to mark this consultation session as completed?",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#059669', // Emerald 600
+            cancelButtonColor: '#64748b',  // Slate 500
+            confirmButtonText: 'Yes, complete it!',
+            cancelButtonText: 'Cancel',
+            customClass: {
+                popup: 'rounded-3xl border border-slate-200 shadow-xl font-sans text-left'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('complete-form-' + bookingId).submit();
+            }
+        });
+    }
+
+    function confirmCancel(bookingId) {
+        Swal.fire({
+            title: 'Cancel Appointment?',
+            text: "Are you sure you want to cancel this booking? This will also remove the event from Google Calendar.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626', // Red 600
+            cancelButtonColor: '#64748b',  // Slate 500
+            confirmButtonText: 'Yes, cancel booking!',
+            cancelButtonText: 'No, keep it',
+            customClass: {
+                popup: 'rounded-3xl border border-slate-200 shadow-xl font-sans text-left'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('cancel-form-' + bookingId).submit();
+            }
+        });
     }
 </script>
 

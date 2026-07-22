@@ -127,8 +127,8 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    <form method="POST" action="<?= APP_URL ?>/form-builder/delete/<?= $f['id'] ?>" onsubmit="return confirm('Delete this question?')">
-                                        <button type="submit" class="text-xs text-red-600 hover:text-red-700 font-semibold px-3 py-1.5 bg-red-50 hover:bg-red-100 rounded-lg transition-colors border border-red-200/60">
+                                    <form id="delete-question-form-<?= $f['id'] ?>" method="POST" action="<?= APP_URL ?>/form-builder/delete/<?= $f['id'] ?>">
+                                        <button type="button" onclick="confirmDeleteQuestion(<?= $f['id'] ?>)" class="text-xs text-red-600 hover:text-red-700 font-semibold px-3 py-1.5 bg-red-50 hover:bg-red-100 rounded-lg transition-colors border border-red-200/60">
                                             Delete
                                         </button>
                                     </form>
@@ -151,6 +151,26 @@ require_once TEMPLATES_DIR . '/layout/header.php';
         } else {
             area.classList.add('hidden');
         }
+    }
+
+    function confirmDeleteQuestion(questionId) {
+        Swal.fire({
+            title: 'Delete Question?',
+            text: "Are you sure you want to delete this custom form question? Existing responses for this field will not be visible on the dashboard.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626', // Red 600
+            cancelButtonColor: '#64748b',  // Slate 500
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel',
+            customClass: {
+                popup: 'rounded-3xl border border-slate-200 shadow-xl font-sans text-left'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('delete-question-form-' + questionId).submit();
+            }
+        });
     }
 </script>
 
