@@ -203,24 +203,87 @@ class AdminController extends Controller {
         $adminUser = $this->requireAdmin();
         $db = Database::getInstance();
 
-        $users = $db->query("
+        // Get Filters
+        $search = isset($_GET['search']) ? trim($_GET['search']) : '';
+        $plan = isset($_GET['plan']) ? trim($_GET['plan']) : '';
+        $status = isset($_GET['status']) ? trim($_GET['status']) : '';
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        if ($page < 1) $page = 1;
+        $limit = 10;
+        $offset = ($page - 1) * $limit;
+
+        // Build SQL Where Clauses
+        $whereClauses = [];
+        $params = [];
+
+        if (!empty($search)) {
+            $whereClauses[] = "(u.name LIKE :search OR u.email LIKE :search2 OR u.username LIKE :search3)";
+            $params['search'] = "%{$search}%";
+            $params['search2'] = "%{$search}%";
+            $params['search3'] = "%{$search}%";
+        }
+
+        if (!empty($plan)) {
+            $whereClauses[] = "u.plan = :plan";
+            $params['plan'] = $plan;
+        }
+
+        if (!empty($status)) {
+            $whereClauses[] = "u.status = :status";
+            $params['status'] = $status;
+        }
+
+        $whereSql = '';
+        if (count($whereClauses) > 0) {
+            $whereSql = "WHERE " . implode(" AND ", $whereClauses);
+        }
+
+        // Count query
+        $countQuery = "SELECT COUNT(*) FROM `users` u " . $whereSql;
+        $stmtCount = $db->prepare($countQuery);
+        $stmtCount->execute($params);
+        $totalUsers = (int)$stmtCount->fetchColumn();
+
+        $totalPages = ceil($totalUsers / $limit);
+        if ($totalPages < 1) $totalPages = 1;
+        if ($page > $totalPages) $page = $totalPages;
+        $offset = ($page - 1) * $limit;
+
+        // Data query
+        $dataQuery = "
             SELECT u.*, p.custom_domain,
                    (SELECT COUNT(*) FROM `bookings` b WHERE b.user_id = u.id) as total_bookings,
                    (SELECT COUNT(*) FROM `events` e WHERE e.user_id = u.id) as total_events
             FROM `users` u 
             LEFT JOIN `profiles` p ON p.user_id = u.id 
+            {$whereSql}
             ORDER BY u.id DESC
-        ")->fetchAll();
+            LIMIT :limit OFFSET :offset
+        ";
+        $stmtData = $db->prepare($dataQuery);
+        $stmtData->bindValue(':limit', $limit, \PDO::PARAM_INT);
+        $stmtData->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        foreach ($params as $key => $val) {
+            $stmtData->bindValue(':' . $key, $val);
+        }
+        $stmtData->execute();
+        $users = $stmtData->fetchAll();
 
         $plans = $this->planModel->getAllPlans();
 
         $this->renderAdmin('users', [
-            'admin'    => $adminUser,
-            'adminTab' => 'users',
-            'users'    => $users,
-            'plans'    => $plans,
-            'success'  => Session::flash('success'),
-            'error'    => Session::flash('error')
+            'admin'       => $adminUser,
+            'adminTab'    => 'users',
+            'users'       => $users,
+            'plans'       => $plans,
+            'search'      => $search,
+            'planFilter'  => $plan,
+            'statusFilter'=> $status,
+            'currentPage' => $page,
+            'totalPages'  => $totalPages,
+            'totalUsers'  => $totalUsers,
+            'success'     => Session::flash('success'),
+            'error'       => Session::flash('error')
         ]);
     }
 
