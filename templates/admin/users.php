@@ -87,7 +87,7 @@ require_once TEMPLATES_DIR . '/admin/layout/header.php';
                                     <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-100 text-slate-500 border border-slate-200">Unlimited (SA)</span>
                                 <?php endif; ?>
                             </td>
-                            <td class="px-6 py-4 text-right space-x-2">
+                            <td class="px-6 py-4 flex items-center justify-end gap-2">
                                 <?php if ((int)$u['id'] !== (int)$admin['id']): ?>
                                     <form method="POST" action="<?= APP_URL ?>/admin/users/<?= $u['id'] ?>/toggle" class="inline-block">
                                         <button type="submit" class="text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors <?= $u['status'] === 'active' ? 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100' : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' ?>">
