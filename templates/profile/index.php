@@ -117,6 +117,32 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                           class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-black"><?= htmlspecialchars($profile['bio'] ?? '') ?></textarea>
             </div>
 
+            <!-- Payment Configuration Section -->
+            <div class="border-t border-slate-100 pt-6 space-y-4">
+                <h3 class="text-sm font-extrabold text-slate-900 uppercase tracking-wider">Manual Payment Credentials</h3>
+                <p class="text-slate-500 text-xs mt-0.5">Define your UPI details so clients can scan and pay manually.</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">UPI ID (for payments)</label>
+                        <input type="text" name="upi_id" value="<?= htmlspecialchars($profile['upi_id'] ?? '') ?>" placeholder="name@upi"
+                               class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-black font-semibold">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Payment QR Code</label>
+                        <div class="flex items-center gap-4">
+                            <?php if (!empty($profile['qr_code'])): ?>
+                                <div class="w-12 h-12 border border-slate-200 rounded-lg overflow-hidden flex-shrink-0">
+                                    <img src="<?= APP_URL ?>/<?= htmlspecialchars($profile['qr_code']) ?>" class="w-full h-full object-cover">
+                                </div>
+                            <?php endif; ?>
+                            <input type="file" name="qr_code_file" accept="image/*" class="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-black file:text-white file:cursor-pointer hover:file:bg-slate-800">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-slate-100 pt-6">
                 <div>
                     <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Subscription Plan</label>

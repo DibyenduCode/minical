@@ -73,6 +73,54 @@
 
 
 
+        <?php if ($booking['status'] === 'awaiting_payment'): ?>
+            <!-- Manual Payment Details Card -->
+            <div class="p-6 border border-slate-200 rounded-2xl bg-indigo-50/20 text-left space-y-4">
+                <h4 class="text-xs font-extrabold uppercase text-slate-800 tracking-wider">How to Pay & Confirm:</h4>
+                
+                <?php if (!empty($profile['upi_id'])): ?>
+                    <div class="bg-white p-3.5 rounded-xl border border-slate-200/60 flex items-center justify-between">
+                        <div>
+                            <span class="block text-[10px] font-bold text-slate-400 uppercase">UPI ID</span>
+                            <span class="text-xs font-mono font-bold text-slate-900 select-all"><?= htmlspecialchars($profile['upi_id']) ?></span>
+                        </div>
+                        <button onclick="navigator.clipboard.writeText('<?= htmlspecialchars($profile['upi_id']) ?>'); alert('UPI ID copied!')"
+                                class="text-[10px] bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-2 py-1 rounded transition-all">
+                            Copy
+                        </button>
+                    </div>
+                <?php endif; ?>
+
+                <?php if (!empty($profile['qr_code'])): ?>
+                    <div class="text-center bg-white p-4 rounded-xl border border-slate-200/60 space-y-2">
+                        <span class="block text-[10px] font-bold text-slate-400 uppercase">Scan to Pay</span>
+                        <div class="w-40 h-40 mx-auto border border-slate-100 rounded-lg overflow-hidden">
+                            <img src="<?= APP_URL ?>/<?= htmlspecialchars($profile['qr_code']) ?>" class="w-full h-full object-contain">
+                        </div>
+                    </div>
+                <?php endif; ?>
+
+                <div class="text-xs text-slate-600 space-y-2 font-medium leading-relaxed">
+                    <p>After completing the payment, please send a screenshot of your transaction receipt with Booking ID <strong class="text-slate-900 font-bold">#<?= $booking['id'] ?></strong> to the host:</p>
+                    <div class="flex flex-col gap-2 pt-1.5 font-sans">
+                        <a href="mailto:<?= htmlspecialchars($hostUser['email']) ?>?subject=Payment Receipt for Booking #<?= $booking['id'] ?>&body=Hello, I have completed the payment. Booking ID: #<?= $booking['id'] ?>"
+                           class="w-full py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white font-bold text-center rounded-xl text-xs transition-all shadow-sm">
+                            ✉ Send Receipt via Email
+                        </a>
+
+                        <?php if (!empty($profile['phone'])): ?>
+                            <?php $waPhone = preg_replace('/[^0-9]/', '', $profile['phone']); ?>
+                            <a href="https://wa.me/<?= $waPhone ?>?text=<?= urlencode("Hello, I have completed the payment for my booking. Booking Ref ID: #" . $booking['id'] . ". Date: " . $booking['booking_date']) ?>"
+                               target="_blank"
+                               class="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-center rounded-xl text-xs transition-all shadow-sm flex items-center justify-center gap-1">
+                                💬 Send Receipt via WhatsApp
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
+
         <div class="pt-2">
             <a href="<?= APP_URL ?>/u/<?= htmlspecialchars($hostUser['username']) ?>" class="text-xs font-bold text-slate-500 hover:text-black transition-colors">
                 ← Book Another Appointment

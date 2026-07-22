@@ -419,12 +419,14 @@ class PublicBookingController extends Controller {
 
         $user = $this->userModel->findById($booking['user_id']);
         $event = $this->eventModel->findByIdAndUserId($booking['event_id'], $booking['user_id']);
+        $profile = $this->profileModel->findByUserId((int)$booking['user_id']);
         $googleConnected = GoogleCalendarService::isConnected((int)$booking['user_id']);
         $googleCalendarUrl = GoogleCalendarService::generateGoogleCalendarUrl($booking, $event, $user);
 
         $this->render('booking/confirmation', [
             'booking'           => $booking,
             'hostUser'          => $user,
+            'profile'           => $profile,
             'event'             => $event,
             'googleConnected'   => $googleConnected,
             'googleCalendarUrl' => $googleCalendarUrl

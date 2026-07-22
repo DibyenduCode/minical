@@ -78,15 +78,17 @@ class ProfileController extends Controller {
         $companyName = trim($data['company_name'] ?? '');
         $customDomain = trim($data['custom_domain'] ?? '');
         $bio = trim($data['bio'] ?? '');
+        $upiId = trim($data['upi_id'] ?? '');
 
         if (empty($name)) {
             Session::flash('error', 'Name cannot be empty.');
             $this->response->redirect(APP_URL . '/profile');
         }
 
-        // Fetch current profile for avatar fallback
+        // Fetch current profile for avatar and qr fallbacks
         $profile = $this->profileModel->findByUserId($user['id']);
         $avatarUrl = $profile['avatar'] ?? null;
+        $qrCodeUrl = $profile['qr_code'] ?? null;
 
         // Process File Upload for Logo / Avatar
         if (!empty($_FILES['avatar_file']['name'])) {
@@ -114,6 +116,32 @@ class ProfileController extends Controller {
             }
         }
 
+        // Process File Upload for Payment QR Code
+        if (!empty($_FILES['qr_code_file']['name'])) {
+            $file = $_FILES['qr_code_file'];
+            $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            
+            if (!in_array($file['type'], $allowedTypes)) {
+                Session::flash('error', 'Only JPG, PNG, GIF, and WEBP image file formats are allowed for QR Code.');
+                $this->response->redirect(APP_URL . '/profile');
+            }
+
+            $uploadDir = PUBLIC_DIR . '/uploads/qrcodes/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+
+            $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+            $newFileName = 'qr_' . $user['id'] . '_' . time() . '.' . $ext;
+            $destination = $uploadDir . $newFileName;
+
+            if (move_uploaded_file($file['tmp_name'], $destination)) {
+                $qrCodeUrl = 'public/uploads/qrcodes/' . $newFileName;
+            } else {
+                error_log("ProfileController Error: Failed to upload QR code to " . $destination);
+            }
+        }
+
         // Update user name
         $db = Database::getInstance();
         $stmt = $db->prepare("UPDATE `users` SET `name` = :name WHERE `id` = :id");
@@ -134,7 +162,9 @@ class ProfileController extends Controller {
             'company_name'  => $companyName,
             'custom_domain' => $customDomain,
             'bio'           => $bio,
-            'avatar'        => $avatarUrl
+            'avatar'        => $avatarUrl,
+            'upi_id'        => $upiId,
+            'qr_code'       => $qrCodeUrl
         ]);
 
         Session::flash('success', 'Branding & Profile settings updated successfully.');
