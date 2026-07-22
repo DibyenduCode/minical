@@ -119,8 +119,8 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                                         <p class="text-xs text-slate-500"><?= htmlspecialchars($b['customer_email']) ?></p>
                                         <?php if (!empty($b['responses'])): ?>
                                             <button type="button" onclick="toggleResponses(<?= $b['id'] ?>)" 
-                                                    class="inline-flex items-center gap-1 mt-1 text-[10px] font-extrabold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 hover:text-indigo-900 border border-indigo-100 px-2 py-0.5 rounded-md w-max transition-colors cursor-pointer select-none">
-                                                💬 Has Custom Answers
+                                                    class="inline-flex items-center gap-1.5 mt-1.5 text-[10px] font-extrabold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 hover:text-indigo-900 border border-indigo-100 px-2.5 py-1 rounded-lg w-max transition-colors cursor-pointer select-none">
+                                                <span>💬 View Form Answers</span>
                                             </button>
                                         <?php endif; ?>
                                     </div>
@@ -179,20 +179,32 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                                 </td>
                             </tr>
                             
-                            <!-- Collapsible Custom Form Field Responses Row -->
+                            <!-- Premium Collapsible Form Field Responses Row -->
                             <?php if (!empty($b['responses'])): ?>
                                 <tr id="responses-row-<?= $b['id'] ?>" class="bg-slate-50/50 hidden border-t border-b border-slate-100">
-                                    <td colspan="5" class="px-8 py-4">
-                                        <div class="space-y-2">
-                                            <div class="flex items-center justify-between">
-                                                <p class="text-[10px] font-extrabold uppercase text-indigo-800 tracking-wider">Client Custom Form Responses:</p>
-                                                <button type="button" onclick="toggleResponses(<?= $b['id'] ?>)" class="text-[10px] font-bold text-slate-400 hover:text-slate-600">✕ Close Details</button>
+                                    <td colspan="5" class="px-8 py-5">
+                                        <div class="max-w-3xl bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm space-y-4">
+                                            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                                                <div class="flex items-center gap-2">
+                                                    <span class="text-lg">📋</span>
+                                                    <span class="text-xs font-extrabold text-slate-900 uppercase tracking-wider">Client Custom Form Responses</span>
+                                                </div>
+                                                <button type="button" onclick="toggleResponses(<?= $b['id'] ?>)" 
+                                                        class="text-[10px] font-bold text-slate-500 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl transition-colors">
+                                                    ✕ Hide Details
+                                                </button>
                                             </div>
-                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 pt-1">
+                                            
+                                            <!-- Definition Style List -->
+                                            <div class="space-y-4">
                                                 <?php foreach ($b['responses'] as $resp): ?>
-                                                    <div class="text-xs bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
-                                                        <span class="block font-bold text-slate-800 mb-1"><?= htmlspecialchars($resp['field_label']) ?></span>
-                                                        <span class="text-slate-600 font-medium leading-relaxed"><?= nl2br(htmlspecialchars($resp['value'])) ?></span>
+                                                    <div class="grid grid-cols-1 md:grid-cols-12 gap-2 text-xs">
+                                                        <div class="md:col-span-4 font-bold text-slate-500 md:text-right md:pr-4 pt-1">
+                                                            <?= htmlspecialchars($resp['field_label']) ?>
+                                                        </div>
+                                                        <div class="md:col-span-8 text-slate-900 font-medium bg-slate-50 border border-slate-100 px-4 py-3 rounded-xl leading-relaxed whitespace-pre-wrap">
+                                                            <?= htmlspecialchars($resp['value']) ?>
+                                                        </div>
                                                     </div>
                                                 <?php endforeach; ?>
                                             </div>
