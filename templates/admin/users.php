@@ -78,8 +78,8 @@ require_once TEMPLATES_DIR . '/admin/layout/header.php';
                                         </button>
                                     </form>
 
-                                    <form method="POST" action="<?= APP_URL ?>/admin/users/<?= $u['id'] ?>/delete" onsubmit="return confirm('Delete user account permanently?')" class="inline-block">
-                                        <button type="submit" class="text-xs text-red-600 hover:text-red-700 font-semibold px-3 py-1.5 bg-red-50 hover:bg-red-100 rounded-lg transition-colors border border-red-200/60">
+                                    <form id="delete-user-form-<?= $u['id'] ?>" method="POST" action="<?= APP_URL ?>/admin/users/<?= $u['id'] ?>/delete" class="inline-block">
+                                        <button type="button" onclick="confirmDeleteUser(<?= $u['id'] ?>)" class="text-xs text-red-600 hover:text-red-700 font-semibold px-3 py-1.5 bg-red-50 hover:bg-red-100 rounded-lg transition-colors border border-red-200/60">
                                             Delete
                                         </button>
                                     </form>
@@ -94,5 +94,28 @@ require_once TEMPLATES_DIR . '/admin/layout/header.php';
         </div>
     </div>
 </div>
+
+<!-- SweetAlert2 Deletion Confirmation script -->
+<script>
+    function confirmDeleteUser(userId) {
+        Swal.fire({
+            title: 'Delete User?',
+            text: "Are you sure you want to permanently delete this user account? All their data (events, bookings, settings) will be destroyed.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626', // Red 600
+            cancelButtonColor: '#64748b',  // Slate 500
+            confirmButtonText: 'Yes, delete permanently!',
+            cancelButtonText: 'Cancel',
+            customClass: {
+                popup: 'rounded-3xl border border-slate-200 shadow-xl font-sans text-left'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('delete-user-form-' + userId).submit();
+            }
+        });
+    }
+</script>
 
 <?php require_once TEMPLATES_DIR . '/admin/layout/footer.php'; ?>

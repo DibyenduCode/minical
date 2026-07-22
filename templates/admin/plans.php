@@ -134,8 +134,8 @@ require_once TEMPLATES_DIR . '/admin/layout/header.php';
                     </div>
 
                     <div class="pt-6">
-                        <form method="POST" action="<?= APP_URL ?>/admin/plans/delete/<?= $p['id'] ?>" onsubmit="return confirm('Delete this plan tier?')">
-                            <button type="submit" class="w-full py-2 text-xs font-bold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-xl border border-red-200 transition-colors">
+                        <form id="delete-plan-form-<?= $p['id'] ?>" method="POST" action="<?= APP_URL ?>/admin/plans/delete/<?= $p['id'] ?>">
+                            <button type="button" onclick="confirmDeletePlan(<?= $p['id'] ?>)" class="w-full py-2 text-xs font-bold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 rounded-xl border border-red-200 transition-colors">
                                 Delete Plan
                             </button>
                         </form>
@@ -145,5 +145,28 @@ require_once TEMPLATES_DIR . '/admin/layout/header.php';
         </div>
     </div>
 </div>
+
+<!-- SweetAlert2 Deletion Confirmation script -->
+<script>
+    function confirmDeletePlan(planId) {
+        Swal.fire({
+            title: 'Delete Plan Tier?',
+            text: "Are you sure you want to delete this pricing plan? This action cannot be undone and it will be removed from the landing page.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626', // Red 600
+            cancelButtonColor: '#64748b',  // Slate 500
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel',
+            customClass: {
+                popup: 'rounded-3xl border border-slate-200 shadow-xl font-sans text-left'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('delete-plan-form-' + planId).submit();
+            }
+        });
+    }
+</script>
 
 <?php require_once TEMPLATES_DIR . '/admin/layout/footer.php'; ?>
