@@ -185,6 +185,17 @@ class PublicBookingController extends Controller {
             return;
         }
 
+        $user = $this->userModel->findByUsername($username);
+        if (!$user) {
+            $this->response->json(['status' => 'error', 'message' => 'Invalid host.'], 400);
+            return;
+        }
+
+        if (!empty($promo['user_id']) && (int)$promo['user_id'] !== (int)$user['id']) {
+            $this->response->json(['status' => 'error', 'message' => 'Invalid promo code for this host\'s appointments.'], 400);
+            return;
+        }
+
         if ($promo['status'] !== 'active') {
             $this->response->json(['status' => 'error', 'message' => 'This promo code is inactive.'], 400);
             return;
@@ -294,8 +305,9 @@ class PublicBookingController extends Controller {
             if ($promo && $promo['status'] === 'active') {
                 $isExpired = !empty($promo['expires_at']) && strtotime($promo['expires_at']) < time();
                 $isLimitReached = !empty($promo['max_uses']) && $promo['used_count'] >= $promo['max_uses'];
+                $isCorrectHost = empty($promo['user_id']) || (int)$promo['user_id'] === (int)$user['id'];
 
-                if (!$isExpired && !$isLimitReached) {
+                if (!$isExpired && !$isLimitReached && $isCorrectHost) {
                     if ($promo['discount_type'] === 'percentage') {
                         $discountAmount = round($finalPrice * ($promo['discount_value'] / 100), 2);
                     } else {

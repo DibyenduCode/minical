@@ -33,6 +33,9 @@ App::post('/reset-password', [AuthController::class, 'resetPassword']);
 // User Dashboard & Settings Routes
 App::get('/dashboard', [DashboardController::class, 'index']);
 App::get('/bookings', [DashboardController::class, 'bookingsList']);
+App::get('/promo-codes', [DashboardController::class, 'promosList']);
+App::post('/promo-codes', [DashboardController::class, 'createPromo']);
+App::post('/promo-codes/delete/{id}', [DashboardController::class, 'deletePromo']);
 App::post('/dashboard/cancel', [DashboardController::class, 'cancelBooking']);
 App::post('/dashboard/complete', [DashboardController::class, 'completeBooking']);
 App::get('/profile', [ProfileController::class, 'index']);

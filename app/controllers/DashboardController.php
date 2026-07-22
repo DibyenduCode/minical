@@ -94,4 +94,79 @@ class DashboardController extends Controller {
 
         $this->response->redirect(APP_URL . '/bookings');
     }
+
+    public function promosList(): void {
+        $user = $this->requireAuth();
+        $db = \App\Core\Database::getInstance();
+
+        $promoCodes = $db->prepare("SELECT * FROM `promo_codes` WHERE `user_id` = :user_id ORDER BY id DESC");
+        $promoCodes->execute(['user_id' => $user['id']]);
+        $codes = $promoCodes->fetchAll();
+
+        $this->render('dashboard/promos', [
+            'user'       => $user,
+            'activeTab'  => 'promos',
+            'promoCodes' => $codes,
+            'success'    => Session::flash('success'),
+            'error'      => Session::flash('error')
+        ]);
+    }
+
+    public function createPromo(): void {
+        $user = $this->requireAuth();
+        $data = $this->request->getBody();
+
+        if (!Session::verifyCsrfToken($data['csrf_token'] ?? '')) {
+            Session::flash('error', 'Invalid security token.');
+            $this->response->redirect(APP_URL . '/promo-codes');
+        }
+
+        $code = strtoupper(trim($data['code'] ?? ''));
+        $discountType = $data['discount_type'] ?? 'percentage';
+        $discountValue = (float)($data['discount_value'] ?? 0);
+        $maxUses = !empty($data['max_uses']) ? (int)$data['max_uses'] : null;
+        $expiresAt = !empty($data['expires_at']) ? $data['expires_at'] : null;
+
+        if (empty($code) || $discountValue <= 0) {
+            Session::flash('error', 'Promo code and positive discount value are required.');
+            $this->response->redirect(APP_URL . '/promo-codes');
+        }
+
+        $db = \App\Core\Database::getInstance();
+        
+        $chk = $db->prepare("SELECT id FROM `promo_codes` WHERE `code` = :code LIMIT 1");
+        $chk->execute(['code' => $code]);
+        if ($chk->fetch()) {
+            Session::flash('error', 'Promo code already exists.');
+            $this->response->redirect(APP_URL . '/promo-codes');
+        }
+
+        $stmt = $db->prepare("
+            INSERT INTO `promo_codes` (`user_id`, `code`, `discount_type`, `discount_value`, `plan_slug`, `max_uses`, `expires_at`, `status`)
+            VALUES (:user_id, :code, :discount_type, :discount_value, NULL, :max_uses, :expires_at, 'active')
+        ");
+        $stmt->execute([
+            'user_id'        => $user['id'],
+            'code'           => $code,
+            'discount_type'  => $discountType,
+            'discount_value' => $discountValue,
+            'max_uses'       => $maxUses,
+            'expires_at'     => $expiresAt
+        ]);
+
+        Session::flash('success', 'Promo code created successfully.');
+        $this->response->redirect(APP_URL . '/promo-codes');
+    }
+
+    public function deletePromo(string $id): void {
+        $user = $this->requireAuth();
+        $promoId = (int)$id;
+
+        $db = \App\Core\Database::getInstance();
+        $stmt = $db->prepare("DELETE FROM `promo_codes` WHERE `id` = :id AND `user_id` = :user_id");
+        $stmt->execute(['id' => $promoId, 'user_id' => $user['id']]);
+
+        Session::flash('success', 'Promo code deleted successfully.');
+        $this->response->redirect(APP_URL . '/promo-codes');
+    }
 }
