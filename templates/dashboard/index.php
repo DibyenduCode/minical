@@ -1,5 +1,5 @@
 <?php
-$title = "Bookings";
+$title = "Dashboard";
 $activeTab = "dashboard";
 require_once TEMPLATES_DIR . '/layout/header.php';
 ?>
@@ -133,159 +133,9 @@ require_once TEMPLATES_DIR . '/layout/header.php';
             </div>
         </div>
     </div>
-
-    <!-- Bookings Table Section -->
-    <div class="bg-white border border-slate-200/90 rounded-3xl p-6 space-y-6 shadow-sm">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <h2 class="text-lg font-bold text-slate-950 tracking-tight">Scheduled Appointments</h2>
-
-            <!-- Filters & Search -->
-            <form method="GET" action="<?= APP_URL ?>/dashboard" class="flex flex-wrap items-center gap-3">
-                <input type="text" name="search" value="<?= htmlspecialchars($search ?? '') ?>" placeholder="Search name or email..."
-                       class="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-black">
-
-                <select name="filter" onchange="this.form.submit()"
-                        class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-black">
-                    <option value="">All Statuses</option>
-                    <option value="today" <?= ($filter === 'today') ? 'selected' : '' ?>>Today</option>
-                    <option value="upcoming" <?= ($filter === 'upcoming') ? 'selected' : '' ?>>Upcoming</option>
-                    <option value="completed" <?= ($filter === 'completed') ? 'selected' : '' ?>>Completed</option>
-                    <option value="cancelled" <?= ($filter === 'cancelled') ? 'selected' : '' ?>>Cancelled</option>
-                </select>
-            </form>
-        </div>
-
-        <!-- Table -->
-        <div class="overflow-x-auto rounded-2xl border border-slate-200">
-            <table class="w-full text-left text-sm text-slate-700">
-                <thead class="bg-slate-50 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">
-                    <tr>
-                        <th class="px-6 py-4">Customer</th>
-                        <th class="px-6 py-4">Event</th>
-                        <th class="px-6 py-4">Date & Time</th>
-                        <th class="px-6 py-4">Status</th>
-                        <th class="px-6 py-4 text-right">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                    <?php if (empty($bookings)): ?>
-                        <tr>
-                            <td colspan="5" class="px-6 py-12 text-center text-slate-400 text-xs font-medium">
-                                No appointments found.
-                            </td>
-                        </tr>
-                    <?php else: ?>
-                        <?php foreach ($bookings as $b): ?>
-                            <tr class="hover:bg-slate-50/30 transition-colors">
-                                <td class="px-6 py-4">
-                                    <div class="flex flex-col">
-                                        <p class="font-bold text-slate-900 text-sm"><?= htmlspecialchars($b['customer_name']) ?></p>
-                                        <p class="text-xs text-slate-500"><?= htmlspecialchars($b['customer_email']) ?></p>
-                                        <?php if (!empty($b['responses'])): ?>
-                                            <button type="button" onclick="toggleResponses(<?= $b['id'] ?>)" 
-                                                    class="inline-flex items-center gap-1.5 mt-1.5 text-[10px] font-extrabold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 hover:text-indigo-900 border border-indigo-100 px-2.5 py-1 rounded-lg w-max transition-colors cursor-pointer select-none">
-                                                <span>💬 View Form Answers</span>
-                                            </button>
-                                        <?php endif; ?>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 font-semibold text-slate-800 text-xs">
-                                    <?= htmlspecialchars($b['event_name']) ?>
-                                    <?php if ($b['is_paid']): ?>
-                                        <span class="ml-2 text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md font-bold">$<?= number_format($b['price'], 2) ?></span>
-                                    <?php endif; ?>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <p class="text-slate-900 font-semibold text-xs"><?= date('M j, Y', strtotime($b['booking_date'])) ?></p>
-                                    <p class="text-[11px] text-slate-500"><?= date('h:i A', strtotime($b['start_time'])) ?> - <?= date('h:i A', strtotime($b['end_time'])) ?></p>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <?php
-                                    $statusClasses = [
-                                        'confirmed' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                                        'completed' => 'bg-blue-50 text-blue-700 border-blue-200',
-                                        'cancelled' => 'bg-red-50 text-red-700 border-red-200',
-                                        'pending'   => 'bg-amber-50 text-amber-700 border-amber-200',
-                                    ];
-                                    $class = $statusClasses[$b['status']] ?? 'bg-slate-100 text-slate-600 border-slate-200';
-                                    ?>
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold border <?= $class ?>">
-                                        <?= ucfirst($b['status']) ?>
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 text-right space-x-2">
-                                    <?php if ($b['status'] !== 'cancelled' && $b['status'] !== 'completed' && !empty($b['meeting_link'])): ?>
-                                        <a href="<?= htmlspecialchars($b['meeting_link']) ?>" target="_blank"
-                                           class="inline-flex items-center gap-1 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 rounded-xl shadow-sm transition-all">
-                                            <span>📹 Join Meet</span>
-                                        </a>
-                                    <?php endif; ?>
-
-                                    <?php if ($b['status'] === 'confirmed' || $b['status'] === 'pending' || $b['status'] === 'paid'): ?>
-                                        <form id="complete-form-<?= $b['id'] ?>" method="POST" action="<?= APP_URL ?>/dashboard/complete" class="inline-block">
-                                            <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
-                                            <input type="hidden" name="booking_id" value="<?= $b['id'] ?>">
-                                            <button type="button" onclick="confirmComplete(<?= $b['id'] ?>)" class="text-xs text-emerald-700 hover:text-emerald-800 font-semibold px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-colors border border-emerald-200/60">
-                                                Complete
-                                            </button>
-                                        </form>
-                                    <?php endif; ?>
-
-                                    <?php if ($b['status'] !== 'cancelled' && $b['status'] !== 'completed'): ?>
-                                        <form id="cancel-form-<?= $b['id'] ?>" method="POST" action="<?= APP_URL ?>/dashboard/cancel" class="inline-block">
-                                            <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
-                                            <input type="hidden" name="booking_id" value="<?= $b['id'] ?>">
-                                            <button type="button" onclick="confirmCancel(<?= $b['id'] ?>)" class="text-xs text-red-600 hover:text-red-700 font-semibold px-3 py-1.5 bg-red-50 hover:bg-red-100 rounded-lg transition-colors border border-red-200/60">
-                                                Cancel
-                                            </button>
-                                        </form>
-                                    <?php endif; ?>
-                                </td>
-                            </tr>
-                            
-                            <!-- Premium Collapsible Form Field Responses Row -->
-                            <?php if (!empty($b['responses'])): ?>
-                                <tr id="responses-row-<?= $b['id'] ?>" class="bg-slate-50/50 hidden border-t border-b border-slate-100/80">
-                                    <td colspan="5" class="px-4 sm:px-8 py-4">
-                                        <div class="w-full max-w-lg bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
-                                            <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
-                                                <div class="flex items-center gap-1.5">
-                                                    <span class="text-sm">📋</span>
-                                                    <span class="text-[10px] font-extrabold text-slate-800 uppercase tracking-wider">Custom Form Responses</span>
-                                                </div>
-                                                <button type="button" onclick="toggleResponses(<?= $b['id'] ?>)" 
-                                                        class="text-[10px] font-extrabold text-slate-400 hover:text-slate-600 transition-colors">
-                                                    ✕ Close
-                                                </button>
-                                            </div>
-                                            
-                                            <!-- Stacked Vertical Question List -->
-                                            <div class="space-y-3.5">
-                                                <?php foreach ($b['responses'] as $resp): ?>
-                                                    <div class="space-y-1 text-left">
-                                                        <span class="block text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">
-                                                            <?= htmlspecialchars($resp['field_label']) ?>
-                                                        </span>
-                                                        <div class="bg-slate-50 border border-slate-200/60 px-4 py-2.5 rounded-2xl text-slate-800 text-xs font-semibold leading-relaxed text-left whitespace-pre-wrap">
-                                                            <?= htmlspecialchars($resp['value']) ?>
-                                                        </div>
-                                                    </div>
-                                                <?php endforeach; ?>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <?php endif; ?>
-
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-        </div>
-    </div>
 </div>
 
-<!-- JS for Collapsible responses, SweetAlert2 Confirmations, and Chart.js -->
+<!-- JS for Chart.js -->
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const ctx = document.getElementById('statusChart').getContext('2d');
@@ -326,53 +176,6 @@ require_once TEMPLATES_DIR . '/layout/header.php';
         };
         new Chart(ctx, config);
     });
-
-    function toggleResponses(bookingId) {
-        const row = document.getElementById('responses-row-' + bookingId);
-        if (row) {
-            row.classList.toggle('hidden');
-        }
-    }
-
-    function confirmComplete(bookingId) {
-        Swal.fire({
-            title: 'Mark as Completed?',
-            text: "Are you sure you want to mark this consultation session as completed?",
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#059669', // Emerald 600
-            cancelButtonColor: '#64748b',  // Slate 500
-            confirmButtonText: 'Yes, complete it!',
-            cancelButtonText: 'Cancel',
-            customClass: {
-                popup: 'rounded-3xl border border-slate-200 shadow-xl font-sans text-left'
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                document.getElementById('complete-form-' + bookingId).submit();
-            }
-        });
-    }
-
-    function confirmCancel(bookingId) {
-        Swal.fire({
-            title: 'Cancel Appointment?',
-            text: "Are you sure you want to cancel this booking? This will also remove the event from Google Calendar.",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#dc2626', // Red 600
-            cancelButtonColor: '#64748b',  // Slate 500
-            confirmButtonText: 'Yes, cancel booking!',
-            cancelButtonText: 'No, keep it',
-            customClass: {
-                popup: 'rounded-3xl border border-slate-200 shadow-xl font-sans text-left'
-            }
-        }).then((result) => {
-            if (result.isConfirmed) {
-                document.getElementById('cancel-form-' + bookingId).submit();
-            }
-        });
-    }
 </script>
 
 <?php require_once TEMPLATES_DIR . '/layout/footer.php'; ?>

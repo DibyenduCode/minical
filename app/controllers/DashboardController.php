@@ -20,14 +20,23 @@ class DashboardController extends Controller {
 
         $stats = $this->bookingModel->getDashboardStats($user['id']);
 
+        $this->render('dashboard/index', [
+            'user'     => $user,
+            'stats'    => $stats,
+            'success'  => Session::flash('success'),
+            'error'    => Session::flash('error')
+        ]);
+    }
+
+    public function bookingsList(): void {
+        $user = $this->requireAuth();
         $filter = $_GET['filter'] ?? null;
         $search = $_GET['search'] ?? null;
 
         $bookings = $this->bookingModel->getBookingsForUser($user['id'], $filter, $search);
 
-        $this->render('dashboard/index', [
+        $this->render('dashboard/bookings', [
             'user'     => $user,
-            'stats'    => $stats,
             'bookings' => $bookings,
             'filter'   => $filter,
             'search'   => $search,
@@ -42,7 +51,7 @@ class DashboardController extends Controller {
 
         if (!Session::verifyCsrfToken($data['csrf_token'] ?? '')) {
             Session::flash('error', 'Invalid security token.');
-            $this->response->redirect(APP_URL . '/dashboard');
+            $this->response->redirect(APP_URL . '/bookings');
         }
 
         $bookingId = (int)($data['booking_id'] ?? 0);
@@ -61,7 +70,7 @@ class DashboardController extends Controller {
             Session::flash('error', 'Booking not found.');
         }
 
-        $this->response->redirect(APP_URL . '/dashboard');
+        $this->response->redirect(APP_URL . '/bookings');
     }
 
     public function completeBooking(): void {
@@ -70,7 +79,7 @@ class DashboardController extends Controller {
 
         if (!Session::verifyCsrfToken($data['csrf_token'] ?? '')) {
             Session::flash('error', 'Invalid security token.');
-            $this->response->redirect(APP_URL . '/dashboard');
+            $this->response->redirect(APP_URL . '/bookings');
         }
 
         $bookingId = (int)($data['booking_id'] ?? 0);
@@ -83,6 +92,6 @@ class DashboardController extends Controller {
             Session::flash('error', 'Booking not found.');
         }
 
-        $this->response->redirect(APP_URL . '/dashboard');
+        $this->response->redirect(APP_URL . '/bookings');
     }
 }

@@ -27,6 +27,7 @@ App::get('/logout', [AuthController::class, 'logout']);
 
 // User Dashboard & Settings Routes
 App::get('/dashboard', [DashboardController::class, 'index']);
+App::get('/bookings', [DashboardController::class, 'bookingsList']);
 App::post('/dashboard/cancel', [DashboardController::class, 'cancelBooking']);
 App::post('/dashboard/complete', [DashboardController::class, 'completeBooking']);
 App::get('/profile', [ProfileController::class, 'index']);
