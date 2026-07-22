@@ -124,6 +124,16 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                                         </a>
                                     <?php endif; ?>
 
+                                    <?php if ($b['status'] === 'awaiting_payment'): ?>
+                                        <form id="confirm-payment-form-<?= $b['id'] ?>" method="POST" action="<?= APP_URL ?>/dashboard/confirm-payment" class="inline-block">
+                                            <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+                                            <input type="hidden" name="booking_id" value="<?= $b['id'] ?>">
+                                            <button type="button" onclick="confirmPaymentAction(<?= $b['id'] ?>)" class="text-xs text-indigo-700 hover:text-indigo-800 font-bold px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors border border-indigo-200/60">
+                                                Confirm Payment
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
+
                                     <?php if ($b['status'] === 'confirmed' || $b['status'] === 'pending' || $b['status'] === 'paid'): ?>
                                         <form id="complete-form-<?= $b['id'] ?>" method="POST" action="<?= APP_URL ?>/dashboard/complete" class="inline-block">
                                             <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
@@ -195,6 +205,26 @@ require_once TEMPLATES_DIR . '/layout/header.php';
         if (row) {
             row.classList.toggle('hidden');
         }
+    }
+
+    function confirmPaymentAction(bookingId) {
+        Swal.fire({
+            title: 'Confirm Payment?',
+            text: "Are you sure you want to mark this appointment as PAID? This will approve the booking, sync it with Google Calendar, and send confirmation emails to the client.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#4f46e5', // Indigo 600
+            cancelButtonColor: '#64748b',  // Slate 500
+            confirmButtonText: 'Yes, confirm payment!',
+            cancelButtonText: 'Cancel',
+            customClass: {
+                popup: 'rounded-3xl border border-slate-200 shadow-xl font-sans text-left'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('confirm-payment-form-' + bookingId).submit();
+            }
+        });
     }
 
     function confirmComplete(bookingId) {

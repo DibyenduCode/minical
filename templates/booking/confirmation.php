@@ -13,18 +13,33 @@
 <body class="bg-[#fafafa] text-slate-900 min-h-screen flex items-center justify-center p-4 selection:bg-black selection:text-white">
     <div class="w-full max-w-lg bg-white border border-slate-200/90 rounded-3xl shadow-xl p-8 space-y-6 text-center">
         
-        <!-- Success Icon -->
-        <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold shadow-sm">
-            ✓
-        </div>
+        <?php if ($booking['status'] === 'awaiting_payment'): ?>
+            <!-- Pending Payment Icon -->
+            <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold shadow-sm">
+                ⏳
+            </div>
 
-        <div>
-            <span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
-                <?= ucfirst($booking['status']) ?>
-            </span>
-            <h1 class="text-2xl font-extrabold text-slate-950 tracking-tight mt-3">Appointment Confirmed!</h1>
-            <p class="text-xs text-slate-500 font-medium mt-1">A calendar invitation and confirmation email have been generated.</p>
-        </div>
+            <div>
+                <span class="text-[10px] font-extrabold uppercase tracking-wider text-amber-700 bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
+                    Awaiting Payment
+                </span>
+                <h1 class="text-2xl font-extrabold text-slate-950 tracking-tight mt-3">Booking Request Received!</h1>
+                <p class="text-xs text-slate-500 font-medium mt-1.5 leading-relaxed">Please complete your payment directly to the host to confirm your slot. Once the host verifies the payment, your booking will be officially approved.</p>
+            </div>
+        <?php else: ?>
+            <!-- Success Icon -->
+            <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold shadow-sm">
+                ✓
+            </div>
+
+            <div>
+                <span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+                    Confirmed
+                </span>
+                <h1 class="text-2xl font-extrabold text-slate-950 tracking-tight mt-3">Appointment Confirmed!</h1>
+                <p class="text-xs text-slate-500 font-medium mt-1">A calendar invitation and confirmation email have been generated.</p>
+            </div>
+        <?php endif; ?>
 
         <!-- Appointment Card -->
         <div class="p-6 bg-slate-50 border border-slate-200/80 rounded-2xl text-left space-y-3.5">

@@ -169,4 +169,40 @@ class DashboardController extends Controller {
         Session::flash('success', 'Promo code deleted successfully.');
         $this->response->redirect(APP_URL . '/promo-codes');
     }
+
+    public function confirmPayment(): void {
+        $user = $this->requireAuth();
+        $data = $this->request->getBody();
+
+        if (!Session::verifyCsrfToken($data['csrf_token'] ?? '')) {
+            Session::flash('error', 'Invalid security token.');
+            $this->response->redirect(APP_URL . '/bookings');
+        }
+
+        $bookingId = (int)($data['booking_id'] ?? 0);
+        $db = \App\Core\Database::getInstance();
+
+        // Verify the booking belongs to this host
+        $stmt = $db->prepare("SELECT id FROM `bookings` WHERE `id` = :id AND `user_id` = :user_id LIMIT 1");
+        $stmt->execute(['id' => $bookingId, 'user_id' => $user['id']]);
+        $booking = $stmt->fetch();
+
+        if (!$booking) {
+            Session::flash('error', 'Appointment not found.');
+            $this->response->redirect(APP_URL . '/bookings');
+        }
+
+        // Update booking status to confirmed (representing manual payment completed)
+        $up = $db->prepare("UPDATE `bookings` SET `status` = 'confirmed' WHERE `id` = :id");
+        $up->execute(['id' => $bookingId]);
+
+        // Auto-create event on connected Google Calendar
+        \App\Services\GoogleCalendarService::createEvent($bookingId);
+
+        // Send booking confirmation emails (with Google Meet join link)
+        \App\Services\EmailService::sendBookingConfirmation($bookingId);
+
+        Session::flash('success', 'Payment confirmed manually and appointment successfully approved.');
+        $this->response->redirect(APP_URL . '/bookings');
+    }
 }

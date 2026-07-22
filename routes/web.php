@@ -38,6 +38,7 @@ App::post('/promo-codes', [DashboardController::class, 'createPromo']);
 App::post('/promo-codes/delete/{id}', [DashboardController::class, 'deletePromo']);
 App::post('/dashboard/cancel', [DashboardController::class, 'cancelBooking']);
 App::post('/dashboard/complete', [DashboardController::class, 'completeBooking']);
+App::post('/dashboard/confirm-payment', [DashboardController::class, 'confirmPayment']);
 App::get('/profile', [ProfileController::class, 'index']);
 App::post('/profile', [ProfileController::class, 'update']);
 App::post('/profile/change-password', [ProfileController::class, 'changePassword']);

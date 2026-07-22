@@ -394,11 +394,13 @@ class PublicBookingController extends Controller {
             }
         }
 
-        // Auto-create event on connected Google Calendar
-        GoogleCalendarService::createEvent($bookingId);
+        if ($bookingStatus === 'confirmed') {
+            // Auto-create event on connected Google Calendar
+            GoogleCalendarService::createEvent($bookingId);
 
-        // Send booking confirmation emails (with Google Meet join link)
-        \App\Services\EmailService::sendBookingConfirmation($bookingId);
+            // Send booking confirmation emails (with Google Meet join link)
+            \App\Services\EmailService::sendBookingConfirmation($bookingId);
+        }
 
         $this->response->json([
             'status'   => 'success',
