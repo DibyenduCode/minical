@@ -81,9 +81,20 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 font-semibold text-slate-800 text-xs">
-                                    <?= htmlspecialchars($b['event_name']) ?>
+                                    <div><?= htmlspecialchars($b['event_name']) ?></div>
                                     <?php if ($b['is_paid']): ?>
-                                        <span class="ml-2 text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md font-bold">$<?= number_format($b['price'], 2) ?></span>
+                                        <div class="mt-1.5 flex flex-col gap-1">
+                                            <span class="text-[10px] text-slate-500 font-medium">Original Price: $<?= number_format($b['price'], 2) ?></span>
+                                            <?php if (!empty($b['promo_code'])): ?>
+                                                <div class="flex items-center gap-1.5 flex-wrap">
+                                                    <span class="text-[9px] bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded font-extrabold font-mono border border-indigo-100" title="Promo Code Applied">Code: <?= htmlspecialchars($b['promo_code']) ?></span>
+                                                    <span class="text-[9px] bg-amber-50 text-amber-700 px-2 py-0.5 rounded font-bold border border-amber-100" title="Discount Amount">-$<?= number_format($b['discount_amount'], 2) ?></span>
+                                                    <span class="text-[9px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-extrabold" title="Final Amount Paid">Paid: $<?= number_format($b['final_price'], 2) ?></span>
+                                                </div>
+                                            <?php else: ?>
+                                                <span class="text-[10px] text-emerald-600 font-extrabold">Paid: $<?= number_format($b['price'], 2) ?></span>
+                                            <?php endif; ?>
+                                        </div>
                                     <?php endif; ?>
                                 </td>
                                 <td class="px-6 py-4">
