@@ -80,6 +80,17 @@ class Booking extends Model {
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
+        $bookings = $stmt->fetchAll();
+
+        foreach ($bookings as &$b) {
+            $b['responses'] = $this->getResponsesForBooking((int)$b['id']);
+        }
+        return $bookings;
+    }
+
+    public function getResponsesForBooking(int $bookingId): array {
+        $stmt = $this->db->prepare("SELECT * FROM `booking_form_responses` WHERE `booking_id` = :booking_id ORDER BY `id` ASC");
+        $stmt->execute(['booking_id' => $bookingId]);
         return $stmt->fetchAll();
     }
 

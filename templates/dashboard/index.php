@@ -112,10 +112,17 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                         </tr>
                     <?php else: ?>
                         <?php foreach ($bookings as $b): ?>
-                            <tr class="hover:bg-slate-50/60 transition-colors">
+                            <tr class="hover:bg-slate-50/30 transition-colors">
                                 <td class="px-6 py-4">
-                                    <p class="font-bold text-slate-900 text-sm"><?= htmlspecialchars($b['customer_name']) ?></p>
-                                    <p class="text-xs text-slate-500"><?= htmlspecialchars($b['customer_email']) ?></p>
+                                    <div class="flex flex-col">
+                                        <p class="font-bold text-slate-900 text-sm"><?= htmlspecialchars($b['customer_name']) ?></p>
+                                        <p class="text-xs text-slate-500"><?= htmlspecialchars($b['customer_email']) ?></p>
+                                        <?php if (!empty($b['responses'])): ?>
+                                            <span class="inline-flex items-center gap-1 mt-1 text-[10px] font-extrabold text-indigo-700 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-md w-max">
+                                                💬 Has Custom Answers
+                                            </span>
+                                        <?php endif; ?>
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4 font-semibold text-slate-800 text-xs">
                                     <?= htmlspecialchars($b['event_name']) ?>
@@ -170,6 +177,26 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                                     <?php endif; ?>
                                 </td>
                             </tr>
+                            
+                            <!-- Expandable Custom Form Field Responses Row -->
+                            <?php if (!empty($b['responses'])): ?>
+                                <tr class="bg-slate-50/50">
+                                    <td colspan="5" class="px-8 py-3.5 border-t border-slate-100">
+                                        <div class="space-y-2">
+                                            <p class="text-[10px] font-extrabold uppercase text-indigo-800 tracking-wider">Client Custom Form Responses:</p>
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2.5">
+                                                <?php foreach ($b['responses'] as $resp): ?>
+                                                    <div class="text-xs">
+                                                        <span class="block font-bold text-slate-700"><?= htmlspecialchars($resp['field_label']) ?></span>
+                                                        <span class="text-slate-600 font-medium"><?= nl2br(htmlspecialchars($resp['value'])) ?></span>
+                                                    </div>
+                                                <?php endforeach; ?>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endif; ?>
+
                         <?php endforeach; ?>
                     <?php endif; ?>
                 </tbody>
