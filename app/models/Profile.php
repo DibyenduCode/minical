@@ -39,7 +39,7 @@ class Profile extends Model {
 
         $stmt = $this->db->prepare("
             UPDATE `profiles` 
-            SET `phone` = :phone, `timezone` = :timezone, `company_name` = :company_name, `custom_domain` = :custom_domain, `bio` = :bio, `avatar` = :avatar
+            SET `phone` = :phone, `timezone` = :timezone, `company_name` = :company_name, `custom_domain` = :custom_domain, `bio` = :bio, `avatar` = :avatar, `upi_id` = :upi_id, `qr_code` = :qr_code
             WHERE `user_id` = :user_id
         ");
         return $stmt->execute([
@@ -49,6 +49,8 @@ class Profile extends Model {
             'custom_domain' => $customDomain,
             'bio'           => $data['bio'] ?? null,
             'avatar'        => $data['avatar'] ?? null,
+            'upi_id'        => $data['upi_id'] ?? null,
+            'qr_code'       => $data['qr_code'] ?? null,
             'user_id'       => $userId
         ]);
     }
