@@ -182,8 +182,8 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                             <!-- Premium Collapsible Form Field Responses Row -->
                             <?php if (!empty($b['responses'])): ?>
                                 <tr id="responses-row-<?= $b['id'] ?>" class="bg-slate-50/50 hidden border-t border-b border-slate-100/80">
-                                    <td colspan="5" class="px-8 py-4">
-                                        <div class="max-w-md bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
+                                    <td colspan="5" class="px-4 sm:px-8 py-4">
+                                        <div class="w-full max-w-lg bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
                                             <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
                                                 <div class="flex items-center gap-1.5">
                                                     <span class="text-sm">📋</span>
@@ -202,7 +202,7 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                                                         <span class="block text-[10px] font-extrabold uppercase text-slate-400 tracking-wider">
                                                             <?= htmlspecialchars($resp['field_label']) ?>
                                                         </span>
-                                                        <div class="bg-slate-50 border border-slate-100 px-3.5 py-2.5 rounded-xl text-slate-800 text-xs font-semibold leading-relaxed whitespace-pre-wrap">
+                                                        <div class="bg-slate-50 border border-slate-200/60 px-4 py-2.5 rounded-2xl text-slate-800 text-xs font-semibold leading-relaxed text-left whitespace-pre-wrap">
                                                             <?= htmlspecialchars($resp['value']) ?>
                                                         </div>
                                                     </div>
