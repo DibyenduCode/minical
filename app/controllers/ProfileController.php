@@ -111,19 +111,17 @@ class ProfileController extends Controller {
             }
         }
 
-        // Update user name and plan
-        $plan = trim($data['plan'] ?? 'free');
+        // Update user name
         $db = Database::getInstance();
-        $stmt = $db->prepare("UPDATE `users` SET `name` = :name, `plan` = :plan WHERE `id` = :id");
+        $stmt = $db->prepare("UPDATE `users` SET `name` = :name WHERE `id` = :id");
         $stmt->execute([
             'name' => $name,
-            'plan' => $plan,
             'id'   => $user['id']
         ]);
 
         // Update session user name and plan
         $user['name'] = $name;
-        $user['plan'] = $plan;
+        $user['plan'] = $dbUser['plan'] ?? 'free';
         Session::set('user', $user);
 
         // Update Profile

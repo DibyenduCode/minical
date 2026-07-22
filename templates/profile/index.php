@@ -120,12 +120,15 @@ require_once TEMPLATES_DIR . '/layout/header.php';
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-slate-100 pt-6">
                 <div>
                     <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Subscription Plan</label>
-                    <select name="plan" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-black">
-                        <option value="free" <?= ($dbUser['plan'] ?? 'free') === 'free' ? 'selected' : '' ?>>Free Plan</option>
-                        <option value="growth" <?= ($dbUser['plan'] ?? 'free') === 'growth' ? 'selected' : '' ?>>Growth Plan</option>
-                        <option value="pro" <?= ($dbUser['plan'] ?? 'free') === 'pro' ? 'selected' : '' ?>>Pro Plan</option>
-                    </select>
-                    <span class="block text-[10px] text-slate-400 font-semibold mt-1">Change your tier to unlock Google Calendar, Stripe payments, and custom domains.</span>
+                    <div class="flex items-center gap-3 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl">
+                        <span class="text-sm font-bold text-slate-900">
+                            <?= isset($planDetails['name']) ? htmlspecialchars($planDetails['name']) : 'Free Plan' ?>
+                        </span>
+                        <span class="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-slate-200 text-slate-700 border border-slate-300/40">
+                            Active
+                        </span>
+                    </div>
+                    <span class="block text-[10px] text-slate-400 font-semibold mt-1">Managed by Administrator. Please contact support to upgrade or modify your subscription.</span>
                 </div>
             </div>
 
