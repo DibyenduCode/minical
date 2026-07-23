@@ -274,19 +274,28 @@ class ApiController extends Controller {
 
         $name = trim($data['name'] ?? '');
         $description = trim($data['description'] ?? '');
-        $duration = (int)($data['duration'] ?? 30);
+        $durationMinutes = (int)($data['duration_minutes'] ?? 30);
+        $bufferMinutes = (int)($data['buffer_minutes'] ?? 0);
+        $bookingWindowDays = (int)($data['booking_window_days'] ?? 30);
+        $locationType = trim($data['location_type'] ?? 'online');
         $price = (float)($data['price'] ?? 0.00);
         $currency = strtoupper(trim($data['currency'] ?? 'USD'));
         $isPaid = isset($data['is_paid']) ? (int)$data['is_paid'] : ($price > 0 ? 1 : 0);
-        $bufferMinutes = (int)($data['buffer_minutes'] ?? 0);
+        $status = trim($data['status'] ?? 'active');
 
         if (empty($name)) {
             $this->response->json(['status' => 'error', 'message' => 'Event name is required.'], 400);
             return;
         }
 
-        // Generate unique slug
-        $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $name), '-'));
+        // Generate unique slug if not explicitly passed
+        $slug = trim($data['slug'] ?? '');
+        if (empty($slug)) {
+            $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $name), '-'));
+        } else {
+            $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $slug), '-'));
+        }
+
         $db = Database::getInstance();
         $stmt = $db->prepare("SELECT id FROM `events` WHERE `user_id` = :user_id AND `slug` = :slug LIMIT 1");
         $stmt->execute(['user_id' => $user['id'], 'slug' => $slug]);
@@ -294,17 +303,19 @@ class ApiController extends Controller {
             $slug .= '-' . time();
         }
 
-        $eventId = $this->eventModel->create([
-            'user_id'        => $user['id'],
-            'name'           => $name,
-            'slug'           => $slug,
-            'description'    => $description,
-            'duration'       => $duration,
-            'is_paid'        => $isPaid,
-            'price'          => $price,
-            'currency'       => $currency,
-            'buffer_minutes' => $bufferMinutes,
-            'status'         => 'active'
+        $eventId = $this->eventModel->createEvent([
+            'user_id'             => $user['id'],
+            'name'                => $name,
+            'slug'                => $slug,
+            'description'         => $description,
+            'duration_minutes'    => $durationMinutes,
+            'buffer_minutes'      => $bufferMinutes,
+            'booking_window_days' => $bookingWindowDays,
+            'location_type'       => $locationType,
+            'is_paid'             => $isPaid,
+            'price'               => $price,
+            'currency'            => $currency,
+            'status'              => $status
         ]);
 
         $event = $this->eventModel->findByIdAndUserId($eventId, $user['id']);
@@ -324,30 +335,42 @@ class ApiController extends Controller {
 
         $name = trim($data['name'] ?? $event['name']);
         $description = trim($data['description'] ?? $event['description']);
-        $duration = (int)($data['duration'] ?? $event['duration']);
+        $durationMinutes = (int)($data['duration_minutes'] ?? $event['duration_minutes']);
+        $bufferMinutes = (int)($data['buffer_minutes'] ?? $event['buffer_minutes']);
+        $bookingWindowDays = (int)($data['booking_window_days'] ?? $event['booking_window_days']);
+        $locationType = trim($data['location_type'] ?? $event['location_type']);
         $price = (float)($data['price'] ?? $event['price']);
         $currency = strtoupper(trim($data['currency'] ?? $event['currency']));
         $isPaid = isset($data['is_paid']) ? (int)$data['is_paid'] : ($price > 0 ? 1 : 0);
-        $bufferMinutes = (int)($data['buffer_minutes'] ?? $event['buffer_minutes']);
         $status = trim($data['status'] ?? $event['status']);
+        
+        $slug = trim($data['slug'] ?? $event['slug']);
+        if (empty($slug)) {
+            $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $name), '-'));
+        } else {
+            $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $slug), '-'));
+        }
 
+        // Verify slug unique among other events
         $db = Database::getInstance();
-        $stmt = $db->prepare("
-            UPDATE `events` 
-            SET `name` = :name, `description` = :description, `duration` = :duration, `is_paid` = :is_paid, `price` = :price, `currency` = :currency, `buffer_minutes` = :buffer_minutes, `status` = :status
-            WHERE `id` = :id AND `user_id` = :user_id
-        ");
-        $stmt->execute([
-            'name'           => $name,
-            'description'    => $description,
-            'duration'       => $duration,
-            'is_paid'        => $isPaid,
-            'price'          => $price,
-            'currency'       => $currency,
-            'buffer_minutes' => $bufferMinutes,
-            'status'         => $status,
-            'id'             => $eventId,
-            'user_id'        => $user['id']
+        $stmt = $db->prepare("SELECT id FROM `events` WHERE `user_id` = :user_id AND `slug` = :slug AND `id` != :id LIMIT 1");
+        $stmt->execute(['user_id' => $user['id'], 'slug' => $slug, 'id' => $eventId]);
+        if ($stmt->fetch()) {
+            $slug .= '-' . time();
+        }
+
+        $this->eventModel->updateEvent($eventId, $user['id'], [
+            'name'                => $name,
+            'slug'                => $slug,
+            'description'         => $description,
+            'duration_minutes'    => $durationMinutes,
+            'buffer_minutes'      => $bufferMinutes,
+            'booking_window_days' => $bookingWindowDays,
+            'location_type'       => $locationType,
+            'is_paid'             => $isPaid,
+            'price'               => $price,
+            'currency'            => $currency,
+            'status'              => $status
         ]);
 
         $updated = $this->eventModel->findByIdAndUserId($eventId, $user['id']);
