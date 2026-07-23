@@ -430,4 +430,62 @@ class ApiController extends Controller {
 
         $this->response->json(['status' => 'success', 'message' => 'Promo code deleted successfully.']);
     }
+
+    public function register(): void {
+        $data = $this->request->getBody();
+
+        $name = trim($data['name'] ?? '');
+        $username = strtolower(trim($data['username'] ?? ''));
+        $email = strtolower(trim($data['email'] ?? ''));
+        $password = $data['password'] ?? '';
+
+        if (empty($name) || empty($username) || empty($email) || empty($password)) {
+            $this->response->json(['status' => 'error', 'message' => 'Please fill in all required fields.'], 400);
+            return;
+        }
+
+        if (strlen($password) < 6) {
+            $this->response->json(['status' => 'error', 'message' => 'Password must be at least 6 characters long.'], 400);
+            return;
+        }
+
+        if (!preg_match('/^[a-z0-9_-]+$/i', $username)) {
+            $this->response->json(['status' => 'error', 'message' => 'Username can only contain letters, numbers, underscores and hyphens.'], 400);
+            return;
+        }
+
+        if ($this->userModel->findByEmail($email)) {
+            $this->response->json(['status' => 'error', 'message' => 'An account with this email already exists.'], 409);
+            return;
+        }
+
+        if ($this->userModel->findByUsername($username)) {
+            $this->response->json(['status' => 'error', 'message' => 'Username is already taken.'], 409);
+            return;
+        }
+
+        // Create user
+        $userId = $this->userModel->create([
+            'name'     => $name,
+            'username' => $username,
+            'email'    => $email,
+            'password' => $password
+        ]);
+
+        $user = $this->userModel->findById($userId);
+
+        // Generate API Token
+        $tokenStr = bin2hex(random_bytes(32));
+        $db = Database::getInstance();
+        $stmt = $db->prepare("INSERT INTO `api_tokens` (`user_id`, `name`, `token`) VALUES (:user_id, 'Mobile Auth Token', :token)");
+        $stmt->execute(['user_id' => $user['id'], 'token' => $tokenStr]);
+
+        unset($user['password_hash']);
+        $this->response->json([
+            'status'  => 'success',
+            'message' => 'Account created successfully!',
+            'token'   => $tokenStr,
+            'user'    => $user
+        ]);
+    }
 }

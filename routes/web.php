@@ -100,6 +100,7 @@ App::get('/api/check-username', [ApiController::class, 'checkUsername']);
 
 // REST API Endpoints (v1)
 App::post('/api/v1/login', [ApiController::class, 'login']);
+App::post('/api/v1/signup', [ApiController::class, 'register']);
 App::get('/api/v1/dashboard', [ApiController::class, 'getDashboard']);
 App::get('/api/v1/profile', [ApiController::class, 'getProfile']);
 App::get('/api/v1/events', [ApiController::class, 'getEvents']);
