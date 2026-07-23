@@ -528,4 +528,12 @@ class AdminController extends Controller {
         Session::flash('success', 'Promo code deleted successfully.');
         $this->response->redirect(APP_URL . '/admin/promo-codes');
     }
+
+    public function documentation(): void {
+        $adminUser = $this->requireAdmin();
+        $this->renderAdmin('documentation', [
+            'admin'    => $adminUser,
+            'adminTab' => 'docs'
+        ]);
+    }
 }

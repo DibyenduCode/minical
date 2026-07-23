@@ -78,6 +78,7 @@ App::post('/admin/plans/delete/{id}', [AdminController::class, 'deletePlan']);
 
 App::get('/admin/users', [AdminController::class, 'users']);
 App::get('/admin/bookings', [AdminController::class, 'bookings']);
+App::get('/admin/documentation', [AdminController::class, 'documentation']);
 App::get('/admin/settings', [AdminController::class, 'settings']);
 App::get('/admin/promo-codes', [AdminController::class, 'promos']);
 App::post('/admin/promo-codes', [AdminController::class, 'createPromo']);
