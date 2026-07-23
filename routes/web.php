@@ -104,5 +104,19 @@ App::get('/api/v1/dashboard', [ApiController::class, 'getDashboard']);
 App::get('/api/v1/profile', [ApiController::class, 'getProfile']);
 App::get('/api/v1/events', [ApiController::class, 'getEvents']);
 App::get('/api/v1/availability', [ApiController::class, 'getAvailability']);
+App::post('/api/v1/availability', [ApiController::class, 'updateAvailability']);
+
 App::get('/api/v1/bookings', [ApiController::class, 'getBookings']);
+App::post('/api/v1/bookings/confirm-payment', [ApiController::class, 'confirmBookingPayment']);
+App::post('/api/v1/bookings/cancel', [ApiController::class, 'cancelBooking']);
+App::post('/api/v1/bookings/complete', [ApiController::class, 'completeBooking']);
+
+App::post('/api/v1/events', [ApiController::class, 'createEvent']);
+App::post('/api/v1/events/update/{id}', [ApiController::class, 'updateEvent']);
+App::post('/api/v1/events/delete/{id}', [ApiController::class, 'deleteEvent']);
+
 App::get('/api/v1/form-fields', [ApiController::class, 'getFormFields']);
+
+App::get('/api/v1/promo-codes', [ApiController::class, 'getPromos']);
+App::post('/api/v1/promo-codes', [ApiController::class, 'createPromo']);
+App::post('/api/v1/promo-codes/delete/{id}', [ApiController::class, 'deletePromo']);
