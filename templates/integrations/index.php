@@ -354,8 +354,9 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                 </div>
                 
                 <div class="space-y-1">
-                    <span class="text-indigo-400"># 1. Fetch Profile Info</span>
+                    <span class="text-indigo-400"># 1. Fetch & Update Profile</span>
                     <p class="text-slate-300"><span class="text-amber-400">GET</span> <?= APP_URL ?>/api/v1/profile</p>
+                    <p class="text-slate-300"><span class="text-indigo-400">POST</span> <?= APP_URL ?>/api/v1/profile</p>
                 </div>
 
                 <div class="space-y-1">

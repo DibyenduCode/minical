@@ -488,4 +488,95 @@ class ApiController extends Controller {
             'user'    => $user
         ]);
     }
+
+    public function updateProfile(): void {
+        $user = $this->authenticateToken();
+        $data = $this->request->getBody();
+
+        $name = trim($data['name'] ?? '');
+        $newUsername = strtolower(trim($data['username'] ?? ''));
+        $phone = trim($data['phone'] ?? '');
+        $timezone = trim($data['timezone'] ?? 'UTC');
+        $companyName = trim($data['company_name'] ?? '');
+        $customDomain = trim($data['custom_domain'] ?? '');
+        $bio = trim($data['bio'] ?? '');
+        $upiId = trim($data['upi_id'] ?? '');
+
+        if (empty($name)) {
+            $this->response->json(['status' => 'error', 'message' => 'Name cannot be empty.'], 400);
+            return;
+        }
+
+        if (empty($newUsername)) {
+            $this->response->json(['status' => 'error', 'message' => 'Username cannot be empty.'], 400);
+            return;
+        }
+
+        if (!preg_match('/^[a-z0-9_-]+$/i', $newUsername)) {
+            $this->response->json(['status' => 'error', 'message' => 'Username can only contain letters, numbers, underscores and hyphens.'], 400);
+            return;
+        }
+
+        // Check if username is already taken by another user
+        $chkUser = $this->userModel->findByUsername($newUsername);
+        if ($chkUser && (int)$chkUser['id'] !== (int)$user['id']) {
+            $this->response->json(['status' => 'error', 'message' => 'Username is already taken by another user.'], 409);
+            return;
+        }
+
+        // Get current profile
+        $profile = $this->profileModel->findByUserId($user['id']);
+        $avatarUrl = $profile['avatar'] ?? null;
+        $qrCodeUrl = $profile['qr_code'] ?? null;
+
+        if (!empty($_FILES['avatar_file']['name'])) {
+            $file = $_FILES['avatar_file'];
+            $uploadDir = PUBLIC_DIR . '/uploads/logos/';
+            if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+            $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+            $newFileName = 'logo_' . $user['id'] . '_' . time() . '.' . $ext;
+            if (move_uploaded_file($file['tmp_name'], $uploadDir . $newFileName)) {
+                $avatarUrl = 'public/uploads/logos/' . $newFileName;
+            }
+        }
+
+        if (!empty($_FILES['qr_code_file']['name'])) {
+            $file = $_FILES['qr_code_file'];
+            $uploadDir = PUBLIC_DIR . '/uploads/qrcodes/';
+            if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+            $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+            $newFileName = 'qr_' . $user['id'] . '_' . time() . '.' . $ext;
+            if (move_uploaded_file($file['tmp_name'], $uploadDir . $newFileName)) {
+                $qrCodeUrl = 'public/uploads/qrcodes/' . $newFileName;
+            }
+        }
+
+        // Update user
+        $db = Database::getInstance();
+        $stmt = $db->prepare("UPDATE `users` SET `name` = :name, `username` = :username WHERE `id` = :id");
+        $stmt->execute([
+            'name'     => $name,
+            'username' => $newUsername,
+            'id'       => $user['id']
+        ]);
+
+        // Update Profile
+        $this->profileModel->updateByUserId($user['id'], [
+            'phone'         => $phone,
+            'timezone'      => $timezone,
+            'company_name'  => $companyName,
+            'custom_domain' => $customDomain,
+            'bio'           => $bio,
+            'avatar'        => $avatarUrl,
+            'upi_id'        => $upiId,
+            'qr_code'       => $qrCodeUrl
+        ]);
+
+        $updatedProfile = $this->profileModel->findByUserId($user['id']);
+        $this->response->json([
+            'status'  => 'success',
+            'message' => 'Profile updated successfully.',
+            'profile' => $updatedProfile
+        ]);
+    }
 }

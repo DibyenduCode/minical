@@ -103,6 +103,7 @@ App::post('/api/v1/login', [ApiController::class, 'login']);
 App::post('/api/v1/signup', [ApiController::class, 'register']);
 App::get('/api/v1/dashboard', [ApiController::class, 'getDashboard']);
 App::get('/api/v1/profile', [ApiController::class, 'getProfile']);
+App::post('/api/v1/profile', [ApiController::class, 'updateProfile']);
 App::get('/api/v1/events', [ApiController::class, 'getEvents']);
 App::get('/api/v1/availability', [ApiController::class, 'getAvailability']);
 App::post('/api/v1/availability', [ApiController::class, 'updateAvailability']);
