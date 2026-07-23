@@ -93,6 +93,9 @@ App::post('/u/{username}/apply-promo', [PublicBookingController::class, 'applyPr
 App::post('/u/{username}/book', [PublicBookingController::class, 'submitBooking']);
 App::get('/booking/confirmation/{id}', [PublicBookingController::class, 'showConfirmation']);
 
+// Public API Utility
+App::get('/api/check-username', [ApiController::class, 'checkUsername']);
+
 // REST API Endpoints (v1)
 App::post('/api/v1/login', [ApiController::class, 'login']);
 App::get('/api/v1/dashboard', [ApiController::class, 'getDashboard']);

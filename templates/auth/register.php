@@ -43,6 +43,7 @@
                     <input type="text" id="username" name="username" required placeholder="johndoe"
                         class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition-all">
                 </div>
+                <span id="username_status" class="block text-[10px] font-bold mt-1.5 hidden"></span>
             </div>
 
             <div>
@@ -69,5 +70,55 @@
             </p>
         </div>
     </div>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const usernameInput = document.getElementById('username');
+        const usernameStatus = document.getElementById('username_status');
+        let timeout = null;
+
+        if (usernameInput) {
+            usernameInput.addEventListener('input', function() {
+                clearTimeout(timeout);
+                const username = usernameInput.value.trim().toLowerCase();
+                usernameStatus.classList.add('hidden');
+
+                if (!username) {
+                    usernameStatus.className = 'block text-[10px] font-bold mt-1.5 text-red-600';
+                    usernameStatus.innerText = 'Username cannot be empty.';
+                    usernameStatus.classList.remove('hidden');
+                    return;
+                }
+
+                if (!/^[a-z0-9_-]+$/i.test(username)) {
+                    usernameStatus.className = 'block text-[10px] font-bold mt-1.5 text-red-600';
+                    usernameStatus.innerText = 'Letters, numbers, underscores and hyphens only.';
+                    usernameStatus.classList.remove('hidden');
+                    return;
+                }
+
+                timeout = setTimeout(() => {
+                    fetch(`<?= APP_URL ?>/api/check-username?username=${username}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            usernameStatus.classList.remove('hidden');
+                            if (data.available) {
+                                usernameStatus.className = 'block text-[10px] font-bold mt-1.5 text-emerald-600';
+                                usernameStatus.innerText = '✓ Username is available';
+                            } else {
+                                usernameStatus.className = 'block text-[10px] font-bold mt-1.5 text-red-600';
+                                usernameStatus.innerText = '✗ Username is already taken';
+                            }
+                        })
+                        .catch(() => {
+                            usernameStatus.className = 'block text-[10px] font-bold mt-1.5 text-red-600';
+                            usernameStatus.innerText = 'Failed to verify username availability.';
+                            usernameStatus.classList.remove('hidden');
+                        });
+                }, 300);
+            });
+        }
+    });
+    </script>
 </body>
 </html>

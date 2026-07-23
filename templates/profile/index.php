@@ -46,7 +46,7 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div>
                     <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Full Name</label>
                     <input type="text" name="name" value="<?= htmlspecialchars($user['name']) ?>" required
@@ -54,7 +54,17 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Email Address</label>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 font-sans">Username (Booking Link)</label>
+                    <div class="relative flex items-center">
+                        <span class="absolute left-4 text-xs font-bold text-slate-400 select-none">/u/</span>
+                        <input type="text" id="username_input" name="username" value="<?= htmlspecialchars($user['username']) ?>" required
+                               class="w-full pl-8 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-black font-semibold">
+                    </div>
+                    <span id="username_status" class="block text-[10px] font-bold mt-1.5 hidden"></span>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 font-sans">Email Address</label>
                     <input type="email" value="<?= htmlspecialchars($user['email']) ?>" disabled
                            class="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-xl text-slate-400 text-sm cursor-not-allowed">
                 </div>
@@ -204,5 +214,55 @@ require_once TEMPLATES_DIR . '/layout/header.php';
 </div>
 
 
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const usernameInput = document.getElementById('username_input');
+    const usernameStatus = document.getElementById('username_status');
+    let timeout = null;
+
+    if (usernameInput) {
+        usernameInput.addEventListener('input', function() {
+            clearTimeout(timeout);
+            const username = usernameInput.value.trim().toLowerCase();
+            usernameStatus.classList.add('hidden');
+
+            if (!username) {
+                usernameStatus.className = 'block text-[10px] font-bold mt-1.5 text-red-600';
+                usernameStatus.innerText = 'Username cannot be empty.';
+                usernameStatus.classList.remove('hidden');
+                return;
+            }
+
+            if (!/^[a-z0-9_-]+$/i.test(username)) {
+                usernameStatus.className = 'block text-[10px] font-bold mt-1.5 text-red-600';
+                usernameStatus.innerText = 'Letters, numbers, underscores and hyphens only.';
+                usernameStatus.classList.remove('hidden');
+                return;
+            }
+
+            timeout = setTimeout(() => {
+                fetch(`<?= APP_URL ?>/api/check-username?username=${username}&exclude_user_id=<?= $user['id'] ?? 0 ?>`)
+                    .then(res => res.json())
+                    .then(data => {
+                        usernameStatus.classList.remove('hidden');
+                        if (data.available) {
+                            usernameStatus.className = 'block text-[10px] font-bold mt-1.5 text-emerald-600';
+                            usernameStatus.innerText = '✓ Username is available';
+                        } else {
+                            usernameStatus.className = 'block text-[10px] font-bold mt-1.5 text-red-600';
+                            usernameStatus.innerText = '✗ Username is already taken';
+                        }
+                    })
+                    .catch(() => {
+                        usernameStatus.className = 'block text-[10px] font-bold mt-1.5 text-red-600';
+                        usernameStatus.innerText = 'Failed to verify username availability.';
+                        usernameStatus.classList.remove('hidden');
+                    });
+            }, 300);
+        });
+    }
+});
+</script>
 
 <?php require_once TEMPLATES_DIR . '/layout/footer.php'; ?>

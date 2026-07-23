@@ -73,6 +73,7 @@ class ProfileController extends Controller {
         }
 
         $name = trim($data['name'] ?? '');
+        $newUsername = strtolower(trim($data['username'] ?? ''));
         $phone = trim($data['phone'] ?? '');
         $timezone = trim($data['timezone'] ?? 'UTC');
         $companyName = trim($data['company_name'] ?? '');
@@ -82,6 +83,23 @@ class ProfileController extends Controller {
 
         if (empty($name)) {
             Session::flash('error', 'Name cannot be empty.');
+            $this->response->redirect(APP_URL . '/profile');
+        }
+
+        if (empty($newUsername)) {
+            Session::flash('error', 'Username cannot be empty.');
+            $this->response->redirect(APP_URL . '/profile');
+        }
+
+        if (!preg_match('/^[a-z0-9_-]+$/i', $newUsername)) {
+            Session::flash('error', 'Username can only contain letters, numbers, underscores and hyphens.');
+            $this->response->redirect(APP_URL . '/profile');
+        }
+
+        // Check if username is already taken by another user
+        $chkUser = $this->userModel->findByUsername($newUsername);
+        if ($chkUser && (int)$chkUser['id'] !== (int)$user['id']) {
+            Session::flash('error', 'Username is already taken by another user.');
             $this->response->redirect(APP_URL . '/profile');
         }
 
@@ -142,16 +160,18 @@ class ProfileController extends Controller {
             }
         }
 
-        // Update user name
+        // Update user name & username
         $db = Database::getInstance();
-        $stmt = $db->prepare("UPDATE `users` SET `name` = :name WHERE `id` = :id");
+        $stmt = $db->prepare("UPDATE `users` SET `name` = :name, `username` = :username WHERE `id` = :id");
         $stmt->execute([
-            'name' => $name,
-            'id'   => $user['id']
+            'name'     => $name,
+            'username' => $newUsername,
+            'id'       => $user['id']
         ]);
 
-        // Update session user name and plan
+        // Update session user name, username and plan
         $user['name'] = $name;
+        $user['username'] = $newUsername;
         $user['plan'] = $dbUser['plan'] ?? 'free';
         Session::set('user', $user);
 

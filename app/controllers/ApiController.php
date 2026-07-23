@@ -102,4 +102,34 @@ class ApiController extends Controller {
         $fields = $this->fieldModel->getByUserId($user['id']);
         $this->response->json(['status' => 'success', 'fields' => $fields]);
     }
+
+    public function checkUsername(): void {
+        $username = strtolower(trim($_GET['username'] ?? ''));
+        if (empty($username)) {
+            $this->response->json(['available' => false, 'message' => 'Username cannot be empty.']);
+            return;
+        }
+
+        if (!preg_match('/^[a-z0-9_-]+$/i', $username)) {
+            $this->response->json(['available' => false, 'message' => 'Letters, numbers, underscores & hyphens only.']);
+            return;
+        }
+
+        $excludeUserId = isset($_GET['exclude_user_id']) ? (int)$_GET['exclude_user_id'] : 0;
+
+        $db = Database::getInstance();
+        $stmt = $db->prepare("SELECT id FROM `users` WHERE `username` = :username LIMIT 1");
+        $stmt->execute(['username' => $username]);
+        $user = $stmt->fetch();
+
+        if ($user) {
+            if ($excludeUserId > 0 && (int)$user['id'] === $excludeUserId) {
+                $this->response->json(['available' => true, 'message' => 'Username is available.']);
+                return;
+            }
+            $this->response->json(['available' => false, 'message' => 'Username is already taken.']);
+        } else {
+            $this->response->json(['available' => true, 'message' => 'Username is available.']);
+        }
+    }
 }
