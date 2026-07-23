@@ -294,6 +294,86 @@ require_once TEMPLATES_DIR . '/layout/header.php';
             </div>
         </div>
 
+        </div>
+
+    </div>
+
+    <!-- Developer API Key Card -->
+    <div class="bg-white border border-slate-200/90 rounded-3xl p-8 shadow-sm space-y-6">
+        <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 bg-indigo-50 text-indigo-700 text-[10px] font-extrabold rounded-full uppercase tracking-wider mb-2">
+                Developer API Access
+            </div>
+            <h2 class="text-xl font-extrabold text-slate-950 tracking-tight">API Key Management</h2>
+            <p class="text-slate-500 text-xs font-medium">Generate an API key to securely connect MiniCal scheduling to your custom web app or software.</p>
+        </div>
+
+        <div class="p-5 bg-slate-50 border border-slate-200 rounded-2xl space-y-4 font-sans">
+            <div class="flex flex-col gap-1.5">
+                <span class="text-xs font-bold text-slate-600">Your Developer API Token:</span>
+                <?php if (!empty($apiKey)): ?>
+                    <div class="flex items-center gap-3">
+                        <input type="text" id="api_key_input" readonly value="<?= htmlspecialchars($apiKey) ?>"
+                               class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-slate-900 font-mono text-xs select-all focus:outline-none focus:ring-1 focus:ring-black">
+                        <button onclick="navigator.clipboard.writeText('<?= htmlspecialchars($apiKey) ?>'); alert('API Key copied to clipboard!')"
+                                class="px-4 py-2.5 bg-black hover:bg-slate-800 text-white text-xs font-bold rounded-xl transition-all shadow-sm flex-shrink-0">
+                            Copy Key
+                        </button>
+                    </div>
+                <?php else: ?>
+                    <span class="text-xs text-slate-400 font-semibold italic">No API key generated yet.</span>
+                <?php endif; ?>
+            </div>
+
+            <div class="pt-4 border-t border-slate-200/80 flex items-center justify-between flex-wrap gap-4">
+                <form action="<?= APP_URL ?>/integrations/api-key/generate" method="POST">
+                    <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+                    <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-sm transition-all">
+                        <?= empty($apiKey) ? '⚡ Generate API Key' : '🔄 Regenerate Key' ?>
+                    </button>
+                </form>
+
+                <?php if (!empty($apiKey)): ?>
+                    <form action="<?= APP_URL ?>/integrations/api-key/revoke" method="POST">
+                        <input type="hidden" name="csrf_token" value="<?= $csrf_token ?>">
+                        <button type="submit" class="px-5 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-bold rounded-xl transition-all">
+                            Revoke Key
+                        </button>
+                    </form>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <!-- Mini Documentation -->
+        <div class="space-y-4 pt-2">
+            <h3 class="text-xs font-extrabold text-slate-800 uppercase tracking-wider">REST API Documentation & Usage:</h3>
+            <div class="bg-slate-900 rounded-2xl p-6 text-slate-200 text-xs font-mono space-y-4 overflow-x-auto">
+                <div>
+                    <span class="text-indigo-400"># Authenticate request header:</span>
+                    <p class="text-emerald-400">Authorization: Bearer YOUR_API_KEY</p>
+                </div>
+                
+                <div class="space-y-1">
+                    <span class="text-indigo-400"># 1. Fetch Profile Info</span>
+                    <p class="text-slate-300"><span class="text-amber-400">GET</span> <?= APP_URL ?>/api/v1/profile</p>
+                </div>
+
+                <div class="space-y-1">
+                    <span class="text-indigo-400"># 2. Fetch Availability Slots</span>
+                    <p class="text-slate-300"><span class="text-amber-400">GET</span> <?= APP_URL ?>/api/v1/availability</p>
+                </div>
+
+                <div class="space-y-1">
+                    <span class="text-indigo-400"># 3. Fetch Bookings</span>
+                    <p class="text-slate-300"><span class="text-amber-400">GET</span> <?= APP_URL ?>/api/v1/bookings</p>
+                </div>
+
+                <div class="space-y-1">
+                    <span class="text-indigo-400"># 4. Fetch Custom Form Fields</span>
+                    <p class="text-slate-300"><span class="text-amber-400">GET</span> <?= APP_URL ?>/api/v1/form-fields</p>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 

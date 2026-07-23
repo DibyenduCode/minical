@@ -46,6 +46,7 @@ class ApiController extends Controller {
             $this->response->json(['status' => 'error', 'message' => 'User account disabled or not found.'], 401);
         }
 
+        unset($user['password_hash']);
         return $user;
     }
 

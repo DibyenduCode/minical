@@ -51,6 +51,8 @@ App::get('/integrations/google/connect', [GoogleAuthController::class, 'connect'
 App::get('/integrations/google/callback', [GoogleAuthController::class, 'callback']);
 App::post('/integrations/google/disconnect', [GoogleAuthController::class, 'disconnect']);
 App::post('/integrations/google/select-calendar', [GoogleAuthController::class, 'selectCalendar']);
+App::post('/integrations/api-key/generate', [IntegrationController::class, 'generateApiKey']);
+App::post('/integrations/api-key/revoke', [IntegrationController::class, 'revokeApiKey']);
 
 // Availability & Event Configuration
 App::get('/availability', [AvailabilityController::class, 'index']);
