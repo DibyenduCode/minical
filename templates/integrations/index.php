@@ -359,17 +359,22 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                 </div>
 
                 <div class="space-y-1">
-                    <span class="text-indigo-400"># 2. Fetch Availability Slots</span>
+                    <span class="text-indigo-400"># 2. Fetch Event Types / Services</span>
+                    <p class="text-slate-300"><span class="text-amber-400">GET</span> <?= APP_URL ?>/api/v1/events</p>
+                </div>
+
+                <div class="space-y-1">
+                    <span class="text-indigo-400"># 3. Fetch Availability Slots</span>
                     <p class="text-slate-300"><span class="text-amber-400">GET</span> <?= APP_URL ?>/api/v1/availability</p>
                 </div>
 
                 <div class="space-y-1">
-                    <span class="text-indigo-400"># 3. Fetch Bookings</span>
+                    <span class="text-indigo-400"># 4. Fetch Bookings</span>
                     <p class="text-slate-300"><span class="text-amber-400">GET</span> <?= APP_URL ?>/api/v1/bookings</p>
                 </div>
 
                 <div class="space-y-1">
-                    <span class="text-indigo-400"># 4. Fetch Custom Form Fields</span>
+                    <span class="text-indigo-400"># 5. Fetch Custom Form Fields</span>
                     <p class="text-slate-300"><span class="text-amber-400">GET</span> <?= APP_URL ?>/api/v1/form-fields</p>
                 </div>
             </div>

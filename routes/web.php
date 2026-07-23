@@ -102,6 +102,7 @@ App::get('/api/check-username', [ApiController::class, 'checkUsername']);
 App::post('/api/v1/login', [ApiController::class, 'login']);
 App::get('/api/v1/dashboard', [ApiController::class, 'getDashboard']);
 App::get('/api/v1/profile', [ApiController::class, 'getProfile']);
+App::get('/api/v1/events', [ApiController::class, 'getEvents']);
 App::get('/api/v1/availability', [ApiController::class, 'getAvailability']);
 App::get('/api/v1/bookings', [ApiController::class, 'getBookings']);
 App::get('/api/v1/form-fields', [ApiController::class, 'getFormFields']);

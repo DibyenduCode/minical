@@ -133,4 +133,13 @@ class ApiController extends Controller {
             $this->response->json(['available' => true, 'message' => 'Username is available.']);
         }
     }
+
+    public function getEvents(): void {
+        $user = $this->authenticateToken();
+        $db = Database::getInstance();
+        $stmt = $db->prepare("SELECT * FROM `events` WHERE `user_id` = :user_id ORDER BY `id` DESC");
+        $stmt->execute(['user_id' => $user['id']]);
+        $events = $stmt->fetchAll();
+        $this->response->json(['status' => 'success', 'events' => $events]);
+    }
 }
