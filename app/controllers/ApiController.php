@@ -60,7 +60,7 @@ class ApiController extends Controller {
 
         $user = $this->userModel->findByEmail($email);
         if (!$user || !$this->userModel->verifyPassword($password, $user['password_hash'])) {
-            $this->response->json(['status' => 'error', 'message' => 'Invalid credentials'], 401);
+            $this->response->json(['status' => 'error', 'message' => 'Please enter correct email and password.'], 200);
         }
 
         // Generate API Bearer Token
@@ -457,27 +457,27 @@ class ApiController extends Controller {
         $password = $data['password'] ?? '';
 
         if (empty($name) || empty($username) || empty($email) || empty($password)) {
-            $this->response->json(['status' => 'error', 'message' => 'Please fill in all required fields.'], 400);
+            $this->response->json(['status' => 'error', 'message' => 'Please fill in all required fields.'], 200);
             return;
         }
 
         if (strlen($password) < 6) {
-            $this->response->json(['status' => 'error', 'message' => 'Password must be at least 6 characters long.'], 400);
+            $this->response->json(['status' => 'error', 'message' => 'Password must be at least 6 characters long.'], 200);
             return;
         }
 
         if (!preg_match('/^[a-z0-9_-]+$/i', $username)) {
-            $this->response->json(['status' => 'error', 'message' => 'Username can only contain letters, numbers, underscores and hyphens.'], 400);
+            $this->response->json(['status' => 'error', 'message' => 'Username can only contain letters, numbers, underscores and hyphens.'], 200);
             return;
         }
 
         if ($this->userModel->findByEmail($email)) {
-            $this->response->json(['status' => 'error', 'message' => 'An account with this email already exists.'], 409);
+            $this->response->json(['status' => 'error', 'message' => 'An account with this email already exists.'], 200);
             return;
         }
 
         if ($this->userModel->findByUsername($username)) {
-            $this->response->json(['status' => 'error', 'message' => 'Username is already taken.'], 409);
+            $this->response->json(['status' => 'error', 'message' => 'Username is already taken.'], 200);
             return;
         }
 
