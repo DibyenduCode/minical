@@ -1,8 +1,8 @@
--- MiniCal Database Schema
--- Database Name: minical
+-- DayCal Database Schema
+-- Database Name: daycal
 
-CREATE DATABASE IF NOT EXISTS `minical` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE `minical`;
+CREATE DATABASE IF NOT EXISTS `daycal` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE `daycal`;
 
 -- Drop tables if they exist to allow clean imports
 SET FOREIGN_KEY_CHECKS = 0;
@@ -231,10 +231,31 @@ CREATE TABLE `settings` (
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Plans Table
+CREATE TABLE `plans` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `name` VARCHAR(100) NOT NULL,
+  `slug` VARCHAR(100) NOT NULL UNIQUE,
+  `price` VARCHAR(50) NOT NULL,
+  `billing_cycle` VARCHAR(100) NOT NULL DEFAULT 'per month',
+  `description` TEXT NULL,
+  `features` TEXT NULL COMMENT 'JSON array of features',
+  `badge` VARCHAR(100) NULL,
+  `button_text` VARCHAR(100) NULL DEFAULT 'Get Started',
+  `is_featured` TINYINT(1) NOT NULL DEFAULT 0,
+  `display_order` INT NOT NULL DEFAULT 0,
+  `status` ENUM('active', 'inactive') NOT NULL DEFAULT 'active',
+  `max_events` INT NOT NULL DEFAULT -1,
+  `allow_custom_domain` TINYINT(1) NOT NULL DEFAULT 0,
+  `allow_google_calendar` TINYINT(1) NOT NULL DEFAULT 0,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Insert Default Admin User (Password: admin123)
 -- Hash generated via password_hash('admin123', PASSWORD_BCRYPT)
 INSERT INTO `users` (`id`, `name`, `username`, `email`, `password_hash`, `role`, `status`) VALUES
-(1, 'Admin User', 'admin', 'admin@minical.local', '$2y$10$1whQ4HiR7NOpUWq0XkD1eeH3/9ax7C2i9UG0XgpzksDzxyXkZxqz.', 'admin', 'active');
+(1, 'Admin User', 'admin', 'admin@daycal.in', '$2y$10$1whQ4HiR7NOpUWq0XkD1eeH3/9ax7C2i9UG0XgpzksDzxyXkZxqz.', 'admin', 'active');
 
 -- Insert Default Profile for Admin
 INSERT INTO `profiles` (`user_id`, `phone`, `timezone`, `bio`) VALUES
@@ -256,7 +277,7 @@ INSERT INTO `availability` (`user_id`, `day_of_week`, `start_time`, `end_time`, 
 
 -- Insert Default System Settings
 INSERT INTO `settings` (`setting_key`, `setting_value`) VALUES
-('site_name', 'MiniCal'),
+('site_name', 'DayCal'),
 ('smtp_host', 'smtp.mailtrap.io'),
 ('smtp_port', '2525'),
 ('smtp_user', ''),

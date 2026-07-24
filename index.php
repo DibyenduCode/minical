@@ -1,6 +1,6 @@
 <?php
 /**
- * MiniCal - Front Controller
+ * DayCal - Front Controller
  */
 
 require_once __DIR__ . '/config/config.php';

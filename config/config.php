@@ -15,7 +15,7 @@ define('PUBLIC_DIR', ROOT_DIR . '/public');
 define('TEMPLATES_DIR', ROOT_DIR . '/templates');
 
 // Session Config
-define('SESSION_NAME', 'minical_session');
+define('SESSION_NAME', 'daycal_session');
 
 // Google OAuth 2.0 Credentials (Set via Environment Variables or Admin Settings)
 define('GOOGLE_CLIENT_ID', getenv('GOOGLE_CLIENT_ID') ?: 'YOUR_GOOGLE_CLIENT_ID');
