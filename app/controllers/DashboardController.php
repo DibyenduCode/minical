@@ -33,15 +33,30 @@ class DashboardController extends Controller {
         $filter = $_GET['filter'] ?? null;
         $search = $_GET['search'] ?? null;
 
-        $bookings = $this->bookingModel->getBookingsForUser($user['id'], $filter, $search);
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        if ($page < 1) $page = 1;
+        $perPage = 10;
+
+        $totalBookings = $this->bookingModel->getBookingsCountForUser($user['id'], $filter, $search);
+        $totalPages = (int)ceil($totalBookings / $perPage);
+        if ($totalPages < 1) $totalPages = 1;
+        if ($page > $totalPages) $page = $totalPages;
+
+        $offset = ($page - 1) * $perPage;
+
+        $bookings = $this->bookingModel->getBookingsForUser($user['id'], $filter, $search, $perPage, $offset);
 
         $this->render('dashboard/bookings', [
-            'user'     => $user,
-            'bookings' => $bookings,
-            'filter'   => $filter,
-            'search'   => $search,
-            'success'  => Session::flash('success'),
-            'error'    => Session::flash('error')
+            'user'          => $user,
+            'bookings'      => $bookings,
+            'filter'        => $filter,
+            'search'        => $search,
+            'currentPage'   => $page,
+            'totalPages'    => $totalPages,
+            'totalBookings' => $totalBookings,
+            'perPage'       => $perPage,
+            'success'       => Session::flash('success'),
+            'error'         => Session::flash('error')
         ]);
     }
 

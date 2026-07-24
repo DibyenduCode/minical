@@ -291,20 +291,42 @@ class AdminController extends Controller {
         $adminUser = $this->requireAdmin();
         $db = Database::getInstance();
 
-        $allBookings = $db->query("
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        if ($page < 1) $page = 1;
+        $limit = 10;
+
+        $stmtCount = $db->query("SELECT COUNT(*) FROM `bookings`");
+        $totalBookings = (int)$stmtCount->fetchColumn();
+
+        $totalPages = (int)ceil($totalBookings / $limit);
+        if ($totalPages < 1) $totalPages = 1;
+        if ($page > $totalPages) $page = $totalPages;
+
+        $offset = ($page - 1) * $limit;
+
+        $stmtData = $db->prepare("
             SELECT b.*, u.name as host_name, u.username as host_username, e.name as event_name 
             FROM `bookings` b 
             JOIN `users` u ON u.id = b.user_id 
             JOIN `events` e ON e.id = b.event_id 
             ORDER BY b.id DESC
-        ")->fetchAll();
+            LIMIT :limit OFFSET :offset
+        ");
+        $stmtData->bindValue(':limit', $limit, \PDO::PARAM_INT);
+        $stmtData->bindValue(':offset', $offset, \PDO::PARAM_INT);
+        $stmtData->execute();
+        $allBookings = $stmtData->fetchAll();
 
         $this->renderAdmin('bookings', [
-            'admin'       => $adminUser,
-            'adminTab'    => 'bookings',
-            'allBookings' => $allBookings,
-            'success'     => Session::flash('success'),
-            'error'       => Session::flash('error')
+            'admin'         => $adminUser,
+            'adminTab'      => 'bookings',
+            'allBookings'   => $allBookings,
+            'currentPage'   => $page,
+            'totalPages'    => $totalPages,
+            'totalBookings' => $totalBookings,
+            'perPage'       => $limit,
+            'success'       => Session::flash('success'),
+            'error'         => Session::flash('error')
         ]);
     }
 

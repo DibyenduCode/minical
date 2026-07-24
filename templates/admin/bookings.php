@@ -11,7 +11,7 @@ require_once TEMPLATES_DIR . '/admin/layout/header.php';
                 <h1 class="text-2xl font-extrabold text-slate-950 tracking-tight">Global Appointments Log</h1>
                 <p class="text-slate-500 text-xs font-medium mt-1">Platform-wide overview of all customer appointments across all hosts.</p>
             </div>
-            <span class="text-xs text-slate-500 font-bold bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200"><?= count($allBookings) ?> Total Bookings</span>
+            <span class="text-xs text-slate-500 font-bold bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200"><?= $totalBookings ?> Total Bookings</span>
         </div>
 
         <div class="overflow-x-auto rounded-2xl border border-slate-200">
@@ -65,6 +65,48 @@ require_once TEMPLATES_DIR . '/admin/layout/header.php';
                 </tbody>
             </table>
         </div>
+
+        <!-- Pagination Controls -->
+        <?php if (!empty($totalBookings) && $totalPages > 1): ?>
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-100">
+                <span class="text-xs text-slate-500 font-medium">
+                    Showing Page <strong class="text-slate-700"><?= $currentPage ?></strong> of <strong class="text-slate-700"><?= $totalPages ?></strong> (Total <?= $totalBookings ?> bookings)
+                </span>
+                
+                <div class="flex items-center gap-1.5">
+                    <?php
+                    $queryParams = $_GET;
+                    ?>
+                    <?php if ($currentPage > 1): ?>
+                        <?php 
+                        $queryParams['page'] = $currentPage - 1;
+                        $prevUrl = APP_URL . '/admin/bookings?' . http_build_query($queryParams);
+                        ?>
+                        <a href="<?= $prevUrl ?>" class="px-3.5 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 transition-all">
+                            ← Previous
+                        </a>
+                    <?php else: ?>
+                        <button disabled class="px-3.5 py-2 bg-slate-50 border border-slate-100 rounded-xl text-xs font-bold text-slate-300 cursor-not-allowed">
+                            ← Previous
+                        </button>
+                    <?php endif; ?>
+
+                    <?php if ($currentPage < $totalPages): ?>
+                        <?php 
+                        $queryParams['page'] = $currentPage + 1;
+                        $nextUrl = APP_URL . '/admin/bookings?' . http_build_query($queryParams);
+                        ?>
+                        <a href="<?= $nextUrl ?>" class="px-3.5 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 transition-all">
+                            Next →
+                        </a>
+                    <?php else: ?>
+                        <button disabled class="px-3.5 py-2 bg-slate-50 border border-slate-100 rounded-xl text-xs font-bold text-slate-300 cursor-not-allowed">
+                            Next →
+                        </button>
+                    <?php endif; ?>
+                </div>
+            </div>
+        <?php endif; ?>
     </div>
 </div>
 

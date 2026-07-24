@@ -81,7 +81,34 @@ class Booking extends Model {
         ];
     }
 
-    public function getBookingsForUser(int $userId, ?string $filter = null, ?string $search = null): array {
+    public function getBookingsCountForUser(int $userId, ?string $filter = null, ?string $search = null): int {
+        $sql = "SELECT COUNT(*) 
+                FROM `bookings` b 
+                JOIN `events` e ON e.id = b.event_id 
+                WHERE b.user_id = :user_id";
+        $params = ['user_id' => $userId];
+
+        if ($filter === 'today') {
+            $sql .= " AND b.booking_date = CURRENT_DATE()";
+        } elseif ($filter === 'upcoming') {
+            $sql .= " AND b.booking_date >= CURRENT_DATE() AND b.status IN ('confirmed', 'paid', 'pending')";
+        } elseif ($filter === 'completed') {
+            $sql .= " AND b.status = 'completed'";
+        } elseif ($filter === 'cancelled') {
+            $sql .= " AND b.status = 'cancelled'";
+        }
+
+        if (!empty($search)) {
+            $sql .= " AND (b.customer_name LIKE :search OR b.customer_email LIKE :search)";
+            $params['search'] = '%' . $search . '%';
+        }
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+        return (int)$stmt->fetchColumn();
+    }
+
+    public function getBookingsForUser(int $userId, ?string $filter = null, ?string $search = null, ?int $limit = null, ?int $offset = null): array {
         $sql = "SELECT b.*, e.name as event_name, e.is_paid, e.price, e.currency 
                 FROM `bookings` b 
                 JOIN `events` e ON e.id = b.event_id 
@@ -104,6 +131,12 @@ class Booking extends Model {
         }
 
         $sql .= " ORDER BY b.booking_date DESC, b.start_time DESC";
+
+        if ($limit !== null && $offset !== null) {
+            $limitVal = (int)$limit;
+            $offsetVal = (int)$offset;
+            $sql .= " LIMIT {$limitVal} OFFSET {$offsetVal}";
+        }
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);

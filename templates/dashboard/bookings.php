@@ -194,7 +194,91 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                     <?php endif; ?>
                 </tbody>
             </table>
-        </div>
+        <!-- Pagination Controls -->
+        <?php if (!empty($totalBookings) && $totalPages > 1): ?>
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-100">
+                <?php
+                $startItem = ($currentPage - 1) * $perPage + 1;
+                $endItem = min($currentPage * $perPage, $totalBookings);
+                ?>
+                <div class="text-xs text-slate-500 font-medium">
+                    Showing <strong class="text-slate-900 font-bold"><?= $startItem ?></strong> to <strong class="text-slate-900 font-bold"><?= $endItem ?></strong> of <strong class="text-slate-900 font-bold"><?= $totalBookings ?></strong> appointments
+                </div>
+
+                <div class="flex items-center gap-1.5">
+                    <?php
+                    $queryParams = $_GET;
+                    ?>
+                    
+                    <!-- Previous Page -->
+                    <?php if ($currentPage > 1): ?>
+                        <?php
+                        $queryParams['page'] = $currentPage - 1;
+                        $prevUrl = APP_URL . '/bookings?' . http_build_query($queryParams);
+                        ?>
+                        <a href="<?= $prevUrl ?>" class="px-3.5 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 transition-all hover:border-slate-300">
+                            ← Previous
+                        </a>
+                    <?php else: ?>
+                        <button disabled class="px-3.5 py-2 bg-slate-50 border border-slate-100 rounded-xl text-xs font-bold text-slate-300 cursor-not-allowed">
+                            ← Previous
+                        </button>
+                    <?php endif; ?>
+
+                    <!-- Page Numbers -->
+                    <div class="flex items-center gap-1 px-1">
+                        <?php
+                        $startPage = max(1, $currentPage - 2);
+                        $endPage = min($totalPages, $currentPage + 2);
+                        if ($startPage > 1):
+                            $queryParams['page'] = 1;
+                        ?>
+                            <a href="<?= APP_URL . '/bookings?' . http_build_query($queryParams) ?>" class="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-100 transition-colors">1</a>
+                            <?php if ($startPage > 2): ?>
+                                <span class="text-slate-400 text-xs font-bold px-0.5">...</span>
+                            <?php endif; ?>
+                        <?php endif; ?>
+
+                        <?php for ($p = $startPage; $p <= $endPage; $p++): ?>
+                            <?php
+                            $queryParams['page'] = $p;
+                            $pUrl = APP_URL . '/bookings?' . http_build_query($queryParams);
+                            if ($p === $currentPage):
+                            ?>
+                                <span class="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-extrabold bg-slate-950 text-white shadow-sm"><?= $p ?></span>
+                            <?php else: ?>
+                                <a href="<?= $pUrl ?>" class="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-100 transition-colors"><?= $p ?></a>
+                            <?php endif; ?>
+                        <?php endfor; ?>
+
+                        <?php if ($endPage < $totalPages): ?>
+                            <?php if ($endPage < $totalPages - 1): ?>
+                                <span class="text-slate-400 text-xs font-bold px-0.5">...</span>
+                            <?php endif; ?>
+                            <?php
+                            $queryParams['page'] = $totalPages;
+                            ?>
+                            <a href="<?= APP_URL . '/bookings?' . http_build_query($queryParams) ?>" class="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-100 transition-colors"><?= $totalPages ?></a>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- Next Page -->
+                    <?php if ($currentPage < $totalPages): ?>
+                        <?php
+                        $queryParams['page'] = $currentPage + 1;
+                        $nextUrl = APP_URL . '/bookings?' . http_build_query($queryParams);
+                        ?>
+                        <a href="<?= $nextUrl ?>" class="px-3.5 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 transition-all hover:border-slate-300">
+                            Next →
+                        </a>
+                    <?php else: ?>
+                        <button disabled class="px-3.5 py-2 bg-slate-50 border border-slate-100 rounded-xl text-xs font-bold text-slate-300 cursor-not-allowed">
+                            Next →
+                        </button>
+                    <?php endif; ?>
+                </div>
+            </div>
+        <?php endif; ?>
     </div>
 </div>
 
