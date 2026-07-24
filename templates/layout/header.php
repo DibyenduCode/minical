@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($title ?? 'Dashboard') ?> - MiniCal</title>
+    <title><?= htmlspecialchars($title ?? 'Dashboard') ?> - DayCal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -16,29 +16,25 @@
     <!-- Mobile Top Navigation Bar (Shown only on small screens) -->
     <header class="md:hidden flex items-center justify-between p-4 bg-white border-b border-slate-200/80 sticky top-0 z-30">
         <a href="<?= APP_URL ?>" class="flex items-center gap-2">
-            <div class="w-8 h-8 bg-black text-white rounded-lg flex items-center justify-center font-extrabold text-sm shadow-sm">
-                MC
-            </div>
-            <span class="font-extrabold text-base tracking-tight text-slate-900">MiniCal</span>
+            <img src="<?= APP_URL ?>/logo.jpg" alt="DayCal Logo" class="w-8 h-8 rounded-lg shadow-sm object-cover">
+            <span class="font-extrabold text-base tracking-tight text-slate-900">DayCal</span>
         </a>
         <button id="hamburger-btn" class="p-2 text-slate-700 hover:bg-slate-100 rounded-lg focus:outline-none">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
         </button>
     </header>
-
+ 
     <!-- Mobile Sidebar Backdrop Overlay -->
     <div id="sidebar-overlay" class="fixed inset-0 bg-black/40 z-40 hidden md:hidden transition-opacity duration-300 opacity-0"></div>
-
+ 
     <!-- Sidebar Navigation Drawer (Slide-in on mobile, static on desktop) -->
     <aside id="app-sidebar" class="fixed inset-y-0 left-0 w-64 bg-white border-r border-slate-200/80 flex flex-col z-50 transform -translate-x-full transition-transform duration-300 ease-in-out md:relative md:translate-x-0 min-h-screen flex-shrink-0">
         
         <div class="p-6 border-b border-slate-100 flex items-center justify-between">
             <a href="<?= APP_URL ?>" class="flex items-center gap-2.5">
-                <div class="w-9 h-9 bg-black text-white rounded-xl flex items-center justify-center font-extrabold text-base shadow-sm">
-                    MC
-                </div>
+                <img src="<?= APP_URL ?>/logo.jpg" alt="DayCal Logo" class="w-9 h-9 rounded-xl shadow-sm object-cover">
                 <div>
-                    <span class="font-extrabold text-lg tracking-tight text-slate-900">MiniCal</span>
+                    <span class="font-extrabold text-lg tracking-tight text-slate-900">DayCal</span>
                     <span class="block text-[10px] text-slate-400 font-bold uppercase tracking-wider">v1.0 MVP</span>
                 </div>
             </a>

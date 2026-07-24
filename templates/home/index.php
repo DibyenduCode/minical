@@ -21,11 +21,9 @@
     <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-200/80">
         <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <div class="flex items-center gap-10">
-                <a href="<?= APP_URL ?>" class="flex items-center gap-2 group">
-                    <div class="w-9 h-9 bg-black text-white rounded-xl flex items-center justify-center font-extrabold text-lg shadow-sm group-hover:scale-105 transition-transform">
-                        MC
-                    </div>
-                    <span class="font-extrabold text-xl tracking-tight text-slate-900">MiniCal</span>
+                <a href="<?= APP_URL ?>" class="flex items-center gap-2.5 group">
+                    <img src="<?= APP_URL ?>/logo.jpg" alt="DayCal Logo" class="w-9 h-9 rounded-xl shadow-sm object-cover group-hover:scale-105 transition-transform">
+                    <span class="font-extrabold text-xl tracking-tight text-slate-900">DayCal</span>
                 </a>
 
                 <nav class="hidden md:flex items-center gap-7 text-sm font-semibold text-slate-600">

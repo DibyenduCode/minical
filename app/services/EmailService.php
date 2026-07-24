@@ -22,7 +22,7 @@ class EmailService {
 
         if (!$booking) return false;
 
-        $siteName = self::getSetting('site_name') ?: 'MiniCal';
+        $siteName = self::getSetting('site_name') ?: 'DayCal';
         
         // Format Email Body
         $subject = "Booking Confirmed: " . $booking['event_name'] . " with " . $booking['host_name'];
@@ -90,7 +90,7 @@ class EmailService {
     }
 
     public static function sendPasswordReset(string $email, string $resetLink): bool {
-        $siteName = self::getSetting('site_name') ?: 'MiniCal';
+        $siteName = self::getSetting('site_name') ?: 'DayCal';
         $subject = "Reset Your Password - " . $siteName;
 
         $htmlBody = "
@@ -135,13 +135,13 @@ class EmailService {
         $smtpPort = (int)($settings['smtp_port'] ?? 587);
         $smtpUser = $settings['smtp_user'] ?? '';
         $smtpPass = $settings['smtp_pass'] ?? '';
-        $siteName = $settings['site_name'] ?? 'MiniCal';
+        $siteName = $settings['site_name'] ?? 'DayCal';
 
         if (empty($smtpHost)) {
             // Fallback to PHP's built-in mail() function
             $headers[] = 'MIME-Version: 1.0';
             $headers[] = 'Content-type: text/html; charset=utf-8';
-            $headers[] = 'From: ' . $siteName . ' <noreply@' . ($_SERVER['HTTP_HOST'] ?? 'minical.local') . '>';
+            $headers[] = 'From: ' . $siteName . ' <noreply@' . ($_SERVER['HTTP_HOST'] ?? 'daycal.in') . '>';
             return @mail($to, $subject, $htmlBody, implode("\r\n", $headers));
         }
 
@@ -164,7 +164,7 @@ class EmailService {
             // Fallback to PHP built-in mail() if socket fails
             $headers[] = 'MIME-Version: 1.0';
             $headers[] = 'Content-type: text/html; charset=utf-8';
-            $headers[] = 'From: ' . $siteName . ' <noreply@' . ($_SERVER['HTTP_HOST'] ?? 'minical.local') . '>';
+            $headers[] = 'From: ' . $siteName . ' <noreply@' . ($_SERVER['HTTP_HOST'] ?? 'daycal.in') . '>';
             return @mail($to, $subject, $htmlBody, implode("\r\n", $headers));
         }
 

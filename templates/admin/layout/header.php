@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($title ?? 'Super Admin') ?> - MiniCal</title>
+    <title><?= htmlspecialchars($title ?? 'Super Admin') ?> - DayCal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -17,11 +17,9 @@
         <!-- Logo & Admin Badge -->
         <div class="p-6 border-b border-slate-100 flex items-center gap-3">
             <a href="<?= APP_URL ?>/admin" class="flex items-center gap-2.5">
-                <div class="w-9 h-9 bg-black text-white rounded-xl flex items-center justify-center font-extrabold text-base shadow-sm">
-                    SA
-                </div>
+                <img src="<?= APP_URL ?>/logo.jpg" alt="DayCal Logo" class="w-9 h-9 rounded-xl shadow-sm object-cover">
                 <div>
-                    <span class="font-extrabold text-lg tracking-tight text-slate-950">MiniCal</span>
+                    <span class="font-extrabold text-lg tracking-tight text-slate-950">DayCal</span>
                     <span class="block text-[10px] bg-black text-white font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider w-fit mt-0.5">Super Admin</span>
                 </div>
             </a>
