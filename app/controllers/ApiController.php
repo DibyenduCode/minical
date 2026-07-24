@@ -156,49 +156,43 @@ class ApiController extends Controller {
             return;
         }
 
-        $db = Database::getInstance();
-        $db->beginTransaction();
         try {
-            // Remove current schedule
-            $del = $db->prepare("DELETE FROM `availability` WHERE `user_id` = :user_id");
-            $del->execute(['user_id' => $user['id']]);
-
-            // Save new schedule
-            $ins = $db->prepare("
-                INSERT INTO `availability` (`user_id`, `day_of_week`, `is_available`, `start_time`, `end_time`)
-                VALUES (:user_id, :day_of_week, :is_available, :start_time, :end_time)
-            ");
-
             foreach ($schedule as $day) {
                 $dayOfWeek = (int)($day['day_of_week'] ?? 0);
-                $isAvailable = (int)($day['is_available'] ?? 0);
-                $slots = $day['slots'] ?? [];
+                $isEnabled = (int)($day['is_enabled'] ?? 0);
+                
+                $startTime = trim($day['start_time'] ?? '09:00');
+                if (strlen($startTime) === 5) $startTime .= ':00';
+                
+                $endTime = trim($day['end_time'] ?? '17:00');
+                if (strlen($endTime) === 5) $endTime .= ':00';
 
-                if ($isAvailable && !empty($slots)) {
-                    foreach ($slots as $slot) {
-                        $ins->execute([
-                            'user_id'      => $user['id'],
-                            'day_of_week'  => $dayOfWeek,
-                            'is_available' => 1,
-                            'start_time'   => $slot['start_time'] ?? '09:00',
-                            'end_time'     => $slot['end_time'] ?? '17:00'
-                        ]);
-                    }
-                } else {
-                    $ins->execute([
-                        'user_id'      => $user['id'],
-                        'day_of_week'  => $dayOfWeek,
-                        'is_available' => 0,
-                        'start_time'   => '09:00',
-                        'end_time'     => '17:00'
-                    ]);
+                $breakEnabled = (int)($day['break_enabled'] ?? 0);
+                $breakStartTime = null;
+                $breakEndTime = null;
+                
+                if ($breakEnabled) {
+                    $breakStartTime = trim($day['break_start_time'] ?? '13:00');
+                    if (strlen($breakStartTime) === 5) $breakStartTime .= ':00';
+                    
+                    $breakEndTime = trim($day['break_end_time'] ?? '14:00');
+                    if (strlen($breakEndTime) === 5) $breakEndTime .= ':00';
                 }
+
+                $this->availabilityModel->updateDay(
+                    $user['id'],
+                    $dayOfWeek,
+                    $startTime,
+                    $endTime,
+                    $isEnabled,
+                    $breakStartTime,
+                    $breakEndTime
+                );
             }
 
-            $db->commit();
-            $this->response->json(['status' => 'success', 'message' => 'Availability updated successfully.']);
+            $updated = $this->availabilityModel->getByUserId($user['id']);
+            $this->response->json(['status' => 'success', 'message' => 'Weekly availability schedule updated.', 'schedule' => $updated]);
         } catch (\Exception $e) {
-            $db->rollBack();
             $this->response->json(['status' => 'error', 'message' => 'Failed to save availability: ' . $e->getMessage()], 500);
         }
     }
