@@ -510,8 +510,8 @@ class ApiController extends Controller {
         $user = $this->authenticateToken();
         $data = $this->request->getBody();
 
-        $name = trim($data['name'] ?? '');
-        $newUsername = strtolower(trim($data['username'] ?? ''));
+        $name = !empty($data['name']) ? trim($data['name']) : $user['name'];
+        $newUsername = !empty($data['username']) ? strtolower(trim($data['username'])) : $user['username'];
         $phone = trim($data['phone'] ?? '');
         $timezone = trim($data['timezone'] ?? 'UTC');
         $companyName = trim($data['company_name'] ?? '');
