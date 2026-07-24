@@ -1,6 +1,5 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /cal/
 
     # Direct access to static files if they exist
     RewriteCond %{REQUEST_FILENAME} !-f
