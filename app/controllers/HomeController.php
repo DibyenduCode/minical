@@ -26,4 +26,16 @@ class HomeController extends Controller {
             'plans'       => $plans
         ]);
     }
+
+    public function privacy(): void {
+        $this->render('home/privacy', [
+            'title' => 'Privacy Policy'
+        ]);
+    }
+
+    public function terms(): void {
+        $this->render('home/terms', [
+            'title' => 'Terms of Service'
+        ]);
+    }
 }

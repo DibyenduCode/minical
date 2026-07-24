@@ -305,7 +305,7 @@ require_once TEMPLATES_DIR . '/layout/header.php';
                 Developer API Access
             </div>
             <h2 class="text-xl font-extrabold text-slate-950 tracking-tight">API Key Management</h2>
-            <p class="text-slate-500 text-xs font-medium">Generate an API key to securely connect MiniCal scheduling to your custom web app or software.</p>
+            <p class="text-slate-500 text-xs font-medium">Generate an API key to securely connect DayCal scheduling to your custom web app or software.</p>
         </div>
 
         <div class="p-5 bg-slate-50 border border-slate-200 rounded-2xl space-y-4 font-sans">

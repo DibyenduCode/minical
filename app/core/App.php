@@ -47,7 +47,7 @@ class App {
         $httpHostClean = explode(':', $httpHost)[0]; // strip port if present
 
         // Skip custom domain check for localhost, 127.0.0.1, or main app domain
-        if (!in_array($httpHostClean, ['localhost', '127.0.0.1', 'xyz.com', 'www.xyz.com'])) {
+        if (!in_array($httpHostClean, ['localhost', '127.0.0.1', 'daycal.in', 'www.daycal.in'])) {
             try {
                 $profileModel = new Profile();
                 $matchedProfile = $profileModel->findByCustomDomain($httpHostClean);

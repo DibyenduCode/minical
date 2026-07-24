@@ -17,6 +17,8 @@ use App\Controllers\ApiController;
 // Home & Landing Page Routes
 App::get('/', [HomeController::class, 'index']);
 App::get('/home', [HomeController::class, 'index']);
+App::get('/privacy', [HomeController::class, 'privacy']);
+App::get('/terms', [HomeController::class, 'terms']);
 
 // Authentication Routes
 App::get('/login', [AuthController::class, 'showLogin']);
@@ -60,6 +62,7 @@ App::post('/availability', [AvailabilityController::class, 'update']);
 
 App::get('/event', [EventController::class, 'index']);
 App::post('/event', [EventController::class, 'create']);
+App::post('/event/create', [EventController::class, 'create']);
 App::post('/event/update/{id}', [EventController::class, 'update']);
 App::post('/event/delete/{id}', [EventController::class, 'delete']);
 

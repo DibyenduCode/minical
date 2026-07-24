@@ -122,7 +122,7 @@ class AuthController extends Controller {
         $user = $this->userModel->findById($userId);
         unset($user['password_hash']);
         Session::set('user', $user);
-        Session::flash('success', 'Account created successfully! Welcome to MiniCal.');
+        Session::flash('success', 'Account created successfully! Welcome to DayCal.');
         $this->response->redirect(APP_URL . '/dashboard');
     }
 

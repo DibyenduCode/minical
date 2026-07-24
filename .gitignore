@@ -4,7 +4,11 @@
 /storage/cache/*
 !.gitkeep
 
-# Operating System Files
+# Operating System & Temporary Files
 .DS_Store
 Thumbs.db
 *.log
+error_log
+*.zip
+.user.ini
+php.ini

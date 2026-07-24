@@ -28,7 +28,7 @@ class Request {
         $data = [];
         if ($this->getMethod() === 'GET') {
             foreach ($_GET as $key => $value) {
-                $data[$key] = filter_input(INPUT_GET, $key, FILTER_SANITIZE_SPECIAL_CHARS);
+                $data[$key] = is_string($value) ? trim($value) : $value;
             }
         }
 
@@ -42,11 +42,7 @@ class Request {
                 }
             } else {
                 foreach ($_POST as $key => $value) {
-                    if (is_array($value)) {
-                        $data[$key] = $value;
-                    } else {
-                        $data[$key] = filter_input(INPUT_POST, $key, FILTER_SANITIZE_SPECIAL_CHARS);
-                    }
+                    $data[$key] = $value;
                 }
             }
         }
@@ -54,9 +50,14 @@ class Request {
     }
 
     public function getBearerToken(): ?string {
-        $headers = getallheaders();
+        $headers = function_exists('getallheaders') ? getallheaders() : [];
         $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? '';
-        if (preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
+        
+        if (empty($authHeader)) {
+            $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
+        }
+
+        if (preg_match('/Bearer\s(\S+)/i', $authHeader, $matches)) {
             return $matches[1];
         }
         return null;

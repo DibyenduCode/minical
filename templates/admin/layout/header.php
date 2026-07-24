@@ -17,7 +17,7 @@
         <!-- Logo & Admin Badge -->
         <div class="p-6 border-b border-slate-100 flex items-center gap-3">
             <a href="<?= APP_URL ?>/admin" class="flex items-center gap-2.5">
-                <img src="<?= APP_URL ?>/logo.jpg" alt="DayCal Logo" class="w-9 h-9 rounded-xl shadow-sm object-cover">
+                <img src="<?= APP_URL ?>/public/logo.jpg" alt="DayCal Logo" class="w-9 h-9 rounded-xl shadow-sm object-cover">
                 <div>
                     <span class="font-extrabold text-lg tracking-tight text-slate-950">DayCal</span>
                     <span class="block text-[10px] bg-black text-white font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider w-fit mt-0.5">Super Admin</span>

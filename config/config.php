@@ -5,8 +5,7 @@
 
 // Base URL configuration (without trailing slash)
 define('APP_NAME', 'DayCal');
-define('APP_URL', 'https://daycal.in');
-
+define('APP_URL', 'http://localhost/daycal');
 // Directory Paths
 define('ROOT_DIR', dirname(__DIR__));
 define('APP_DIR', ROOT_DIR . '/app');

@@ -29,6 +29,10 @@ class EventController extends Controller {
         $stmt->execute(['slug' => $userPlanSlug]);
         $planDetails = $stmt->fetch();
 
+        if (($user['role'] ?? '') === 'admin' && $planDetails) {
+            $planDetails['max_events'] = -1;
+        }
+
         $this->render('event/index', [
             'user'        => $user,
             'dbUser'      => $dbUser,
@@ -56,7 +60,12 @@ class EventController extends Controller {
         $stmt->execute(['slug' => $userPlanSlug]);
         $planDetails = $stmt->fetch();
 
-        $maxEvents = isset($planDetails['max_events']) ? (int)$planDetails['max_events'] : -1;
+        if (($user['role'] ?? '') === 'admin') {
+            $maxEvents = -1;
+        } else {
+            $maxEvents = isset($planDetails['max_events']) ? (int)$planDetails['max_events'] : -1;
+        }
+
         if ($maxEvents !== -1) {
             $existingEvents = $this->eventModel->getByUserId($user['id']);
             if (count($existingEvents) >= $maxEvents) {
@@ -68,9 +77,23 @@ class EventController extends Controller {
         $name = trim($data['name'] ?? '');
         $slug = strtolower(trim($data['slug'] ?? ''));
 
-        if (empty($name) || empty($slug)) {
-            Session::flash('error', 'Event Name and URL Slug are required.');
+        if (empty($name)) {
+            Session::flash('error', 'Event Name is required.');
             $this->response->redirect(APP_URL . '/event');
+        }
+
+        if (empty($slug)) {
+            $slug = preg_replace('/[^a-z0-9]+/', '-', strtolower($name));
+            $slug = trim($slug, '-');
+        }
+        if (empty($slug)) {
+            $slug = 'event-' . time();
+        }
+
+        // Ensure unique slug per user
+        $existing = $this->eventModel->findBySlugAndUserId($slug, $user['id']);
+        if ($existing) {
+            $slug = $slug . '-' . rand(100, 999);
         }
 
         $this->eventModel->createEvent([

@@ -25,7 +25,7 @@ require_once TEMPLATES_DIR . '/admin/layout/header.php';
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Platform Site Name</label>
-                    <input type="text" name="site_name" value="<?= htmlspecialchars($settings['site_name'] ?? 'MiniCal') ?>"
+                    <input type="text" name="site_name" value="<?= htmlspecialchars($settings['site_name'] ?? 'DayCal') ?>"
                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-black">
                 </div>
 

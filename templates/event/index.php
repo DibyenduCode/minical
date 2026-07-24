@@ -44,13 +44,13 @@ require_once TEMPLATES_DIR . '/layout/header.php';
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1">Service Title</label>
-                    <input type="text" name="name" placeholder="e.g. 1:1 Business Strategy Session" required
+                    <input type="text" id="service-name" name="name" placeholder="e.g. 1:1 Business Strategy Session" required
                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-black">
                 </div>
 
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1">URL Slug</label>
-                    <input type="text" name="slug" placeholder="e.g. strategy-session" required
+                    <input type="text" id="service-slug" name="slug" placeholder="e.g. strategy-session"
                            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-black">
                 </div>
             </div>
@@ -381,6 +381,25 @@ require_once TEMPLATES_DIR . '/layout/header.php';
             }, 150);
         }
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const nameInput = document.getElementById('service-name');
+        const slugInput = document.getElementById('service-slug');
+        if (nameInput && slugInput) {
+            nameInput.addEventListener('input', function() {
+                if (!slugInput.dataset.manual) {
+                    slugInput.value = nameInput.value
+                        .toLowerCase()
+                        .trim()
+                        .replace(/[^a-z0-9\s-]/g, '')
+                        .replace(/[\s-]+/g, '-');
+                }
+            });
+            slugInput.addEventListener('input', function() {
+                slugInput.dataset.manual = "true";
+            });
+        }
+    });
 </script>
 
 <?php require_once TEMPLATES_DIR . '/layout/footer.php'; ?>
