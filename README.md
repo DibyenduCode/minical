@@ -1,10 +1,10 @@
-# MiniCal - Modern Appointment Scheduling Platform
+# DayCal - Modern Appointment Scheduling Platform
 
-![MiniCal](https://img.shields.com/badge/PHP-8.3%2B-indigo)
+![DayCal](https://img.shields.com/badge/PHP-8.3%2B-indigo)
 ![TailwindCSS](https://img.shields.com/badge/TailwindCSS-3.x-blue)
 ![License](https://img.shields.com/badge/License-MIT-green)
 
-MiniCal is a lightweight, modern, open-source appointment scheduling platform inspired by Cal.com. Built with Core PHP (MVC Architecture), MySQL, Tailwind CSS, Vanilla JavaScript, and FullCalendar.
+DayCal is a lightweight, modern, open-source appointment scheduling platform inspired by Cal.com. Built with Core PHP (MVC Architecture), MySQL, Tailwind CSS, Vanilla JavaScript, and FullCalendar.
 
 ---
 
@@ -50,7 +50,7 @@ MiniCal is a lightweight, modern, open-source appointment scheduling platform in
    - **Landing Page**: `http://localhost/cal/`
    - **Login**: `http://localhost/cal/login`
    - **Super Admin Credentials**:
-     - Email: `admin@minical.local`
+     - Email: `admin@daycal.in`
      - Password: `admin123`
    - **Public Booking Page**: `http://localhost/cal/u/admin`
 

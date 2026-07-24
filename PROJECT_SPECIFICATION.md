@@ -1,6 +1,6 @@
-# MiniCal - Complete Project Specification (MVP)
+# DayCal - Complete Project Specification (MVP)
 
-> **Project Name:** MiniCal
+> **Project Name:** DayCal
 > **Version:** 1.0 (MVP)
 > **Architecture:** Core PHP (MVC)
 > **Frontend:** HTML5 + Tailwind CSS + Vanilla JavaScript + AJAX + FullCalendar

@@ -209,7 +209,7 @@ class EmailService {
             }
         }
 
-        $fromEmail = !empty($smtpUser) && filter_var($smtpUser, FILTER_VALIDATE_EMAIL) ? $smtpUser : 'noreply@' . ($_SERVER['HTTP_HOST'] ?? 'minical.local');
+        $fromEmail = !empty($smtpUser) && filter_var($smtpUser, FILTER_VALIDATE_EMAIL) ? $smtpUser : 'noreply@' . ($_SERVER['HTTP_HOST'] ?? 'daycal.in');
         $sendCommand($socket, "MAIL FROM:<" . $fromEmail . ">");
 
         $rcpt = $sendCommand($socket, "RCPT TO:<" . $to . ">");

@@ -39,7 +39,7 @@ require_once TEMPLATES_DIR . '/admin/layout/header.php';
             <section id="architecture" class="bg-white border border-slate-200/90 rounded-3xl p-8 shadow-sm space-y-4">
                 <h2 class="text-lg font-extrabold text-slate-950 tracking-tight border-b border-slate-100 pb-3">1. Platform Architecture</h2>
                 <p class="text-xs text-slate-600 leading-relaxed font-medium">
-                    MiniCal is built on a clean, light, and high-performance **custom MVC framework** in PHP. It does not use heavy external frameworks, making it load instantly and extremely easy to scale.
+                    DayCal is built on a clean, light, and high-performance **custom MVC framework** in PHP. It does not use heavy external frameworks, making it load instantly and extremely easy to scale.
                 </p>
                 <div class="grid grid-cols-2 gap-4 text-xs font-sans">
                     <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl">
@@ -57,7 +57,7 @@ require_once TEMPLATES_DIR . '/admin/layout/header.php';
             <section id="dns" class="bg-white border border-slate-200/90 rounded-3xl p-8 shadow-sm space-y-4">
                 <h2 class="text-lg font-extrabold text-slate-950 tracking-tight border-b border-slate-100 pb-3">2. DNS & Custom Domain Routing</h2>
                 <p class="text-xs text-slate-600 leading-relaxed font-medium">
-                    MiniCal supports multi-tenant **custom domains** for Growth and Pro plan hosts. In order to route traffic:
+                    DayCal supports multi-tenant **custom domains** for Growth and Pro plan hosts. In order to route traffic:
                 </p>
                 <div class="bg-slate-900 rounded-2xl p-6 text-slate-200 text-[11px] font-mono leading-relaxed space-y-2">
                     <p class="text-indigo-400"># DNS record configuration for host subdomains:</p>
@@ -147,7 +147,7 @@ require_once TEMPLATES_DIR . '/admin/layout/header.php';
             <section id="api" class="bg-white border border-slate-200/90 rounded-3xl p-8 shadow-sm space-y-4">
                 <h2 class="text-lg font-extrabold text-slate-950 tracking-tight border-b border-slate-100 pb-3">6. Developer REST API Reference</h2>
                 <p class="text-xs text-slate-600 leading-relaxed font-medium">
-                    Hosts and external developers can interact with MiniCal through transactional endpoints. Set the authentication header on all requests:
+                    Hosts and external developers can interact with DayCal through transactional endpoints. Set the authentication header on all requests:
                 </p>
                 <div class="bg-slate-900 rounded-2xl p-6 text-slate-200 text-[11px] font-mono space-y-3">
                     <p class="text-indigo-400"># Header Authentication:</p>

@@ -1,5 +1,5 @@
 <?php
-$title = "Promo Codes - MiniCal";
+$title = "Promo Codes - DayCal";
 $activeTab = "promos";
 require_once TEMPLATES_DIR . '/layout/header.php';
 ?>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign in - MiniCal</title>
+    <title>Sign in - DayCal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -13,10 +13,10 @@
 <body class="bg-[#fafafa] text-slate-900 min-h-screen flex items-center justify-center p-4">
     <div class="w-full max-w-md bg-white rounded-3xl border border-slate-200/90 shadow-xl shadow-slate-200/50 p-8 space-y-6">
         <div class="text-center space-y-2">
-            <div class="inline-flex items-center justify-center w-12 h-12 bg-black text-white rounded-2xl mb-2 font-black text-xl shadow-sm">
-                MC
+            <div class="flex justify-center mb-2">
+                <img src="<?= APP_URL ?>/public/logo.jpg" alt="DayCal Logo" class="w-12 h-12 rounded-2xl shadow-sm object-cover">
             </div>
-            <h1 class="text-2xl font-extrabold text-slate-950 tracking-tight">Welcome back to MiniCal</h1>
+            <h1 class="text-2xl font-extrabold text-slate-950 tracking-tight">Welcome back to DayCal</h1>
             <p class="text-slate-500 text-xs font-medium">Sign in to manage your appointments and schedule</p>
         </div>
 
@@ -39,7 +39,7 @@
 
             <div>
                 <label for="email" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Email address</label>
-                <input type="email" id="email" name="email" required placeholder="admin@minical.local"
+                <input type="email" id="email" name="email" required placeholder="admin@daycal.in"
                     class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-black focus:bg-white transition-all">
             </div>
 
