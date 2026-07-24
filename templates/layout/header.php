@@ -16,7 +16,7 @@
     <!-- Mobile Top Navigation Bar (Shown only on small screens) -->
     <header class="md:hidden flex items-center justify-between p-4 bg-white border-b border-slate-200/80 sticky top-0 z-30">
         <a href="<?= APP_URL ?>" class="flex items-center gap-2">
-            <img src="<?= APP_URL ?>/logo.jpg" alt="DayCal Logo" class="w-8 h-8 rounded-lg shadow-sm object-cover">
+            <img src="<?= APP_URL ?>/public/logo.jpg" alt="DayCal Logo" class="w-8 h-8 rounded-lg shadow-sm object-cover">
             <span class="font-extrabold text-base tracking-tight text-slate-900">DayCal</span>
         </a>
         <button id="hamburger-btn" class="p-2 text-slate-700 hover:bg-slate-100 rounded-lg focus:outline-none">
@@ -32,7 +32,7 @@
         
         <div class="p-6 border-b border-slate-100 flex items-center justify-between">
             <a href="<?= APP_URL ?>" class="flex items-center gap-2.5">
-                <img src="<?= APP_URL ?>/logo.jpg" alt="DayCal Logo" class="w-9 h-9 rounded-xl shadow-sm object-cover">
+                <img src="<?= APP_URL ?>/public/logo.jpg" alt="DayCal Logo" class="w-9 h-9 rounded-xl shadow-sm object-cover">
                 <div>
                     <span class="font-extrabold text-lg tracking-tight text-slate-900">DayCal</span>
                     <span class="block text-[10px] text-slate-400 font-bold uppercase tracking-wider">v1.0 MVP</span>

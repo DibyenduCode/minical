@@ -17,6 +17,8 @@ use App\Controllers\ApiController;
 // Home & Landing Page Routes
 App::get('/', [HomeController::class, 'index']);
 App::get('/home', [HomeController::class, 'index']);
+App::get('/privacy', [HomeController::class, 'privacy']);
+App::get('/terms', [HomeController::class, 'terms']);
 
 // Authentication Routes
 App::get('/login', [AuthController::class, 'showLogin']);

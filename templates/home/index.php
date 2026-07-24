@@ -22,7 +22,7 @@
         <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <div class="flex items-center gap-10">
                 <a href="<?= APP_URL ?>" class="flex items-center gap-2.5 group">
-                    <img src="<?= APP_URL ?>/logo.jpg" alt="DayCal Logo" class="w-9 h-9 rounded-xl shadow-sm object-cover group-hover:scale-105 transition-transform">
+                    <img src="<?= APP_URL ?>/public/logo.jpg" alt="DayCal Logo" class="w-9 h-9 rounded-xl shadow-sm object-cover group-hover:scale-105 transition-transform">
                     <span class="font-extrabold text-xl tracking-tight text-slate-900">DayCal</span>
                 </a>
 
@@ -246,10 +246,14 @@
     <footer class="border-t border-slate-200/80 bg-white py-12 text-slate-500 text-xs">
         <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-6">
             <div class="flex items-center gap-3">
-                <div class="w-7 h-7 bg-black text-white font-bold rounded-lg flex items-center justify-center text-xs">MC</div>
-                <span class="font-bold text-slate-900 text-sm">MiniCal</span>
+                <img src="<?= APP_URL ?>/public/logo.jpg" alt="DayCal Logo" class="w-7 h-7 rounded-lg object-cover">
+                <span class="font-bold text-slate-900 text-sm">DayCal</span>
             </div>
-            <p>© <?= date('Y') ?> MiniCal. All rights reserved. Inspired by Cal.com.</p>
+            <p>© <?= date('Y') ?> DayCal. All rights reserved. Inspired by Cal.com.</p>
+            <div class="flex gap-4 font-semibold">
+                <a href="<?= APP_URL ?>/privacy" class="hover:text-black transition-colors">Privacy Policy</a>
+                <a href="<?= APP_URL ?>/terms" class="hover:text-black transition-colors">Terms of Service</a>
+            </div>
         </div>
     </footer>
 
